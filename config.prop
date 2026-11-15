@@ -1,0 +1,25 @@
+# Samsung Daily Optimizer Configuration
+# Set RAM_PLUS_ENABLED=0 or RAM_PLUS_SIZE=0 to disable RAM Plus completely.
+# Set RAM_PLUS_SIZE=2048 for 2GB, 4096 for 4GB, 8192 for 8GB.
+RAM_PLUS_ENABLED=1
+RAM_PLUS_SIZE=2048
+
+# VM & Kernel Swappiness Tuning (Default 60 reduces swap lag)
+TUNE_SWAPPINESS=1
+SWAPPINESS_VALUE=60
+
+# Flash Storage Read-Ahead (512 KB accelerates sequential reads and app opening)
+TUNE_READ_AHEAD=1
+READ_AHEAD_KB=512
+
+# Crash Dump & Cache Cleanup
+PURGE_CRASH_LOGS=1
+TRIM_APP_CACHES=1
+
+# Audio & Wireless Radio Stability
+DISABLE_BACKGROUND_BLE_SCAN=1
+DISABLE_BACKGROUND_WIFI_SCAN=1
+WHITELIST_AUDIO_APPS=1
+
+# Samsung Enhanced CPU Responsiveness (1 = Faster CPU ramp-up, 0 = Standard)
+ENHANCED_CPU_RESPONSIVENESS=1
