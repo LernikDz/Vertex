@@ -26,3 +26,26 @@ ENHANCED_CPU_RESPONSIVENESS=1
 
 # Notifications (1 = Live NowBar/Dynamic Island notification while running + Static on finish)
 SHOW_NOTIFICATIONS=1
+
+# Kernel Memory & VFS Cache Tuning (50 prioritizes keeping directory dentries/inodes in RAM)
+TUNE_VFS_CACHE=1
+VFS_CACHE_PRESSURE=50
+
+# Kernel Scheduler Context-Switch Accounting (0 disables schedstats overhead)
+DISABLE_SCHED_STATS=1
+
+# Kernel VM Stat Interval (10s reduces timer wakeups when idle/screen off)
+TUNE_STAT_INTERVAL=1
+STAT_INTERVAL_SEC=10
+
+# TCP BBR Congestion Control (Low latency & high-throughput streaming)
+ENABLE_TCP_BBR=1
+
+# Bluetooth Audio Diagnostics & HCI Snoop Log (0 disables background BT log dumping)
+DISABLE_BT_SNOOP_LOG=1
+
+# Wi-Fi Sleep Policy (2 = never sleep during screen-off audio streaming)
+TUNE_WIFI_SLEEP=1
+
+# Samsung Diagnostics & Telemetry Hibernation (Puts diagmon & survey daemons into restricted standby)
+RESTRICT_SAMSUNG_TELEMETRY=1

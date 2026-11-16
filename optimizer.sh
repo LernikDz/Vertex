@@ -28,6 +28,15 @@ DISABLE_BACKGROUND_WIFI_SCAN="${DISABLE_BACKGROUND_WIFI_SCAN:-1}"
 WHITELIST_AUDIO_APPS="${WHITELIST_AUDIO_APPS:-1}"
 ENHANCED_CPU_RESPONSIVENESS="${ENHANCED_CPU_RESPONSIVENESS:-1}"
 SHOW_NOTIFICATIONS="${SHOW_NOTIFICATIONS:-1}"
+TUNE_VFS_CACHE="${TUNE_VFS_CACHE:-1}"
+VFS_CACHE_PRESSURE="${VFS_CACHE_PRESSURE:-50}"
+DISABLE_SCHED_STATS="${DISABLE_SCHED_STATS:-1}"
+TUNE_STAT_INTERVAL="${TUNE_STAT_INTERVAL:-1}"
+STAT_INTERVAL_SEC="${STAT_INTERVAL_SEC:-10}"
+ENABLE_TCP_BBR="${ENABLE_TCP_BBR:-1}"
+DISABLE_BT_SNOOP_LOG="${DISABLE_BT_SNOOP_LOG:-1}"
+TUNE_WIFI_SLEEP="${TUNE_WIFI_SLEEP:-1}"
+RESTRICT_SAMSUNG_TELEMETRY="${RESTRICT_SAMSUNG_TELEMETRY:-1}"
 
 # Notification helpers (Live NowBar / Dynamic Island notification while running, static on finish)
 notify_live() {
@@ -89,6 +98,15 @@ if [ "$TUNE_SWAPPINESS" = "1" ]; then
     if [ -w /proc/sys/vm/dirty_ratio ]; then
         echo 20 > /proc/sys/vm/dirty_ratio 2>/dev/null
     fi
+    if [ "$TUNE_VFS_CACHE" = "1" ] && [ -w /proc/sys/vm/vfs_cache_pressure ]; then
+        echo "$VFS_CACHE_PRESSURE" > /proc/sys/vm/vfs_cache_pressure 2>/dev/null && log "  [OK] VFS cache pressure set to $VFS_CACHE_PRESSURE"
+    fi
+    if [ "$DISABLE_SCHED_STATS" = "1" ] && [ -w /proc/sys/kernel/sched_schedstats ]; then
+        echo 0 > /proc/sys/kernel/sched_schedstats 2>/dev/null && log "  [OK] Kernel scheduler statistics disabled"
+    fi
+    if [ "$TUNE_STAT_INTERVAL" = "1" ] && [ -w /proc/sys/vm/stat_interval ]; then
+        echo "$STAT_INTERVAL_SEC" > /proc/sys/vm/stat_interval 2>/dev/null && log "  [OK] VM stat interval set to ${STAT_INTERVAL_SEC}s"
+    fi
 fi
 
 # 3. Flash Storage Read-Ahead
@@ -126,12 +144,45 @@ if [ "$WHITELIST_AUDIO_APPS" = "1" ]; then
     done
 fi
 
+if [ "$ENABLE_TCP_BBR" = "1" ] && [ -w /proc/sys/net/ipv4/tcp_congestion_control ]; then
+    if grep -q "bbr" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
+        echo "bbr" > /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null && log "  [OK] TCP congestion control set to BBR"
+    else
+        CURRENT_TCP=$(cat /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null)
+        log "  [INFO] TCP congestion algorithm: $CURRENT_TCP"
+    fi
+fi
+
+if [ "$DISABLE_BT_SNOOP_LOG" = "1" ]; then
+    settings put global bluetooth_btsnoop_default_mode disabled 2>/dev/null
+    setprop persist.bluetooth.btsnoopenable false 2>/dev/null
+    log "  [OK] Bluetooth HCI snoop logging disabled"
+fi
+
+if [ "$TUNE_WIFI_SLEEP" = "1" ]; then
+    settings put global wifi_sleep_policy 2 2>/dev/null && log "  [OK] Wi-Fi sleep policy set to never sleep"
+fi
+
 # 5. Samsung Enhanced CPU Responsiveness
 if [ "$ENHANCED_CPU_RESPONSIVENESS" = "1" ]; then
     settings put global sem_enhanced_cpu_responsiveness 1 2>/dev/null && log "  [OK] Enhanced CPU responsiveness enabled"
 fi
 
-# 6. Crash Logs & Stale Cache Cleanup
+# 6. Samsung Diagnostics & Telemetry Hibernation
+if [ "$RESTRICT_SAMSUNG_TELEMETRY" = "1" ]; then
+    log "Restricting Samsung diagnostic and telemetry services..."
+    notify_live "🛡️ Restricting Samsung diagnostic & telemetry services..."
+    TELEMETRY_PKGS="com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence"
+    for tpkg in $TELEMETRY_PKGS; do
+        if pm list packages 2>/dev/null | grep -q "$tpkg"; then
+            am set-standby-bucket "$tpkg" restricted 2>/dev/null
+            cmd appops set "$tpkg" RUN_IN_BACKGROUND ignore 2>/dev/null
+            log "  [RESTRICTED] $tpkg placed into restricted standby"
+        fi
+    done
+fi
+
+# 7. Crash Logs & Stale Cache Cleanup
 if [ "$PURGE_CRASH_LOGS" = "1" ]; then
     log "Purging crash dumps, ANR traces, and dropbox logs..."
     notify_live "🧹 Purging crash logs & trimming app caches..."
@@ -146,7 +197,7 @@ if [ "$TRIM_APP_CACHES" = "1" ]; then
     pm trim-caches 4096M >/dev/null 2>&1 && log "  [OK] Dead caches trimmed"
 fi
 
-# 7. Kernel Memory Compaction & Storage Trim
+# 8. Kernel Memory Compaction & Storage Trim
 log "Executing kernel memory maintenance and storage trim..."
 notify_live "💾 Compacting kernel memory & running fstrim..."
 sync
@@ -160,7 +211,7 @@ fi
 fstrim -v /data 2>/dev/null | while read -r line; do log "  [TRIM] /data: $line"; done
 fstrim -v /cache 2>/dev/null | while read -r line; do log "  [TRIM] /cache: $line"; done
 
-# 8. Safe Selective ART AOT / Profile Compilation
+# 9. Safe Selective ART AOT / Profile Compilation
 # NOTE: com.android.systemui is strictly excluded to prevent breaking Dynamic Island / Xposed
 log "Running selective ART profile compilation (excluding SystemUI)..."
 notify_live "🚀 Profile compiling apps (Speed-profile)..."

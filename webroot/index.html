@@ -417,12 +417,27 @@
           <div class="info-value" id="val-ramplus-config">Loading...</div>
         </div>
 
+        <div class="info-group">
+          <div class="info-label">Kernel VM & VFS Cache</div>
+          <div class="info-value" id="val-vfs-cache">vfs_cache_pressure: 50 &bull; schedstats: disabled</div>
+        </div>
+
         <!-- Category: Audio & System Guard -->
         <div class="section-title">Audio & System Guard</div>
 
         <div class="info-group">
           <div class="info-label">Bluetooth Radio Stutter Guard</div>
           <div class="info-value" id="val-radio-status">Nearby & BLE scanning disabled (Protected)</div>
+        </div>
+
+        <div class="info-group">
+          <div class="info-label">Network TCP & Audio Latency</div>
+          <div class="info-value" id="val-tcp-status">TCP BBR &bull; BT snoop log disabled</div>
+        </div>
+
+        <div class="info-group">
+          <div class="info-label">Samsung Telemetry & Analytics</div>
+          <div class="info-value" id="val-telemetry-status">Restricted (Diagmon & Survey Hibernated)</div>
         </div>
 
         <div class="info-group">
@@ -511,6 +526,22 @@
             <div class="action-desc">Switches sem_enhanced_cpu_responsiveness for faster clock ramp.</div>
           </div>
           <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+
+        <div class="action-item" onclick="restrictTelemetry()">
+          <div class="action-text">
+            <div class="action-title">Hibernate Samsung Telemetry</div>
+            <div class="action-desc">Places Diagmon and Survey services into restricted standby.</div>
+          </div>
+          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+
+        <div class="action-item" onclick="applyNetworkBoost()">
+          <div class="action-text">
+            <div class="action-title">Apply Network & Audio Boost</div>
+            <div class="action-desc">Enables TCP BBR, disables BT snoop log, and optimizes Wi-Fi sleep.</div>
+          </div>
+          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </div>
 
         <div class="action-item" onclick="toggleDaemonState()">
@@ -708,6 +739,38 @@
       refreshData();
     }
 
+    async function restrictTelemetry() {
+      showToast("Restricting Samsung diagnostic & telemetry daemons...");
+      const cmd = `
+        for pkg in com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence; do
+          if pm list packages 2>/dev/null | grep -q "$pkg"; then
+            am set-standby-bucket "$pkg" restricted 2>/dev/null
+            cmd appops set "$pkg" RUN_IN_BACKGROUND ignore 2>/dev/null
+          fi
+        done
+        cmd notification post -i @android:drawable/ic_dialog_info -t 'Samsung Daily Optimizer' 'samsung_optimizer' '🛡️ Samsung diagnostic & telemetry daemons hibernated' 2>/dev/null
+      `;
+      await execCmd(cmd);
+      showToast("Samsung telemetry services hibernated!");
+      refreshData();
+    }
+
+    async function applyNetworkBoost() {
+      showToast("Applying TCP BBR & Audio Radio Boost...");
+      const cmd = `
+        if grep -q "bbr" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
+          echo "bbr" > /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null
+        fi
+        settings put global bluetooth_btsnoop_default_mode disabled 2>/dev/null
+        setprop persist.bluetooth.btsnoopenable false 2>/dev/null
+        settings put global wifi_sleep_policy 2 2>/dev/null
+        cmd notification post -i @android:drawable/ic_dialog_info -t 'Samsung Daily Optimizer' 'samsung_optimizer' '🌐 TCP BBR active & BT snoop log disabled' 2>/dev/null
+      `;
+      await execCmd(cmd);
+      showToast("TCP BBR & Bluetooth audio boost applied!");
+      refreshData();
+    }
+
     async function toggleDaemonState() {
       if (isDaemonRunning) {
         showToast("Stopping 5:00 AM daemon...");
@@ -796,6 +859,22 @@
       } else {
         document.getElementById("val-radio-status").innerText = "Scanning active (Nearby: " + nearby + ", BLE: " + ble + ")";
       }
+
+      // 6. Kernel VFS, Schedstats & Stat Interval
+      const vfs = (await execCmd("cat /proc/sys/vm/vfs_cache_pressure 2>/dev/null")).trim();
+      const sched = (await execCmd("cat /proc/sys/kernel/sched_schedstats 2>/dev/null")).trim();
+      if (vfs) {
+        document.getElementById("val-vfs-cache").innerText = "vfs_cache_pressure: " + vfs + " \u2022 schedstats: " + (sched === "0" ? "disabled" : "enabled");
+      }
+
+      // 7. Network TCP & BT Snoop Log
+      const tcp = (await execCmd("cat /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null")).trim();
+      const btSnoop = (await execCmd("settings get global bluetooth_btsnoop_default_mode 2>/dev/null")).trim();
+      document.getElementById("val-tcp-status").innerText = "TCP " + (tcp ? tcp.toUpperCase() : "BBR") + " \u2022 BT snoop: " + (btSnoop === "disabled" ? "disabled" : "default");
+
+      // 8. Telemetry Status
+      const diagmon = (await execCmd("am get-standby-bucket com.sec.android.diagmonagent 2>/dev/null")).trim();
+      document.getElementById("val-telemetry-status").innerText = (diagmon === "45" || diagmon.toLowerCase().includes("restricted")) ? "Restricted (Diagmon & Survey Hibernated)" : "Active (Standard)";
     }
 
     // Initial Load & polling
