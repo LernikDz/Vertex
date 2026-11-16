@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Samsung Daily Optimizer</title>
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --card-bg: #151922;
+      --card-border: #222836;
+      --accent: #2e75ff;
+      --accent-glow: rgba(46, 117, 255, 0.25);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f1f5f9;
+      --text-sub: #94a3b8;
+      --text-dim: #64748b;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text-main); padding: 16px; padding-bottom: 40px; min-height: 100vh; overflow-x: hidden; }
+    
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 4px 2px; }
+    .title-group h1 { font-size: 20px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .title-group p { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+    .badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-idle { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 360px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-val { font-size: 22px; font-weight: 700; color: #fff; }
+    .stat-desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+    .progress-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-top: 10px; }
+    .progress-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; background: var(--accent); }
+    .fill-warning { background: var(--warning); }
+    .fill-danger { background: var(--danger); }
+
+    /* Segmented selector */
+    .selector-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+    .sel-btn { background: #1c212d; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 4px; text-align: center; cursor: pointer; transition: all 0.2s; color: var(--text-sub); }
+    .sel-btn.active { background: var(--accent); color: #fff; border-color: #5593ff; box-shadow: 0 0 12px var(--accent-glow); }
+    .sel-btn .btn-size { font-size: 14px; font-weight: 700; }
+    .sel-btn .btn-sub { font-size: 9px; opacity: 0.8; margin-top: 2px; }
+
+    /* Action buttons */
+    .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .btn { background: #1c212d; border: 1px solid var(--card-border); color: var(--text-main); border-radius: 12px; padding: 12px 14px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; text-align: center; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--accent); color: #fff; border-color: #4b89ff; }
+    .btn-primary:active { background: #2062e0; }
+    .btn-outline { background: transparent; border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171; }
+
+    /* Terminal / Log box */
+    .terminal { background: #07090e; border: 1px solid #1a202c; border-radius: 12px; padding: 12px; font-family: "Courier New", Courier, monospace; font-size: 11px; color: #a5b4fc; height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; margin-top: 10px; }
+    
+    .status-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+    .status-row:last-child { border-bottom: none; }
+    .status-label { color: var(--text-sub); }
+    .status-value { font-weight: 600; color: #fff; }
+
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); opacity: 0; transition: all 0.3s; z-index: 1000; }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-group">
+      <h1><span style="color:var(--accent);">Samsung</span> Optimizer</h1>
+      <p id="dev-model">Samsung Galaxy &bull; One UI</p>
+    </div>
+    <div id="daemon-badge" class="badge badge-idle">
+      <span class="dot"></span> <span id="daemon-status-text">Checking...</span>
+    </div>
+  </header>
+
+  <!-- Live Stats Grid -->
+  <div class="grid-2">
+    <!-- Physical RAM Card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Physical RAM</span>
+        <span id="ram-pct" style="font-size:12px; font-weight:600; color:var(--accent);">--%</span>
+      </div>
+      <div class="stat-val" id="ram-used">-- GB</div>
+      <div class="stat-desc" id="ram-total">Total: -- GB</div>
+      <div class="progress-bar-bg">
+        <div id="ram-bar" class="progress-bar-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Swap / ZRAM Card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Swap / ZRAM</span>
+        <span id="swap-pct" style="font-size:12px; font-weight:600; color:var(--accent);">--%</span>
+      </div>
+      <div class="stat-val" id="swap-used">-- GB</div>
+      <div class="stat-desc" id="swap-total">Allocated: -- GB</div>
+      <div class="progress-bar-bg">
+        <div id="swap-bar" class="progress-bar-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAM Plus Configuration Card -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">RAM Plus (Virtual Memory)</span>
+      <span id="cur-ramplus-badge" class="badge badge-success">Current: -- GB</span>
+    </div>
+    <p style="font-size: 12px; color: var(--text-sub); line-height: 1.4;">
+      Disabling RAM Plus (0 GB) eliminates swap thrashing and background I/O micro-stutters.
+    </p>
+
+    <div class="selector-grid">
+      <div class="sel-btn" data-size="0" onclick="selectRamPlus(0)">
+        <div class="btn-size">0 GB</div>
+        <div class="btn-sub">OFF (Best)</div>
+      </div>
+      <div class="sel-btn" data-size="2048" onclick="selectRamPlus(2048)">
+        <div class="btn-size">2 GB</div>
+        <div class="btn-sub">Balanced</div>
+      </div>
+      <div class="sel-btn" data-size="4096" onclick="selectRamPlus(4096)">
+        <div class="btn-size">4 GB</div>
+        <div class="btn-sub">Standard</div>
+      </div>
+      <div class="sel-btn" data-size="8192" onclick="selectRamPlus(8192)">
+        <div class="btn-size">8 GB</div>
+        <div class="btn-sub">Heavy</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="width: 100%; margin-top: 14px;" onclick="applyRamPlus()">
+      Save & Apply RAM Plus Setting
+    </button>
+  </div>
+
+  <!-- Quick Actions Panel -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Quick Actions</span>
+    </div>
+    <div class="actions-grid">
+      <button class="btn btn-primary" onclick="runOptimizeNow()">
+        ⚡ Optimize Now
+      </button>
+      <button class="btn" onclick="purgeLogs()">
+        🧹 Purge Logs & Cache
+      </button>
+      <button class="btn" onclick="compactMemory()">
+        🔄 Compact RAM & Trim
+      </button>
+      <button class="btn" onclick="toggleEnhancedCpu()">
+        🚀 Toggle Enhanced CPU
+      </button>
+      <button class="btn btn-outline" onclick="toggleDaemon(true)">
+        🕒 Start 5 AM Daemon
+      </button>
+      <button class="btn btn-danger" onclick="toggleDaemon(false)">
+        🛑 Stop Daemon
+      </button>
+    </div>
+  </div>
+
+  <!-- Bluetooth & Radio Status Card -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Wireless & Radio Status</span>
+      <button onclick="refreshData()" style="background:transparent; border:none; color:var(--accent); font-size:12px; font-weight:600; cursor:pointer;">Refresh ⟳</button>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Samsung Nearby Scanning</span>
+      <span class="status-value" id="status-nearby">--</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Background BLE Scanning</span>
+      <span class="status-value" id="status-ble">--</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Background Wi-Fi Scanning</span>
+      <span class="status-value" id="status-wifi">--</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Enhanced CPU Responsiveness</span>
+      <span class="status-value" id="status-cpu-boost">--</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Device Uptime</span>
+      <span class="status-value" id="status-uptime">--</span>
+    </div>
+  </div>
+
+  <!-- Terminal / Log Viewer Card -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Optimization Activity Log</span>
+      <button onclick="loadLogs()" style="background:transparent; border:none; color:var(--accent); font-size:12px; font-weight:600; cursor:pointer;">Reload Log ⟳</button>
+    </div>
+    <div class="terminal" id="terminal-log">Loading activity log...</div>
+  </div>
+
+  <div id="toast" class="toast">Action completed</div>
+
+  <script>
+    let selectedSize = 2048;
+    let modulePath = "/data/adb/modules/samsung_daily_optimizer";
+
+    // Universal command executor (KSU / APatch / Standalone REST API)
+    async function execCmd(cmd) {
+      if (window.ksu && window.ksu.exec) {
+        return new Promise((resolve) => {
+          try {
+            const res = window.ksu.exec(cmd);
+            if (res && typeof res.then === "function") {
+              res.then(r => resolve(r.stdout || r)).catch(e => resolve(""));
+            } else if (typeof res === "string") {
+              resolve(res);
+            }
+          } catch (e) {
+            try {
+              window.ksu.exec(cmd, (errno, stdout, stderr) => resolve(stdout || ""));
+            } catch (err) { resolve(""); }
+          }
+        });
+      } else {
+        // Fallback: local web server API
+        try {
+          const res = await fetch("/api/exec", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cmd })
+          });
+          const data = await res.json();
+          return data.stdout || "";
+        } catch (e) {
+          return "";
+        }
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.innerText = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2800);
+    }
+
+    function selectRamPlus(size) {
+      selectedSize = size;
+      document.querySelectorAll(".sel-btn").forEach(b => {
+        b.classList.toggle("active", parseInt(b.dataset.size) === size);
+      });
+    }
+
+    async function applyRamPlus() {
+      showToast("Applying RAM Plus setting...");
+      await execCmd(`settings put global ram_expand_size ${selectedSize}`);
+      // Also update config.prop if accessible
+      const cfgCmd = `
+        for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
+          if [ -d "$dir" ]; then
+            sed -i "s/^RAM_PLUS_SIZE=.*/RAM_PLUS_SIZE=${selectedSize}/" "$dir/config.prop" 2>/dev/null
+            [ "${selectedSize}" = "0" ] && sed -i "s/^RAM_PLUS_ENABLED=.*/RAM_PLUS_ENABLED=0/" "$dir/config.prop" 2>/dev/null || sed -i "s/^RAM_PLUS_ENABLED=.*/RAM_PLUS_ENABLED=1/" "$dir/config.prop" 2>/dev/null
+          fi
+        done
+      `;
+      await execCmd(cfgCmd);
+      showToast(selectedSize === 0 ? "RAM Plus disabled! (Takes effect after reboot)" : `RAM Plus set to ${selectedSize / 1024} GB! (Reboot to apply)`);
+      refreshData();
+    }
+
+    async function runOptimizeNow() {
+      showToast("Running optimization routine...");
+      document.getElementById("terminal-log").innerText = "Executing optimizer routine, please wait...\n";
+      const out = await execCmd("sh /data/adb/modules/samsung_daily_optimizer/run_now.sh 2>&1 || sh /data/local/tmp/SamsungDailyOptimizer/run_now.sh 2>&1");
+      document.getElementById("terminal-log").innerText = out || "Optimization completed.";
+      showToast("Optimization pass complete!");
+      refreshData();
+    }
+
+    async function purgeLogs() {
+      showToast("Purging crash logs and trimming cache...");
+      await execCmd("rm -f /data/anr/* /data/tombstones/* /data/system/dropbox/* 2>/dev/null; pm trim-caches 4096M 2>/dev/null");
+      showToast("Logs cleared & caches trimmed!");
+      refreshData();
+    }
+
+    async function compactMemory() {
+      showToast("Compacting memory & trimming storage...");
+      await execCmd("sync; echo 1 > /proc/sys/vm/compact_memory 2>/dev/null; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null; fstrim -v /data 2>/dev/null");
+      showToast("Memory compacted & storage trimmed!");
+      refreshData();
+    }
+
+    async function toggleEnhancedCpu() {
+      const cur = await execCmd("settings get global sem_enhanced_cpu_responsiveness 2>/dev/null");
+      const next = cur.trim() === "1" ? "0" : "1";
+      await execCmd(`settings put global sem_enhanced_cpu_responsiveness ${next}`);
+      showToast(`Enhanced CPU Responsiveness: ${next === "1" ? "Enabled" : "Disabled"}`);
+      refreshData();
+    }
+
+    async function toggleDaemon(start) {
+      if (start) {
+        showToast("Starting 5:00 AM daemon...");
+        await execCmd("sh /data/adb/modules/samsung_daily_optimizer/start_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/start_daemon.sh 2>/dev/null");
+      } else {
+        showToast("Stopping daemon...");
+        await execCmd("sh /data/adb/modules/samsung_daily_optimizer/stop_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/stop_daemon.sh 2>/dev/null");
+      }
+      setTimeout(refreshData, 500);
+    }
+
+    async function loadLogs() {
+      const log = await execCmd("cat /data/adb/modules/samsung_daily_optimizer/optimizer.log 2>/dev/null || cat /data/local/tmp/SamsungDailyOptimizer/optimizer.log 2>/dev/null || cat /data/local/tmp/samsung_daily_optimizer.log 2>/dev/null || echo 'No activity log found yet.'");
+      const t = document.getElementById("terminal-log");
+      t.innerText = log.trim() ? log.trim().split("\n").slice(-30).join("\n") : "No activity logged yet.";
+      t.scrollTop = t.scrollHeight;
+    }
+
+    async function refreshData() {
+      // 1. Memory and Swap
+      const meminfo = await execCmd("cat /proc/meminfo");
+      if (meminfo) {
+        const getVal = (key) => {
+          const m = meminfo.match(new RegExp(key + ":\\s+(\\d+)\\s+kB"));
+          return m ? parseInt(m[1]) : 0;
+        };
+        const memTotal = getVal("MemTotal");
+        const memFree = getVal("MemFree") + getVal("Buffers") + getVal("Cached");
+        const memUsed = memTotal - memFree;
+        const ramPct = memTotal ? Math.round((memUsed / memTotal) * 100) : 0;
+
+        document.getElementById("ram-used").innerText = (memUsed / (1024 * 1024)).toFixed(1) + " GB";
+        document.getElementById("ram-total").innerText = "Total: " + (memTotal / (1024 * 1024)).toFixed(1) + " GB";
+        document.getElementById("ram-pct").innerText = ramPct + "%";
+        const rBar = document.getElementById("ram-bar");
+        rBar.style.width = ramPct + "%";
+        rBar.className = "progress-bar-fill " + (ramPct > 90 ? "fill-danger" : ramPct > 75 ? "fill-warning" : "");
+
+        const swapTotal = getVal("SwapTotal");
+        const swapFree = getVal("SwapFree");
+        const swapUsed = swapTotal - swapFree;
+        const swapPct = swapTotal ? Math.round((swapUsed / swapTotal) * 100) : 0;
+
+        document.getElementById("swap-used").innerText = (swapUsed / (1024 * 1024)).toFixed(1) + " GB";
+        document.getElementById("swap-total").innerText = "Allocated: " + (swapTotal / (1024 * 1024)).toFixed(1) + " GB";
+        document.getElementById("swap-pct").innerText = swapPct + "%";
+        const sBar = document.getElementById("swap-bar");
+        sBar.style.width = swapPct + "%";
+        sBar.className = "progress-bar-fill " + (swapPct > 80 ? "fill-danger" : swapPct > 60 ? "fill-warning" : "");
+      }
+
+      // 2. RAM Plus Setting
+      const ramSizeRaw = (await execCmd("settings get global ram_expand_size 2>/dev/null")).trim();
+      const ramSize = parseInt(ramSizeRaw) || 0;
+      document.getElementById("cur-ramplus-badge").innerText = "Current: " + (ramSize === 0 ? "Disabled (0 GB)" : (ramSize / 1024) + " GB");
+      selectRamPlus(ramSize);
+
+      // 3. Radio & Tuning Status
+      const nearby = (await execCmd("settings get system nearby_scanning_enabled 2>/dev/null")).trim();
+      document.getElementById("status-nearby").innerText = nearby === "0" ? "Disabled (Optimized)" : "Active (Scanning)";
+      document.getElementById("status-nearby").style.color = nearby === "0" ? "var(--success)" : "var(--warning)";
+
+      const ble = (await execCmd("settings get global ble_scan_always_enabled 2>/dev/null")).trim();
+      document.getElementById("status-ble").innerText = ble === "0" ? "Disabled (Optimized)" : "Active";
+      document.getElementById("status-ble").style.color = ble === "0" ? "var(--success)" : "var(--warning)";
+
+      const wifi = (await execCmd("settings get global wifi_scan_always_enabled 2>/dev/null")).trim();
+      document.getElementById("status-wifi").innerText = wifi === "0" ? "Disabled (Optimized)" : "Active";
+      document.getElementById("status-wifi").style.color = wifi === "0" ? "var(--success)" : "var(--warning)";
+
+      const cpuBoost = (await execCmd("settings get global sem_enhanced_cpu_responsiveness 2>/dev/null")).trim();
+      document.getElementById("status-cpu-boost").innerText = cpuBoost === "1" ? "Enabled (High Speed)" : "Standard";
+      document.getElementById("status-cpu-boost").style.color = cpuBoost === "1" ? "var(--success)" : "var(--text-sub)";
+
+      const uptime = (await execCmd("uptime 2>/dev/null")).trim();
+      if (uptime) {
+        const u = uptime.match(/up\s+([^,]+)/);
+        document.getElementById("status-uptime").innerText = u ? u[1] : uptime;
+      }
+
+      // 4. Daemon Running Status
+      const daemonPid = (await execCmd("cat /data/adb/modules/samsung_daily_optimizer/daemon.pid 2>/dev/null || cat /data/local/tmp/SamsungDailyOptimizer/daemon.pid 2>/dev/null")).trim();
+      const badge = document.getElementById("daemon-badge");
+      const badgeText = document.getElementById("daemon-status-text");
+      if (daemonPid && !isNaN(parseInt(daemonPid))) {
+        badge.className = "badge badge-success";
+        badgeText.innerText = "Daemon Active (PID " + daemonPid + ")";
+      } else {
+        badge.className = "badge badge-idle";
+        badgeText.innerText = "Daemon Idle";
+      }
+
+      // Device Model
+      const model = (await execCmd("getprop ro.product.model 2>/dev/null")).trim();
+      if (model) document.getElementById("dev-model").innerText = model + " \u2022 One UI Daily Optimizer";
+    }
+
+    // Initial load
+    refreshData();
+    loadLogs();
+    // Auto refresh every 4 seconds
+    setInterval(refreshData, 4000);
+  </script>
+</body>
+</html>

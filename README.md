@@ -62,3 +62,38 @@ DISABLE_BACKGROUND_WIFI_SCAN=1
 WHITELIST_AUDIO_APPS=1
 ENHANCED_CPU_RESPONSIVENESS=1
 ```
+
+---
+
+## WebUI Dashboard
+
+The module includes a lightweight, zero-dependency One UI-styled Web Dashboard for real-time monitoring and control.
+
+### How to Access:
+- **KernelSU / APatch / MMRL**: Tap the **WebUI** button on the module card.
+- **On-Phone Browser (Standalone / Temproot)**:
+  ```bash
+  su -c /data/local/tmp/SamsungDailyOptimizer/start_webui.sh
+  ```
+  Then open **`http://127.0.0.1:8888`** in Samsung Internet or Chrome.
+- **From Your PC (via ADB)**:
+  ```bash
+  adb forward tcp:8888 tcp:8888
+  ```
+  Then open **`http://localhost:8888`** in your desktop browser.
+- **Stop Web Server**:
+  ```bash
+  su -c /data/local/tmp/SamsungDailyOptimizer/stop_webui.sh
+  ```
+
+### Dashboard Capabilities:
+- **Live Memory & Swap Metrics**: Real-time progress bars for Physical RAM and Swap/ZRAM usage.
+- **Radio & System Status**: Live indicators for Nearby Scanning, Background BLE, Wi-Fi Scanning, Enhanced CPU, and Daemon status.
+- **Interactive RAM Plus Selector**: Select and apply 0 GB (Off), 2 GB, 4 GB, or 8 GB with one tap.
+- **Quick Actions**:
+  - ⚡ **Optimize Now**: Run the complete daily optimization suite.
+  - 🧹 **Compact Memory & Trim**: Compact kernel memory, drop caches, and run `fstrim`.
+  - 🗑️ **Purge Logs**: Clear tombstones, ANRs, and dropbox crash logs.
+  - 🚀 **Toggle Enhanced CPU**: Toggle `sem_enhanced_cpu_responsiveness`.
+  - ⏱️ **Start / Stop Daemon**: Control the 5:00 AM timer daemon.
+- **Live Log Viewer**: Inspect recent execution logs with one-click refresh.

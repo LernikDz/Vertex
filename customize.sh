@@ -80,11 +80,15 @@ ui_print "- Finalizing permissions..."
 set_perm_recursive "$MODPATH" 0 0 0755 0755
 set_perm "$MODPATH/module.prop" 0 0 0644
 set_perm "$MODPATH/config.prop" 0 0 0644
+set_perm "$MODPATH/webroot/index.html" 0 0 0644
 set_perm "$MODPATH/optimizer.sh" 0 0 0755
 set_perm "$MODPATH/daemon.sh" 0 0 0755
 set_perm "$MODPATH/run_now.sh" 0 0 0755
 set_perm "$MODPATH/start_daemon.sh" 0 0 0755
 set_perm "$MODPATH/stop_daemon.sh" 0 0 0755
+set_perm "$MODPATH/start_webui.sh" 0 0 0755
+set_perm "$MODPATH/stop_webui.sh" 0 0 0755
+set_perm "$MODPATH/web_handler.sh" 0 0 0755
 set_perm "$MODPATH/configure.sh" 0 0 0755
 set_perm "$MODPATH/action.sh" 0 0 0755
 set_perm "$MODPATH/service.sh" 0 0 0755
