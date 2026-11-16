@@ -37,8 +37,8 @@ An automated daily performance maintenance module and standalone utility for Sam
    - **Vol+**: Disable RAM Plus (`0 GB` - Recommended for lowest lag).
    - **Vol-**: Enable RAM Plus (`2 GB`).
 
-### Standalone / Temproot
-If your device uses temporary root (or you prefer running without flashing a module), copy the folder to `/data/local/tmp/SamsungDailyOptimizer`:
+### Standalone
+If you prefer running without flashing a module, copy the folder to `/data/local/tmp/SamsungDailyOptimizer`:
 
 ```bash
 # Start the daily 5:00 AM timer daemon:
