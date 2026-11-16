@@ -2,223 +2,621 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Samsung Daily Optimizer</title>
   <style>
     :root {
-      --bg: #0b0e14;
-      --card-bg: #151922;
-      --card-border: #222836;
-      --accent: #2e75ff;
-      --accent-glow: rgba(46, 117, 255, 0.25);
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --text-main: #f1f5f9;
-      --text-sub: #94a3b8;
-      --text-dim: #64748b;
-      --radius: 16px;
+      --bg: #121213;
+      --card-bg: #1e1e20;
+      --status-bg: #3c3c3f;
+      --pill-active: #353842;
+      --text-primary: #ffffff;
+      --text-secondary: #9c9ca2;
+      --text-muted: #6e6e73;
+      --accent: #5e97f6;
+      --radius-status: 22px;
+      --radius-card: 26px;
+      --radius-item: 16px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg); color: var(--text-main); padding: 16px; padding-bottom: 40px; min-height: 100vh; overflow-x: hidden; }
-    
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 4px 2px; }
-    .title-group h1 { font-size: 20px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .title-group p { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
-    .badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
-    .badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-idle { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
-    .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-    @media (max-width: 360px) { .grid-2 { grid-template-columns: 1fr; } }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Google Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
 
-    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .card-title { font-size: 13px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-val { font-size: 22px; font-weight: 700; color: #fff; }
-    .stat-desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-bottom: 96px;
+      overflow-x: hidden;
+      font-size: 15px;
+    }
 
-    .progress-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-top: 10px; }
-    .progress-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; background: var(--accent); }
-    .fill-warning { background: var(--warning); }
-    .fill-danger { background: var(--danger); }
+    /* Top App Bar */
+    .app-header {
+      padding: 24px 20px 16px 20px;
+    }
 
-    /* Segmented selector */
-    .selector-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
-    .sel-btn { background: #1c212d; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 4px; text-align: center; cursor: pointer; transition: all 0.2s; color: var(--text-sub); }
-    .sel-btn.active { background: var(--accent); color: #fff; border-color: #5593ff; box-shadow: 0 0 12px var(--accent-glow); }
-    .sel-btn .btn-size { font-size: 14px; font-weight: 700; }
-    .sel-btn .btn-sub { font-size: 9px; opacity: 0.8; margin-top: 2px; }
+    .app-header h1 {
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--text-primary);
+      letter-spacing: -0.2px;
+    }
 
-    /* Action buttons */
-    .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
-    .btn { background: #1c212d; border: 1px solid var(--card-border); color: var(--text-main); border-radius: 12px; padding: 12px 14px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; text-align: center; }
-    .btn:active { transform: scale(0.97); }
-    .btn-primary { background: var(--accent); color: #fff; border-color: #4b89ff; }
-    .btn-primary:active { background: #2062e0; }
-    .btn-outline { background: transparent; border-color: var(--accent); color: var(--accent); }
-    .btn-danger { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171; }
+    /* Container */
+    .container {
+      padding: 0 16px;
+    }
 
-    /* Terminal / Log box */
-    .terminal { background: #07090e; border: 1px solid #1a202c; border-radius: 12px; padding: 12px; font-family: "Courier New", Courier, monospace; font-size: 11px; color: #a5b4fc; height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; margin-top: 10px; }
-    
-    .status-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
-    .status-row:last-child { border-bottom: none; }
-    .status-label { color: var(--text-sub); }
-    .status-value { font-weight: 600; color: #fff; }
+    /* Status Card (Top Banner) */
+    .status-card {
+      background: var(--status-bg);
+      border-radius: var(--radius-status);
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
 
-    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); opacity: 0; transition: all 0.3s; z-index: 1000; }
-    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .status-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      color: var(--text-primary);
+    }
+
+    .status-text {
+      font-size: 21px;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: -0.2px;
+    }
+
+    /* Details Card */
+    .details-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    /* Section Subheaders */
+    .section-title {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      margin-top: 22px;
+      margin-bottom: 14px;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Items */
+    .info-group {
+      margin-bottom: 16px;
+    }
+
+    .info-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    /* Tab Page Views */
+    .tab-page {
+      display: none;
+    }
+
+    .tab-page.active {
+      display: block;
+    }
+
+    /* Selection Pills / Cards for RAM Plus */
+    .option-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+      margin-bottom: 20px;
+    }
+
+    .option-card {
+      background: #28282b;
+      border: 2px solid transparent;
+      border-radius: var(--radius-item);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .option-card.selected {
+      background: #32353e;
+      border-color: var(--accent);
+    }
+
+    .option-card-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .option-card-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Action List Items */
+    .action-item {
+      background: #28282b;
+      border-radius: var(--radius-item);
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .action-item:active {
+      background: #333338;
+    }
+
+    .action-text {
+      flex: 1;
+      padding-right: 12px;
+    }
+
+    .action-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .action-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    .action-btn-icon {
+      width: 22px;
+      height: 22px;
+      color: var(--text-secondary);
+    }
+
+    /* Standard Button */
+    .m3-button {
+      background: var(--status-bg);
+      color: var(--text-primary);
+      border: none;
+      border-radius: 20px;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      transition: opacity 0.2s;
+    }
+
+    .m3-button:active {
+      opacity: 0.8;
+    }
+
+    /* Terminal Log View */
+    .log-box {
+      background: #111112;
+      border: 1px solid #28282b;
+      border-radius: var(--radius-item);
+      padding: 14px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #9cdcfe;
+      height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      user-select: text;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      background: #323235;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.1, 1, 0.1, 1);
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Bottom Navigation Bar (Material 3) */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 76px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      border-top: 1px solid #1a1a1c;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 25%;
+      transition: color 0.15s ease;
+    }
+
+    .nav-pill {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 30px;
+      border-radius: 16px;
+      transition: background-color 0.2s ease;
+    }
+
+    .nav-label {
+      font-size: 12px;
+      font-weight: 400;
+      margin-top: 4px;
+      transition: font-weight 0.2s, color 0.2s;
+    }
+
+    .nav-item.active .nav-pill {
+      background-color: var(--pill-active);
+    }
+
+    .nav-item.active {
+      color: var(--text-primary);
+    }
+
+    .nav-item.active .nav-label {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .nav-icon {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2;
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="title-group">
-      <h1><span style="color:var(--accent);">Samsung</span> Optimizer</h1>
-      <p id="dev-model">Samsung Galaxy &bull; One UI</p>
-    </div>
-    <div id="daemon-badge" class="badge badge-idle">
-      <span class="dot"></span> <span id="daemon-status-text">Checking...</span>
-    </div>
-  </header>
-
-  <!-- Live Stats Grid -->
-  <div class="grid-2">
-    <!-- Physical RAM Card -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Physical RAM</span>
-        <span id="ram-pct" style="font-size:12px; font-weight:600; color:var(--accent);">--%</span>
-      </div>
-      <div class="stat-val" id="ram-used">-- GB</div>
-      <div class="stat-desc" id="ram-total">Total: -- GB</div>
-      <div class="progress-bar-bg">
-        <div id="ram-bar" class="progress-bar-fill" style="width: 0%;"></div>
-      </div>
-    </div>
-
-    <!-- Swap / ZRAM Card -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Swap / ZRAM</span>
-        <span id="swap-pct" style="font-size:12px; font-weight:600; color:var(--accent);">--%</span>
-      </div>
-      <div class="stat-val" id="swap-used">-- GB</div>
-      <div class="stat-desc" id="swap-total">Allocated: -- GB</div>
-      <div class="progress-bar-bg">
-        <div id="swap-bar" class="progress-bar-fill" style="width: 0%;"></div>
-      </div>
-    </div>
+  <!-- Top App Header -->
+  <div class="app-header">
+    <h1 id="page-title">Samsung Daily Optimizer</h1>
   </div>
 
-  <!-- RAM Plus Configuration Card -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">RAM Plus (Virtual Memory)</span>
-      <span id="cur-ramplus-badge" class="badge badge-success">Current: -- GB</span>
-    </div>
-    <p style="font-size: 12px; color: var(--text-sub); line-height: 1.4;">
-      Disabling RAM Plus (0 GB) eliminates swap thrashing and background I/O micro-stutters.
-    </p>
+  <div class="container">
 
-    <div class="selector-grid">
-      <div class="sel-btn" data-size="0" onclick="selectRamPlus(0)">
-        <div class="btn-size">0 GB</div>
-        <div class="btn-sub">OFF (Best)</div>
+    <!-- TAB 1: HOME (Exact match of ReZygisk / KSU Manager Screen) -->
+    <div id="tab-home" class="tab-page active">
+      
+      <!-- Status Card -->
+      <div class="status-card">
+        <div class="status-icon">
+          <!-- Circle Checkmark SVG matching screenshot -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" style="width:26px; height:26px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+        </div>
+        <div class="status-text" id="main-status-text">Working</div>
       </div>
-      <div class="sel-btn" data-size="2048" onclick="selectRamPlus(2048)">
-        <div class="btn-size">2 GB</div>
-        <div class="btn-sub">Balanced</div>
-      </div>
-      <div class="sel-btn" data-size="4096" onclick="selectRamPlus(4096)">
-        <div class="btn-size">4 GB</div>
-        <div class="btn-sub">Standard</div>
-      </div>
-      <div class="sel-btn" data-size="8192" onclick="selectRamPlus(8192)">
-        <div class="btn-size">8 GB</div>
-        <div class="btn-sub">Heavy</div>
+
+      <!-- Main Info Card -->
+      <div class="details-card">
+        
+        <!-- Category: ROM / Kernel -->
+        <div class="section-title">ROM / Kernel</div>
+        
+        <div class="info-group">
+          <div class="info-label">Android Version</div>
+          <div class="info-value" id="val-android-ver">17</div>
+        </div>
+
+        <div class="info-group">
+          <div class="info-label">Linux Kernel Version</div>
+          <div class="info-value" id="val-kernel-ver">6.1.162-android14-11</div>
+        </div>
+
+        <!-- Category: Root / Optimizer -->
+        <div class="section-title">Root / Optimizer</div>
+
+        <div class="info-group">
+          <div class="info-label">Version</div>
+          <div class="info-value" id="val-module-ver">v1.0.0 (SamsungDailyOptimizer)</div>
+        </div>
+
+        <div class="info-group">
+          <div class="info-label">Root Implementation</div>
+          <div class="info-value" id="val-root-impl">KernelSU Next / Temproot</div>
+        </div>
+
+        <!-- Category: Daily Daemon -->
+        <div class="section-title">Daemon Status</div>
+
+        <div class="info-group">
+          <div class="info-label">5:00 AM Maintenance Timer</div>
+          <div class="info-value" id="val-daemon-status">Active (Scheduled daily)</div>
+        </div>
+
+        <!-- Category: Memory / RAM Plus -->
+        <div class="section-title">Memory / Swap</div>
+
+        <div class="info-group">
+          <div class="info-label">Physical RAM</div>
+          <div class="info-value" id="val-ram-usage">Loading memory metrics...</div>
+        </div>
+
+        <div class="info-group">
+          <div class="info-label">Swap / ZRAM Allocation</div>
+          <div class="info-value" id="val-swap-usage">Loading swap metrics...</div>
+        </div>
+
+        <div class="info-group">
+          <div class="info-label">RAM Plus Configuration</div>
+          <div class="info-value" id="val-ramplus-config">Loading...</div>
+        </div>
+
+        <!-- Category: Audio & System Guard -->
+        <div class="section-title">Audio & System Guard</div>
+
+        <div class="info-group">
+          <div class="info-label">Bluetooth Radio Stutter Guard</div>
+          <div class="info-value" id="val-radio-status">Nearby & BLE scanning disabled (Protected)</div>
+        </div>
+
+        <div class="info-group">
+          <div class="info-label">SystemUI Dexopt Safety</div>
+          <div class="info-value">Protected (Excluded for Dynamic Island)</div>
+        </div>
+
       </div>
     </div>
 
-    <button class="btn btn-primary" style="width: 100%; margin-top: 14px;" onclick="applyRamPlus()">
-      Save & Apply RAM Plus Setting
-    </button>
+    <!-- TAB 2: RAM PLUS (Configuration) -->
+    <div id="tab-ramplus" class="tab-page">
+      <div class="details-card">
+        <div class="section-title" style="margin-top:0;">Virtual RAM (Swap) Allocation</div>
+        <div class="info-value" style="margin-bottom: 16px;">
+          RAM Plus swaps inactive app pages onto internal flash storage. Disabling it (0 GB) completely prevents kernel swap thrashing and background audio stutter.
+        </div>
+
+        <div class="option-grid">
+          <div class="option-card" id="opt-0" onclick="selectRamOption(0)">
+            <div class="option-card-title">0 GB</div>
+            <div class="option-card-desc">Off &bull; Lowest lag (Recommended)</div>
+          </div>
+          <div class="option-card" id="opt-2048" onclick="selectRamOption(2048)">
+            <div class="option-card-title">2 GB</div>
+            <div class="option-card-desc">Minimal swap</div>
+          </div>
+          <div class="option-card" id="opt-4096" onclick="selectRamOption(4096)">
+            <div class="option-card-title">4 GB</div>
+            <div class="option-card-desc">Default balanced</div>
+          </div>
+          <div class="option-card" id="opt-8192" onclick="selectRamOption(8192)">
+            <div class="option-card-title">8 GB</div>
+            <div class="option-card-desc">Maximum swap</div>
+          </div>
+        </div>
+
+        <button class="m3-button" onclick="applyRamSetting()">Apply & Save Configuration</button>
+      </div>
+
+      <div class="details-card">
+        <div class="section-title" style="margin-top:0;">Swappiness & Dirty Ratios</div>
+        <div class="info-group">
+          <div class="info-label">vm.swappiness</div>
+          <div class="info-value" id="val-swappiness-setting">60 (Balanced / Low swap bias)</div>
+        </div>
+        <div class="info-group" style="margin-top: 14px;">
+          <div class="info-label">UFS Read-Ahead</div>
+          <div class="info-value">512 KB (Fast cold start)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ACTIONS -->
+    <div id="tab-actions" class="tab-page">
+      <div class="details-card" style="padding: 16px;">
+        <div class="section-title" style="margin: 8px 8px 16px 8px;">Quick Actions</div>
+
+        <div class="action-item" onclick="runOptimizeNow()">
+          <div class="action-text">
+            <div class="action-title">Run Daily Optimization</div>
+            <div class="action-desc">Executes full maintenance, trimming, and memory compaction.</div>
+          </div>
+          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+
+        <div class="action-item" onclick="compactMemory()">
+          <div class="action-text">
+            <div class="action-title">Compact Memory & Trim</div>
+            <div class="action-desc">Frees inactive page caches and runs fstrim on /data.</div>
+          </div>
+          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+
+        <div class="action-item" onclick="purgeLogs()">
+          <div class="action-text">
+            <div class="action-title">Purge Crash Dumps & Caches</div>
+            <div class="action-desc">Deletes stale ANRs, tombstones, and trims dead app caches.</div>
+          </div>
+          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </div>
+
+        <div class="action-item" onclick="toggleEnhancedCpu()">
+          <div class="action-text">
+            <div class="action-title">Toggle Enhanced CPU</div>
+            <div class="action-desc">Switches sem_enhanced_cpu_responsiveness for faster clock ramp.</div>
+          </div>
+          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+
+        <div class="action-item" onclick="toggleDaemonState()">
+          <div class="action-text">
+            <div class="action-title" id="action-daemon-title">Toggle 5:00 AM Daemon</div>
+            <div class="action-desc" id="action-daemon-desc">Start or stop the background daily schedule daemon.</div>
+          </div>
+          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 4: LOGS (Settings / Terminal) -->
+    <div id="tab-logs" class="tab-page">
+      <div class="details-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+          <div class="section-title" style="margin:0;">Optimization Log</div>
+          <button onclick="loadLogs()" class="m3-button" style="width:auto; padding:6px 14px; font-size:13px; border-radius:12px;">Refresh ⟳</button>
+        </div>
+        <div class="log-box" id="terminal-log">Loading activity log...</div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Quick Actions Panel -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Quick Actions</span>
-    </div>
-    <div class="actions-grid">
-      <button class="btn btn-primary" onclick="runOptimizeNow()">
-        ⚡ Optimize Now
-      </button>
-      <button class="btn" onclick="purgeLogs()">
-        🧹 Purge Logs & Cache
-      </button>
-      <button class="btn" onclick="compactMemory()">
-        🔄 Compact RAM & Trim
-      </button>
-      <button class="btn" onclick="toggleEnhancedCpu()">
-        🚀 Toggle Enhanced CPU
-      </button>
-      <button class="btn btn-outline" onclick="toggleDaemon(true)">
-        🕒 Start 5 AM Daemon
-      </button>
-      <button class="btn btn-danger" onclick="toggleDaemon(false)">
-        🛑 Stop Daemon
-      </button>
-    </div>
-  </div>
-
-  <!-- Bluetooth & Radio Status Card -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Wireless & Radio Status</span>
-      <button onclick="refreshData()" style="background:transparent; border:none; color:var(--accent); font-size:12px; font-weight:600; cursor:pointer;">Refresh ⟳</button>
-    </div>
-    <div class="status-row">
-      <span class="status-label">Samsung Nearby Scanning</span>
-      <span class="status-value" id="status-nearby">--</span>
-    </div>
-    <div class="status-row">
-      <span class="status-label">Background BLE Scanning</span>
-      <span class="status-value" id="status-ble">--</span>
-    </div>
-    <div class="status-row">
-      <span class="status-label">Background Wi-Fi Scanning</span>
-      <span class="status-value" id="status-wifi">--</span>
-    </div>
-    <div class="status-row">
-      <span class="status-label">Enhanced CPU Responsiveness</span>
-      <span class="status-value" id="status-cpu-boost">--</span>
-    </div>
-    <div class="status-row">
-      <span class="status-label">Device Uptime</span>
-      <span class="status-value" id="status-uptime">--</span>
-    </div>
-  </div>
-
-  <!-- Terminal / Log Viewer Card -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Optimization Activity Log</span>
-      <button onclick="loadLogs()" style="background:transparent; border:none; color:var(--accent); font-size:12px; font-weight:600; cursor:pointer;">Reload Log ⟳</button>
-    </div>
-    <div class="terminal" id="terminal-log">Loading activity log...</div>
-  </div>
-
+  <!-- Toast Notification -->
   <div id="toast" class="toast">Action completed</div>
 
-  <script>
-    let selectedSize = 2048;
-    let modulePath = "/data/adb/modules/samsung_daily_optimizer";
+  <!-- Bottom Navigation Bar (Matching ReZygisk / KernelSU Navigation) -->
+  <div class="bottom-nav">
+    
+    <!-- Home Tab -->
+    <div class="nav-item active" onclick="switchTab('home')">
+      <div class="nav-pill">
+        <!-- Home SVG -->
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        </svg>
+      </div>
+      <span class="nav-label">Home</span>
+    </div>
 
-    // Universal command executor (KSU / APatch / Standalone REST API)
+    <!-- Modules / RAM Plus Tab -->
+    <div class="nav-item" onclick="switchTab('ramplus')">
+      <div class="nav-pill">
+        <!-- Cube/Box SVG matching screenshot -->
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+      </div>
+      <span class="nav-label">RAM Plus</span>
+    </div>
+
+    <!-- Actions Tab -->
+    <div class="nav-item" onclick="switchTab('actions')">
+      <div class="nav-pill">
+        <!-- Play / Actions SVG matching screenshot -->
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="10"/>
+          <polygon points="10 8 16 12 10 16 10 8"/>
+        </svg>
+      </div>
+      <span class="nav-label">Actions</span>
+    </div>
+
+    <!-- Logs / Settings Tab -->
+    <div class="nav-item" onclick="switchTab('logs')">
+      <div class="nav-pill">
+        <!-- Cog / Settings SVG matching screenshot -->
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </div>
+      <span class="nav-label">Logs</span>
+    </div>
+
+  </div>
+
+  <script>
+    let currentRamChoice = 2048;
+    let isDaemonRunning = false;
+
+    // Tab Navigation Switcher
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-page').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      const activePage = document.getElementById('tab-' + tabId);
+      if (activePage) activePage.classList.add('active');
+
+      const tabs = ['home', 'ramplus', 'actions', 'logs'];
+      const index = tabs.indexOf(tabId);
+      if (index >= 0) {
+        document.querySelectorAll('.nav-item')[index].classList.add('active');
+      }
+
+      if (tabId === 'logs') {
+        loadLogs();
+      }
+    }
+
+    // Universal Command Executor
     async function execCmd(cmd) {
       if (window.ksu && window.ksu.exec) {
         return new Promise((resolve) => {
@@ -236,7 +634,6 @@
           }
         });
       } else {
-        // Fallback: local web server API
         try {
           const res = await fetch("/api/exec", {
             method: "POST",
@@ -258,44 +655,35 @@
       setTimeout(() => t.classList.remove("show"), 2800);
     }
 
-    function selectRamPlus(size) {
-      selectedSize = size;
-      document.querySelectorAll(".sel-btn").forEach(b => {
-        b.classList.toggle("active", parseInt(b.dataset.size) === size);
-      });
+    function selectRamOption(size) {
+      currentRamChoice = size;
+      document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+      const activeCard = document.getElementById('opt-' + size);
+      if (activeCard) activeCard.classList.add('selected');
     }
 
-    async function applyRamPlus() {
+    async function applyRamSetting() {
       showToast("Applying RAM Plus setting...");
-      await execCmd(`settings put global ram_expand_size ${selectedSize}`);
-      // Also update config.prop if accessible
+      await execCmd(`settings put global ram_expand_size ${currentRamChoice}`);
       const cfgCmd = `
         for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
           if [ -d "$dir" ]; then
-            sed -i "s/^RAM_PLUS_SIZE=.*/RAM_PLUS_SIZE=${selectedSize}/" "$dir/config.prop" 2>/dev/null
-            [ "${selectedSize}" = "0" ] && sed -i "s/^RAM_PLUS_ENABLED=.*/RAM_PLUS_ENABLED=0/" "$dir/config.prop" 2>/dev/null || sed -i "s/^RAM_PLUS_ENABLED=.*/RAM_PLUS_ENABLED=1/" "$dir/config.prop" 2>/dev/null
+            sed -i "s/^RAM_PLUS_SIZE=.*/RAM_PLUS_SIZE=${currentRamChoice}/" "$dir/config.prop" 2>/dev/null
+            [ "${currentRamChoice}" = "0" ] && sed -i "s/^RAM_PLUS_ENABLED=.*/RAM_PLUS_ENABLED=0/" "$dir/config.prop" 2>/dev/null || sed -i "s/^RAM_PLUS_ENABLED=.*/RAM_PLUS_ENABLED=1/" "$dir/config.prop" 2>/dev/null
           fi
         done
       `;
       await execCmd(cfgCmd);
-      showToast(selectedSize === 0 ? "RAM Plus disabled! (Takes effect after reboot)" : `RAM Plus set to ${selectedSize / 1024} GB! (Reboot to apply)`);
+      showToast(currentRamChoice === 0 ? "RAM Plus Disabled (Reboot to take effect)" : `RAM Plus set to ${currentRamChoice / 1024} GB (Reboot to take effect)`);
       refreshData();
     }
 
     async function runOptimizeNow() {
-      showToast("Running optimization routine...");
-      document.getElementById("terminal-log").innerText = "Executing optimizer routine, please wait...\n";
-      const out = await execCmd("sh /data/adb/modules/samsung_daily_optimizer/run_now.sh 2>&1 || sh /data/local/tmp/SamsungDailyOptimizer/run_now.sh 2>&1");
-      document.getElementById("terminal-log").innerText = out || "Optimization completed.";
+      showToast("Executing daily optimization...");
+      const res = await execCmd("sh /data/adb/modules/samsung_daily_optimizer/run_now.sh 2>&1 || sh /data/local/tmp/SamsungDailyOptimizer/run_now.sh 2>&1");
       showToast("Optimization pass complete!");
       refreshData();
-    }
-
-    async function purgeLogs() {
-      showToast("Purging crash logs and trimming cache...");
-      await execCmd("rm -f /data/anr/* /data/tombstones/* /data/system/dropbox/* 2>/dev/null; pm trim-caches 4096M 2>/dev/null");
-      showToast("Logs cleared & caches trimmed!");
-      refreshData();
+      loadLogs();
     }
 
     async function compactMemory() {
@@ -305,21 +693,28 @@
       refreshData();
     }
 
+    async function purgeLogs() {
+      showToast("Purging crash logs...");
+      await execCmd("rm -f /data/anr/* /data/tombstones/* /data/system/dropbox/* 2>/dev/null; pm trim-caches 4096M 2>/dev/null");
+      showToast("Logs purged & dead caches trimmed!");
+      refreshData();
+    }
+
     async function toggleEnhancedCpu() {
       const cur = await execCmd("settings get global sem_enhanced_cpu_responsiveness 2>/dev/null");
       const next = cur.trim() === "1" ? "0" : "1";
       await execCmd(`settings put global sem_enhanced_cpu_responsiveness ${next}`);
-      showToast(`Enhanced CPU Responsiveness: ${next === "1" ? "Enabled" : "Disabled"}`);
+      showToast(`Enhanced CPU: ${next === "1" ? "Enabled" : "Standard"}`);
       refreshData();
     }
 
-    async function toggleDaemon(start) {
-      if (start) {
+    async function toggleDaemonState() {
+      if (isDaemonRunning) {
+        showToast("Stopping 5:00 AM daemon...");
+        await execCmd("sh /data/adb/modules/samsung_daily_optimizer/stop_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/stop_daemon.sh 2>/dev/null");
+      } else {
         showToast("Starting 5:00 AM daemon...");
         await execCmd("sh /data/adb/modules/samsung_daily_optimizer/start_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/start_daemon.sh 2>/dev/null");
-      } else {
-        showToast("Stopping daemon...");
-        await execCmd("sh /data/adb/modules/samsung_daily_optimizer/stop_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/stop_daemon.sh 2>/dev/null");
       }
       setTimeout(refreshData, 500);
     }
@@ -327,13 +722,22 @@
     async function loadLogs() {
       const log = await execCmd("cat /data/adb/modules/samsung_daily_optimizer/optimizer.log 2>/dev/null || cat /data/local/tmp/SamsungDailyOptimizer/optimizer.log 2>/dev/null || cat /data/local/tmp/samsung_daily_optimizer.log 2>/dev/null || echo 'No activity log found yet.'");
       const t = document.getElementById("terminal-log");
-      t.innerText = log.trim() ? log.trim().split("\n").slice(-30).join("\n") : "No activity logged yet.";
-      t.scrollTop = t.scrollHeight;
+      if (t) {
+        t.innerText = log.trim() ? log.trim().split("\n").slice(-40).join("\n") : "No activity logged yet.";
+        t.scrollTop = t.scrollHeight;
+      }
     }
 
     async function refreshData() {
-      // 1. Memory and Swap
-      const meminfo = await execCmd("cat /proc/meminfo");
+      // 1. Android & Kernel Version
+      const androidVer = (await execCmd("getprop ro.build.version.release 2>/dev/null")).trim();
+      if (androidVer) document.getElementById("val-android-ver").innerText = androidVer;
+
+      const kernelVer = (await execCmd("uname -r 2>/dev/null")).trim();
+      if (kernelVer) document.getElementById("val-kernel-ver").innerText = kernelVer;
+
+      // 2. RAM & Swap Stats
+      const meminfo = await execCmd("cat /proc/meminfo 2>/dev/null");
       if (meminfo) {
         const getVal = (key) => {
           const m = meminfo.match(new RegExp(key + ":\\s+(\\d+)\\s+kB"));
@@ -344,76 +748,58 @@
         const memUsed = memTotal - memFree;
         const ramPct = memTotal ? Math.round((memUsed / memTotal) * 100) : 0;
 
-        document.getElementById("ram-used").innerText = (memUsed / (1024 * 1024)).toFixed(1) + " GB";
-        document.getElementById("ram-total").innerText = "Total: " + (memTotal / (1024 * 1024)).toFixed(1) + " GB";
-        document.getElementById("ram-pct").innerText = ramPct + "%";
-        const rBar = document.getElementById("ram-bar");
-        rBar.style.width = ramPct + "%";
-        rBar.className = "progress-bar-fill " + (ramPct > 90 ? "fill-danger" : ramPct > 75 ? "fill-warning" : "");
+        if (memTotal > 0) {
+          document.getElementById("val-ram-usage").innerText = 
+            (memUsed / (1024 * 1024)).toFixed(1) + " GB / " + (memTotal / (1024 * 1024)).toFixed(1) + " GB (" + ramPct + "% used)";
+        }
 
         const swapTotal = getVal("SwapTotal");
         const swapFree = getVal("SwapFree");
         const swapUsed = swapTotal - swapFree;
         const swapPct = swapTotal ? Math.round((swapUsed / swapTotal) * 100) : 0;
 
-        document.getElementById("swap-used").innerText = (swapUsed / (1024 * 1024)).toFixed(1) + " GB";
-        document.getElementById("swap-total").innerText = "Allocated: " + (swapTotal / (1024 * 1024)).toFixed(1) + " GB";
-        document.getElementById("swap-pct").innerText = swapPct + "%";
-        const sBar = document.getElementById("swap-bar");
-        sBar.style.width = swapPct + "%";
-        sBar.className = "progress-bar-fill " + (swapPct > 80 ? "fill-danger" : swapPct > 60 ? "fill-warning" : "");
+        if (swapTotal > 0) {
+          document.getElementById("val-swap-usage").innerText = 
+            (swapUsed / 1024).toFixed(0) + " MB / " + (swapTotal / 1024).toFixed(0) + " MB (" + swapPct + "% swap used)";
+        } else {
+          document.getElementById("val-swap-usage").innerText = "0 MB (Swap disabled)";
+        }
       }
 
-      // 2. RAM Plus Setting
+      // 3. RAM Plus Setting
       const ramSizeRaw = (await execCmd("settings get global ram_expand_size 2>/dev/null")).trim();
       const ramSize = parseInt(ramSizeRaw) || 0;
-      document.getElementById("cur-ramplus-badge").innerText = "Current: " + (ramSize === 0 ? "Disabled (0 GB)" : (ramSize / 1024) + " GB");
-      selectRamPlus(ramSize);
+      selectRamOption(ramSize);
+      document.getElementById("val-ramplus-config").innerText = 
+        ramSize === 0 ? "Disabled (0 GB - Zero swap lag)" : (ramSize / 1024) + " GB (" + ramSize + " MB)";
 
-      // 3. Radio & Tuning Status
-      const nearby = (await execCmd("settings get system nearby_scanning_enabled 2>/dev/null")).trim();
-      document.getElementById("status-nearby").innerText = nearby === "0" ? "Disabled (Optimized)" : "Active (Scanning)";
-      document.getElementById("status-nearby").style.color = nearby === "0" ? "var(--success)" : "var(--warning)";
-
-      const ble = (await execCmd("settings get global ble_scan_always_enabled 2>/dev/null")).trim();
-      document.getElementById("status-ble").innerText = ble === "0" ? "Disabled (Optimized)" : "Active";
-      document.getElementById("status-ble").style.color = ble === "0" ? "var(--success)" : "var(--warning)";
-
-      const wifi = (await execCmd("settings get global wifi_scan_always_enabled 2>/dev/null")).trim();
-      document.getElementById("status-wifi").innerText = wifi === "0" ? "Disabled (Optimized)" : "Active";
-      document.getElementById("status-wifi").style.color = wifi === "0" ? "var(--success)" : "var(--warning)";
-
-      const cpuBoost = (await execCmd("settings get global sem_enhanced_cpu_responsiveness 2>/dev/null")).trim();
-      document.getElementById("status-cpu-boost").innerText = cpuBoost === "1" ? "Enabled (High Speed)" : "Standard";
-      document.getElementById("status-cpu-boost").style.color = cpuBoost === "1" ? "var(--success)" : "var(--text-sub)";
-
-      const uptime = (await execCmd("uptime 2>/dev/null")).trim();
-      if (uptime) {
-        const u = uptime.match(/up\s+([^,]+)/);
-        document.getElementById("status-uptime").innerText = u ? u[1] : uptime;
-      }
-
-      // 4. Daemon Running Status
+      // 4. Daemon Status
       const daemonPid = (await execCmd("cat /data/adb/modules/samsung_daily_optimizer/daemon.pid 2>/dev/null || cat /data/local/tmp/SamsungDailyOptimizer/daemon.pid 2>/dev/null")).trim();
-      const badge = document.getElementById("daemon-badge");
-      const badgeText = document.getElementById("daemon-status-text");
       if (daemonPid && !isNaN(parseInt(daemonPid))) {
-        badge.className = "badge badge-success";
-        badgeText.innerText = "Daemon Active (PID " + daemonPid + ")";
+        isDaemonRunning = true;
+        document.getElementById("val-daemon-status").innerText = "Active (PID " + daemonPid + " &bull; 5:00 AM Daily)";
+        document.getElementById("main-status-text").innerText = "Working";
+        document.getElementById("action-daemon-title").innerText = "Stop 5:00 AM Daemon";
+        document.getElementById("action-daemon-desc").innerText = "Daemon currently running (PID " + daemonPid + "). Tap to stop.";
       } else {
-        badge.className = "badge badge-idle";
-        badgeText.innerText = "Daemon Idle";
+        isDaemonRunning = false;
+        document.getElementById("val-daemon-status").innerText = "Idle (Manual trigger only)";
+        document.getElementById("action-daemon-title").innerText = "Start 5:00 AM Daemon";
+        document.getElementById("action-daemon-desc").innerText = "Schedule automated daily maintenance at 5:00 AM.";
       }
 
-      // Device Model
-      const model = (await execCmd("getprop ro.product.model 2>/dev/null")).trim();
-      if (model) document.getElementById("dev-model").innerText = model + " \u2022 One UI Daily Optimizer";
+      // 5. Radio Status
+      const nearby = (await execCmd("settings get system nearby_scanning_enabled 2>/dev/null")).trim();
+      const ble = (await execCmd("settings get global ble_scan_always_enabled 2>/dev/null")).trim();
+      if (nearby === "0" && ble === "0") {
+        document.getElementById("val-radio-status").innerText = "Protected (Nearby & background BLE scanning disabled)";
+      } else {
+        document.getElementById("val-radio-status").innerText = "Scanning active (Nearby: " + nearby + ", BLE: " + ble + ")";
+      }
     }
 
-    // Initial load
+    // Initial Load & polling
     refreshData();
-    loadLogs();
-    // Auto refresh every 4 seconds
     setInterval(refreshData, 4000);
   </script>
 </body>
