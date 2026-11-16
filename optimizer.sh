@@ -37,6 +37,7 @@ ENABLE_TCP_BBR="${ENABLE_TCP_BBR:-1}"
 DISABLE_BT_SNOOP_LOG="${DISABLE_BT_SNOOP_LOG:-1}"
 TUNE_WIFI_SLEEP="${TUNE_WIFI_SLEEP:-1}"
 RESTRICT_SAMSUNG_TELEMETRY="${RESTRICT_SAMSUNG_TELEMETRY:-1}"
+BOOST_AUDIO_PRIORITY="${BOOST_AUDIO_PRIORITY:-1}"
 
 # Notification helpers (Live NowBar / Dynamic Island notification while running, static on finish)
 notify_live() {
@@ -222,6 +223,24 @@ for pkg in $COMPILE_PKGS; do
         cmd package compile -m speed-profile "$pkg" >/dev/null 2>&1 && log "  [OK] $pkg compiled successfully" || log "  [WARN] Failed to compile $pkg"
     fi
 done
+
+# 10. Real-Time Audio & Bluetooth Thread Priority Boost
+# Prevents audio thread starvation and L/R earbud desync under high CPU/memory load
+if [ "$BOOST_AUDIO_PRIORITY" = "1" ]; then
+    log "Boosting Bluetooth and Audio HAL real-time priorities..."
+    notify_live "🎧 Prioritizing Bluetooth audio & AudioFlinger threads..."
+    AUDIO_PIDS=$(pidof audioserver android.hardware.audio.service com.android.bluetooth android.hardware.bluetooth@1.1-service-qti 2>/dev/null)
+    for apid in $AUDIO_PIDS; do
+        renice -n -16 -p "$apid" >/dev/null 2>&1
+        if [ -d "/proc/$apid/task" ]; then
+            for atid in /proc/"$apid"/task/*; do
+                tid_num=$(basename "$atid")
+                [ -d /dev/cpuset/top-app ] && echo "$tid_num" > /dev/cpuset/top-app/tasks 2>/dev/null
+            done
+        fi
+    done
+    log "  [OK] Bluetooth audio encoder & AudioFlinger boosted to high-priority scheduling"
+fi
 
 log "======================================================"
 log "Optimization completed successfully."

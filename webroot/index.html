@@ -544,6 +544,14 @@
           <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </div>
 
+        <div class="action-item" onclick="boostAudioPriority()">
+          <div class="action-text">
+            <div class="action-title">Boost Audio & BT Priority</div>
+            <div class="action-desc">Grants real-time scheduling to audio and Bluetooth to fix earbud desync.</div>
+          </div>
+          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+        </div>
+
         <div class="action-item" onclick="toggleDaemonState()">
           <div class="action-text">
             <div class="action-title" id="action-daemon-title">Toggle 5:00 AM Daemon</div>
@@ -768,6 +776,24 @@
       `;
       await execCmd(cmd);
       showToast("TCP BBR & Bluetooth audio boost applied!");
+      refreshData();
+    }
+
+    async function boostAudioPriority() {
+      showToast("Boosting audio & Bluetooth real-time priorities...");
+      const cmd = `
+        for apid in $(pidof audioserver android.hardware.audio.service com.android.bluetooth android.hardware.bluetooth@1.1-service-qti 2>/dev/null); do
+          renice -n -16 -p "$apid" 2>/dev/null
+          if [ -d "/proc/$apid/task" ]; then
+            for atid in /proc/"$apid"/task/*; do
+              [ -d /dev/cpuset/top-app ] && echo "$(basename "$atid")" > /dev/cpuset/top-app/tasks 2>/dev/null
+            done
+          fi
+        done
+        cmd notification post -i @android:drawable/stat_sys_headset -t 'Samsung Daily Optimizer' 'samsung_optimizer' '🎧 Audio & Bluetooth threads boosted to Real-Time priority' 2>/dev/null
+      `;
+      await execCmd(cmd);
+      showToast("Audio & BT threads boosted to real-time priority!");
       refreshData();
     }
 
