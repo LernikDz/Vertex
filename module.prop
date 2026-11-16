@@ -1,6 +1,6 @@
 id=samsung_daily_optimizer
 name=Vertex
-version=v1.2
-versionCode=120
+version=v1.3
+versionCode=130
 author=Wolly
-description=Automated daily maintenance for Samsung Galaxy devices: RAM Plus control, VM swappiness tuning, storage trim, log cache cleanup, Bluetooth audio stabilization, and safe ART optimization every morning at 5:00 AM (Temproot compatible, boot-run disabled).
+description=Performance & daily maintenance for Samsung Galaxy devices: ZSTD ZRAM engine, 120Hz smooth scroll lock, bypass charging, RAM Plus control, audio real-time scheduling, and screen-aware 5 AM optimization.

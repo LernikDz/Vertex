@@ -52,3 +52,13 @@ RESTRICT_SAMSUNG_TELEMETRY=1
 
 # Audio & Bluetooth Real-Time Scheduling (nice -16 + top-app cpuset to prevent L/R earbud desync)
 BOOST_AUDIO_PRIORITY=1
+
+# ZRAM Compression Algorithm Engine (zstd = ~35% higher compression ratio, lz4 = low CPU, lzo-rle = default)
+TUNE_ZRAM_ALGORITHM=1
+ZRAM_COMP_ALGORITHM=zstd
+
+# Display Smooth Scroll Lock (1 = Force 120Hz minimum refresh rate, 0 = Stock dynamic LTPO 1-120Hz)
+FORCE_120HZ_REFRESH=0
+
+# Smart Screen-Off / Idle Aware Daemon (1 = wait until screen is off/idle before running 5 AM pass)
+SMART_SCREEN_AWARE=1

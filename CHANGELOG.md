@@ -4,6 +4,18 @@ All notable changes to the **Vertex** (formerly Samsung Daily Optimizer) project
 
 ---
 
+## [v1.3] - 2026-11-16
+
+### 🚀 Performance & Display
+* **ZRAM Compression Engine Switcher (`ZSTD`)**: Dynamically switch kernel ZRAM compression to **ZSTD** for ~35% higher compression ratio on modern ARMv9 CPUs, storing significantly more compressed pages in RAM before swapping. Includes 1-tap switching between **ZSTD**, **LZ4**, and stock **LZO-RLE** in the WebUI.
+* **120Hz Smooth Scroll Lock**: Forces display minimum refresh rate to 120Hz (`min_refresh_rate 120.0`) to eradicate scrolling micro-stutters and aggressive 60Hz downclocking, with 1-tap toggle back to dynamic LTPO (1Hz-120Hz).
+
+### 🔋 Battery & Hardware Longevity
+* **Bypass Charging (Desk & Gaming Mode)**: Powers the device directly from the wall charger without routing charging current into the lithium battery (`batt_slate_mode`), preventing battery wear, overheating, and thermal throttling while gaming or docked.
+* **Smart Screen-Off Aware Scheduler**: The daily 5:00 AM daemon now checks display wakefulness (`mWakefulness=Awake`). If the user is actively using the phone at 5:00 AM, maintenance is deferred up to 60 minutes until the screen is off and the device is idle, guaranteeing uninterrupted user interaction.
+
+---
+
 ## [v1.2] - 2026-11-16
 
 ### 🏷️ Rebrand

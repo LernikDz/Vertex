@@ -383,7 +383,7 @@
 
         <div class="info-group">
           <div class="info-label">Version</div>
-          <div class="info-value" id="val-module-ver">v1.2 (Vertex)</div>
+          <div class="info-value" id="val-module-ver">v1.3 (Vertex)</div>
         </div>
 
         <div class="info-group">
@@ -413,6 +413,11 @@
         </div>
 
         <div class="info-group">
+          <div class="info-label">ZRAM Compression Engine</div>
+          <div class="info-value" id="val-zram-alg">Loading compression engine...</div>
+        </div>
+
+        <div class="info-group">
           <div class="info-label">RAM Plus Configuration</div>
           <div class="info-value" id="val-ramplus-config">Loading...</div>
         </div>
@@ -420,6 +425,19 @@
         <div class="info-group">
           <div class="info-label">Kernel VM & VFS Cache</div>
           <div class="info-value" id="val-vfs-cache">vfs_cache_pressure: 50 &bull; schedstats: disabled</div>
+        </div>
+
+        <!-- Category: Display & Power Management -->
+        <div class="section-title">Display & Power</div>
+
+        <div class="info-group">
+          <div class="info-label">Display Refresh Rate (LTPO)</div>
+          <div class="info-value" id="val-refresh-rate">Loading refresh rate...</div>
+        </div>
+
+        <div class="info-group">
+          <div class="info-label">Battery & Power Routing</div>
+          <div class="info-value" id="val-battery-status">Loading power metrics...</div>
         </div>
 
         <!-- Category: Audio & System Guard -->
@@ -476,6 +494,30 @@
         </div>
 
         <button class="m3-button" onclick="applyRamSetting()">Apply & Save Configuration</button>
+      </div>
+
+      <div class="details-card">
+        <div class="section-title" style="margin-top:0;">ZRAM Compression Engine</div>
+        <div class="info-value" style="margin-bottom: 16px;">
+          ZSTD provides ~35% higher compression ratio on modern ARMv9 CPU cores (S24), storing significantly more compressed memory in RAM before swapping.
+        </div>
+
+        <div class="option-grid">
+          <div class="option-card" id="opt-alg-zstd" onclick="selectAlgOption('zstd')">
+            <div class="option-card-title">ZSTD</div>
+            <div class="option-card-desc">High ratio (~35% more RAM)</div>
+          </div>
+          <div class="option-card" id="opt-alg-lz4" onclick="selectAlgOption('lz4')">
+            <div class="option-card-title">LZ4</div>
+            <div class="option-card-desc">Ultra-fast decompression</div>
+          </div>
+          <div class="option-card" id="opt-alg-lzo-rle" onclick="selectAlgOption('lzo-rle')">
+            <div class="option-card-title">LZO-RLE</div>
+            <div class="option-card-desc">Samsung stock default</div>
+          </div>
+        </div>
+
+        <button class="m3-button" onclick="applyAlgSetting()">Switch ZRAM Engine</button>
       </div>
 
       <div class="details-card">
@@ -550,6 +592,22 @@
             <div class="action-desc">Grants real-time scheduling to audio and Bluetooth to fix earbud desync.</div>
           </div>
           <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+        </div>
+
+        <div class="action-item" onclick="toggleRefreshRateLock()">
+          <div class="action-text">
+            <div class="action-title" id="action-refresh-title">Lock 120Hz Smooth Scroll</div>
+            <div class="action-desc" id="action-refresh-desc">Forces 120Hz minimum refresh rate to eliminate scrolling micro-stutters.</div>
+          </div>
+          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+
+        <div class="action-item" onclick="toggleBypassCharging()">
+          <div class="action-text">
+            <div class="action-title" id="action-bypass-title">Bypass Charging (Desk Mode)</div>
+            <div class="action-desc" id="action-bypass-desc">Powers device from wall adapter without charging battery to stop heat & degradation.</div>
+          </div>
+          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </div>
 
         <div class="action-item" onclick="toggleDaemonState()">
@@ -634,7 +692,10 @@
 
   <script>
     let currentRamChoice = 2048;
+    let currentAlgChoice = 'zstd';
     let isDaemonRunning = false;
+    let is120HzLocked = false;
+    let isBypassActive = false;
 
     // Tab Navigation Switcher
     function switchTab(tabId) {
@@ -696,9 +757,81 @@
 
     function selectRamOption(size) {
       currentRamChoice = size;
-      document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.option-card').forEach(c => {
+        if (c.id.startsWith('opt-') && !c.id.startsWith('opt-alg-')) c.classList.remove('selected');
+      });
       const activeCard = document.getElementById('opt-' + size);
       if (activeCard) activeCard.classList.add('selected');
+    }
+
+    function selectAlgOption(alg, isUserSelect = true) {
+      currentAlgChoice = alg;
+      ['zstd', 'lz4', 'lzo-rle'].forEach(a => {
+        const el = document.getElementById('opt-alg-' + a);
+        if (el) el.classList.remove('selected');
+      });
+      const active = document.getElementById('opt-alg-' + alg);
+      if (active) active.classList.add('selected');
+    }
+
+    async function applyAlgSetting() {
+      showToast("Switching ZRAM engine to " + currentAlgChoice + "...");
+      const script = `
+        ZRAM_SIZE=$(cat /sys/block/zram0/disksize 2>/dev/null)
+        swapoff /dev/block/zram0 2>/dev/null
+        echo 1 > /sys/block/zram0/reset 2>/dev/null
+        echo '${currentAlgChoice}' > /sys/block/zram0/comp_algorithm 2>/dev/null
+        [ -n "$ZRAM_SIZE" ] && [ "$ZRAM_SIZE" -gt 0 ] && echo "$ZRAM_SIZE" > /sys/block/zram0/disksize 2>/dev/null
+        mkswap /dev/block/zram0 2>/dev/null
+        swapon /dev/block/zram0 2>/dev/null
+        for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
+          if [ -d "$dir" ] && [ -f "$dir/config.prop" ]; then
+            if grep -q "^ZRAM_COMP_ALGORITHM=" "$dir/config.prop"; then
+              sed -i "s/^ZRAM_COMP_ALGORITHM=.*/ZRAM_COMP_ALGORITHM=${currentAlgChoice}/" "$dir/config.prop" 2>/dev/null
+            else
+              echo "ZRAM_COMP_ALGORITHM=${currentAlgChoice}" >> "$dir/config.prop" 2>/dev/null
+            fi
+          fi
+        done
+        cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚡ ZRAM Engine set to ${currentAlgChoice.toUpperCase()}' 2>/dev/null
+      `;
+      await execCmd(script);
+      showToast("ZRAM engine switched to " + currentAlgChoice.toUpperCase() + "!");
+      refreshData();
+    }
+
+    async function toggleRefreshRateLock() {
+      if (is120HzLocked) {
+        showToast("Restoring dynamic LTPO refresh rate (1Hz - 120Hz)...");
+        await execCmd("settings put system min_refresh_rate 1.0 2>/dev/null; settings put system peak_refresh_rate 120.0 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🌱 Dynamic LTPO Restored (1Hz - 120Hz)' 2>/dev/null");
+        showToast("Dynamic LTPO (1Hz - 120Hz) active!");
+      } else {
+        showToast("Locking 120Hz Smooth Scroll...");
+        await execCmd("settings put system min_refresh_rate 120.0 2>/dev/null; settings put system peak_refresh_rate 120.0 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚡ 120Hz Smooth Scroll Locked' 2>/dev/null");
+        showToast("120Hz Smooth Scroll locked!");
+      }
+      refreshData();
+    }
+
+    async function toggleBypassCharging() {
+      if (isBypassActive) {
+        showToast("Resuming normal battery charging...");
+        await execCmd(`
+          echo 0 > /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null
+          echo 1 > /sys/class/power_supply/battery/charging_enabled 2>/dev/null
+          echo 1 > /sys/class/power_supply/battery/battery_charging_enabled 2>/dev/null
+          cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🔋 Normal Battery Charging Resumed' 2>/dev/null
+        `);
+        showToast("Normal charging resumed!");
+      } else {
+        showToast("Enabling Bypass Charging (Desk Mode)...");
+        await execCmd(`
+          echo 1 > /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || echo 0 > /sys/class/power_supply/battery/charging_enabled 2>/dev/null || echo 0 > /sys/class/power_supply/battery/battery_charging_enabled 2>/dev/null
+          cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚡ Bypass Charging Active (Desk Mode)' 2>/dev/null
+        `);
+        showToast("Bypass Charging active! Battery not charging.");
+      }
+      refreshData();
     }
 
     async function applyRamSetting() {
@@ -855,6 +988,15 @@
         }
       }
 
+      // 2b. ZRAM Compression Algorithm
+      const zramAlgRaw = (await execCmd("cat /sys/block/zram0/comp_algorithm 2>/dev/null")).trim();
+      if (zramAlgRaw) {
+        const match = zramAlgRaw.match(/\[([^\]]+)\]/);
+        const activeAlg = match ? match[1] : "lzo-rle";
+        document.getElementById("val-zram-alg").innerText = activeAlg.toUpperCase() + " (Active) \u2022 [" + zramAlgRaw.replace(/\[|\]/g, "") + "]";
+        selectAlgOption(activeAlg, false);
+      }
+
       // 3. RAM Plus Setting
       const ramSizeRaw = (await execCmd("settings get global ram_expand_size 2>/dev/null")).trim();
       const ramSize = parseInt(ramSizeRaw) || 0;
@@ -901,6 +1043,50 @@
       // 8. Telemetry Status
       const diagmon = (await execCmd("am get-standby-bucket com.sec.android.diagmonagent 2>/dev/null")).trim();
       document.getElementById("val-telemetry-status").innerText = (diagmon === "45" || diagmon.toLowerCase().includes("restricted")) ? "Restricted (Diagmon & Survey Hibernated)" : "Active (Standard)";
+
+      // 9. Display Refresh Rate (LTPO)
+      const minRate = (await execCmd("settings get system min_refresh_rate 2>/dev/null")).trim();
+      const peakRate = (await execCmd("settings get system peak_refresh_rate 2>/dev/null")).trim();
+      if (parseFloat(minRate) >= 120.0) {
+        is120HzLocked = true;
+        document.getElementById("val-refresh-rate").innerText = "120Hz Locked (Zero micro-stutter)";
+        document.getElementById("action-refresh-title").innerText = "Restore Dynamic LTPO (1-120Hz)";
+        document.getElementById("action-refresh-desc").innerText = "Currently locked at 120Hz. Tap to restore variable refresh rate.";
+      } else {
+        is120HzLocked = false;
+        document.getElementById("val-refresh-rate").innerText = (minRate ? minRate + "Hz" : "1Hz") + " - " + (peakRate ? peakRate + "Hz" : "120Hz") + " (Dynamic LTPO)";
+        document.getElementById("action-refresh-title").innerText = "Lock 120Hz Smooth Scroll";
+        document.getElementById("action-refresh-desc").innerText = "Forces 120Hz minimum refresh rate to eliminate scrolling micro-stutters.";
+      }
+
+      // 10. Battery & Power Routing (Bypass Charging)
+      const battInfo = await execCmd("dumpsys battery 2>/dev/null");
+      const slate = (await execCmd("cat /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || cat /sys/class/power_supply/battery/charging_enabled 2>/dev/null")).trim();
+      if (battInfo) {
+        const mLevel = battInfo.match(/level:\s*(\d+)/);
+        const mUsb = battInfo.match(/USB powered:\s*(true|false)/i);
+        const mAc = battInfo.match(/AC powered:\s*(true|false)/i);
+        const level = mLevel ? mLevel[1] + "%" : "--%";
+        const plugged = (mUsb && mUsb[1] === "true") || (mAc && mAc[1] === "true");
+
+        isBypassActive = (slate === "1");
+
+        let statusText = level;
+        if (isBypassActive) {
+          statusText += " \u2022 Bypass Charging Active (Desk Mode)";
+          document.getElementById("action-bypass-title").innerText = "Resume Normal Charging";
+          document.getElementById("action-bypass-desc").innerText = "Bypass active (device running off charger). Tap to charge battery.";
+        } else if (plugged) {
+          statusText += " \u2022 Charging (Plugged In)";
+          document.getElementById("action-bypass-title").innerText = "Bypass Charging (Desk Mode)";
+          document.getElementById("action-bypass-desc").innerText = "Power phone directly from charger without charging battery to stop heat.";
+        } else {
+          statusText += " \u2022 Discharging (Battery Power)";
+          document.getElementById("action-bypass-title").innerText = "Bypass Charging (Requires Charger)";
+          document.getElementById("action-bypass-desc").innerText = "Connect USB-C charger to enable bypass wall power mode.";
+        }
+        document.getElementById("val-battery-status").innerText = statusText;
+      }
     }
 
     // Initial Load & polling

@@ -6,6 +6,10 @@ An automated daily performance maintenance module and standalone utility for Sam
 
 ## Features
 
+- **ZRAM Compression Engine Switcher (`ZSTD` / `LZ4` / `LZO-RLE`)**: Switches kernel ZRAM compression to **ZSTD** for ~35% higher compression ratio on modern ARMv9 cores (S24), storing significantly more compressed memory in RAM and preventing memory thrashing.
+- **120Hz Smooth Scroll Lock**: Forces display minimum refresh rate to 120Hz (`min_refresh_rate 120.0`) to eliminate scrolling micro-stutters and aggressive 60Hz downclocking, with 1-tap restore to dynamic LTPO (1Hz-120Hz).
+- **Bypass Charging (Desk & Gaming Mode)**: Powers the device directly from the wall charger without routing charging current into the lithium battery (`batt_slate_mode`), preventing battery wear, overheating, and thermal throttling while gaming or docked.
+- **Smart Screen-Off Aware Scheduler**: Automatically defers daily 5:00 AM maintenance passes if the screen is active/awake, guaranteeing zero frame drops or interruptions during active use.
 - **RAM Plus Control**: Easily disable (0 GB) or configure (2 GB / 4 GB / 8 GB) Samsung's virtual RAM to eliminate swap thrashing and `kswapd0` CPU spikes.
 - **Kernel VM & Memory Subsystem Tuning**:
   - Lowers `vm.swappiness` to 60 (down from Samsung's 160–180) and tunes dirty ratios (`dirty_background_ratio = 10`, `dirty_ratio = 20`) to eliminate UI frame stalls.

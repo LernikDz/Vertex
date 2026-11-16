@@ -51,7 +51,37 @@ while true; do
 
     sleep "$SLEEP_SEC"
 
-    log_daemon "Scheduled time reached! Triggering optimizer..."
+    log_daemon "Scheduled time reached! Checking device state..."
+    
+    # Load configuration
+    SMART_SCREEN_AWARE=1
+    if [ -f "$SCRIPT_DIR/config.prop" ]; then
+        . "$SCRIPT_DIR/config.prop"
+    elif [ -f "/data/adb/modules/samsung_daily_optimizer/config.prop" ]; then
+        . "/data/adb/modules/samsung_daily_optimizer/config.prop"
+    fi
+
+    if [ "$SMART_SCREEN_AWARE" = "1" ]; then
+        MAX_WAIT=60 # Defer up to 60 minutes if user is actively using the phone
+        WAIT_COUNT=0
+        while [ "$WAIT_COUNT" -lt "$MAX_WAIT" ]; do
+            if dumpsys power 2>/dev/null | grep -q "mWakefulness=Awake"; then
+                log_daemon "Screen is currently active/awake. Deferring optimization for 60s to ensure zero UI stutter ($((WAIT_COUNT + 1))/$MAX_WAIT min)..."
+                sleep 60
+                WAIT_COUNT=$((WAIT_COUNT + 1))
+            else
+                break
+            fi
+        done
+        if [ "$WAIT_COUNT" -ge "$MAX_WAIT" ]; then
+            log_daemon "Max deferral reached. Running maintenance now..."
+        else
+            log_daemon "Screen is asleep/idle. Triggering optimizer now..."
+        fi
+    else
+        log_daemon "Triggering optimizer..."
+    fi
+
     if [ -f "$SCRIPT_DIR/optimizer.sh" ]; then
         sh "$SCRIPT_DIR/optimizer.sh"
     elif [ -f "/data/adb/modules/samsung_daily_optimizer/optimizer.sh" ]; then
