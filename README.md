@@ -1,4 +1,4 @@
-# Samsung Daily Optimizer
+# Vertex (Samsung Daily Optimizer)
 
 An automated daily performance maintenance module and standalone utility for Samsung Galaxy devices running One UI (compatible with **Magisk**, **KernelSU**, **APatch**, and **Temproot**).
 

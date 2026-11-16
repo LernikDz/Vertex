@@ -1,4 +1,4 @@
-# Samsung Daily Optimizer Configuration
+# Vertex Configuration (formerly Samsung Daily Optimizer)
 # Set RAM_PLUS_ENABLED=0 or RAM_PLUS_SIZE=0 to disable RAM Plus completely.
 # Set RAM_PLUS_SIZE=2048 for 2GB, 4096 for 4GB, 8192 for 8GB.
 RAM_PLUS_ENABLED=1

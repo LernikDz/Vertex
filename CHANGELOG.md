@@ -1,10 +1,13 @@
 # Changelog
 
-All notable changes to the **Samsung Daily Optimizer** project will be documented in this file.
+All notable changes to the **Vertex** (formerly Samsung Daily Optimizer) project will be documented in this file.
 
 ---
 
 ## [v1.2] - 2026-11-16
+
+### 🏷️ Rebrand
+* **Display Name**: Rebranded the module display name and UI to **Vertex** while preserving the internal module ID (`samsung_daily_optimizer`) for seamless updates and full backwards compatibility.
 
 ### 🎨 Material 3 WebUI Dashboard
 * **Native ReZygisk / KernelSU Design**: Completely overhauled the Web UI to match the clean Material 3 dark aesthetic.

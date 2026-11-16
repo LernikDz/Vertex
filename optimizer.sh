@@ -1,5 +1,5 @@
 #!/system/bin/sh
-# Samsung Daily Optimizer Routine
+# Vertex Routine (formerly Samsung Daily Optimizer)
 # Automated performance maintenance for Samsung Galaxy devices (One UI)
 # Safe for Xposed / Vector (com.android.systemui is explicitly excluded)
 
@@ -42,12 +42,12 @@ BOOST_AUDIO_PRIORITY="${BOOST_AUDIO_PRIORITY:-1}"
 # Notification helpers (Live NowBar / Dynamic Island notification while running, static on finish)
 notify_live() {
     [ "$SHOW_NOTIFICATIONS" != "1" ] && return 0
-    cmd notification post -S media -i @android:drawable/stat_notify_sync -t "Samsung Daily Optimizer" "samsung_optimizer" "$1" >/dev/null 2>&1
+    cmd notification post -S media -i @android:drawable/stat_notify_sync -t "Vertex" "samsung_optimizer" "$1" >/dev/null 2>&1
 }
 
 notify_done() {
     [ "$SHOW_NOTIFICATIONS" != "1" ] && return 0
-    cmd notification post -i @android:drawable/ic_dialog_info -t "Samsung Daily Optimizer" "samsung_optimizer" "$1" >/dev/null 2>&1
+    cmd notification post -i @android:drawable/ic_dialog_info -t "Vertex" "samsung_optimizer" "$1" >/dev/null 2>&1
 }
 
 # Determine log file path
@@ -73,7 +73,7 @@ log() {
 }
 
 log "======================================================"
-log "Starting Samsung Daily Optimization..."
+log "Starting Vertex Optimization..."
 log "======================================================"
 
 notify_live "⚡ Starting daily optimization routine..."

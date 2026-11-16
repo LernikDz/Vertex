@@ -1,5 +1,5 @@
 #!/system/bin/sh
-# Micro HTTP request handler for Samsung Daily Optimizer WebUI
+# Micro HTTP request handler for Vertex WebUI
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 WEBROOT="$SCRIPT_DIR/webroot"

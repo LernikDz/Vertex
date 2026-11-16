@@ -1,5 +1,5 @@
 #!/system/bin/sh
-# Immediate manual trigger for Samsung Daily Optimizer
+# Immediate manual trigger for Vertex
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 if [ -f "$SCRIPT_DIR/optimizer.sh" ]; then

@@ -1,12 +1,12 @@
 #!/system/bin/sh
-# Interactive Configuration Script for Samsung Daily Optimizer
+# Interactive Configuration Script for Vertex
 # Allows changing RAM Plus, swappiness, and tuning anytime without re-flashing
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_FILE="$SCRIPT_DIR/config.prop"
 
 echo "=========================================="
-echo "   Samsung Daily Optimizer Configuration"
+echo "   Vertex Configuration"
 echo "=========================================="
 echo "Current RAM Plus setting in system:"
 CURRENT_SYS=$(settings get global ram_expand_size 2>/dev/null || echo "Unknown")
@@ -61,7 +61,7 @@ if [ -f "$CONFIG_FILE" ]; then
     sed -i "s/^RAM_PLUS_SIZE=.*/RAM_PLUS_SIZE=$SIZE/" "$CONFIG_FILE"
 else
     cat << EOF > "$CONFIG_FILE"
-# Samsung Daily Optimizer Configuration
+# Vertex Configuration (samsung_daily_optimizer)
 RAM_PLUS_ENABLED=$ENABLED
 RAM_PLUS_SIZE=$SIZE
 TUNE_SWAPPINESS=1

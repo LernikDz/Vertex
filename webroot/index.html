@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Samsung Daily Optimizer</title>
+  <title>Vertex</title>
   <style>
     :root {
       --bg: #121213;
@@ -342,7 +342,7 @@
 
   <!-- Top App Header -->
   <div class="app-header">
-    <h1 id="page-title">Samsung Daily Optimizer</h1>
+    <h1 id="page-title">Vertex</h1>
   </div>
 
   <div class="container">
@@ -383,7 +383,7 @@
 
         <div class="info-group">
           <div class="info-label">Version</div>
-          <div class="info-value" id="val-module-ver">v1.0.0 (SamsungDailyOptimizer)</div>
+          <div class="info-value" id="val-module-ver">v1.2 (Vertex)</div>
         </div>
 
         <div class="info-group">
@@ -727,14 +727,14 @@
 
     async function compactMemory() {
       showToast("Compacting memory & trimming storage...");
-      await execCmd("cmd notification post -S media -i @android:drawable/stat_notify_sync -t 'Samsung Daily Optimizer' 'samsung_optimizer' '💾 Compacting memory & trimming storage...' 2>/dev/null; sync; echo 1 > /proc/sys/vm/compact_memory 2>/dev/null; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null; fstrim -v /data 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Samsung Daily Optimizer' 'samsung_optimizer' '✅ Memory compacted & storage trimmed!' 2>/dev/null");
+      await execCmd("cmd notification post -S media -i @android:drawable/stat_notify_sync -t 'Vertex' 'samsung_optimizer' '💾 Compacting memory & trimming storage...' 2>/dev/null; sync; echo 1 > /proc/sys/vm/compact_memory 2>/dev/null; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null; fstrim -v /data 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '✅ Memory compacted & storage trimmed!' 2>/dev/null");
       showToast("Memory compacted & storage trimmed!");
       refreshData();
     }
 
     async function purgeLogs() {
       showToast("Purging crash logs...");
-      await execCmd("rm -f /data/anr/* /data/tombstones/* /data/system/dropbox/* 2>/dev/null; pm trim-caches 4096M 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Samsung Daily Optimizer' 'samsung_optimizer' '🗑️ Logs purged & dead caches trimmed!' 2>/dev/null");
+      await execCmd("rm -f /data/anr/* /data/tombstones/* /data/system/dropbox/* 2>/dev/null; pm trim-caches 4096M 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🗑️ Logs purged & dead caches trimmed!' 2>/dev/null");
       showToast("Logs purged & dead caches trimmed!");
       refreshData();
     }
@@ -756,7 +756,7 @@
             cmd appops set "$pkg" RUN_IN_BACKGROUND ignore 2>/dev/null
           fi
         done
-        cmd notification post -i @android:drawable/ic_dialog_info -t 'Samsung Daily Optimizer' 'samsung_optimizer' '🛡️ Samsung diagnostic & telemetry daemons hibernated' 2>/dev/null
+        cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🛡️ Samsung diagnostic & telemetry daemons hibernated' 2>/dev/null
       `;
       await execCmd(cmd);
       showToast("Samsung telemetry services hibernated!");
@@ -772,7 +772,7 @@
         settings put global bluetooth_btsnoop_default_mode disabled 2>/dev/null
         setprop persist.bluetooth.btsnoopenable false 2>/dev/null
         settings put global wifi_sleep_policy 2 2>/dev/null
-        cmd notification post -i @android:drawable/ic_dialog_info -t 'Samsung Daily Optimizer' 'samsung_optimizer' '🌐 TCP BBR active & BT snoop log disabled' 2>/dev/null
+        cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🌐 TCP BBR active & BT snoop log disabled' 2>/dev/null
       `;
       await execCmd(cmd);
       showToast("TCP BBR & Bluetooth audio boost applied!");
@@ -790,7 +790,7 @@
             done
           fi
         done
-        cmd notification post -i @android:drawable/stat_sys_headset -t 'Samsung Daily Optimizer' 'samsung_optimizer' '🎧 Audio & Bluetooth threads boosted to Real-Time priority' 2>/dev/null
+        cmd notification post -i @android:drawable/stat_sys_headset -t 'Vertex' 'samsung_optimizer' '🎧 Audio & Bluetooth threads boosted to Real-Time priority' 2>/dev/null
       `;
       await execCmd(cmd);
       showToast("Audio & BT threads boosted to real-time priority!");

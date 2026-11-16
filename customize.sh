@@ -1,6 +1,6 @@
 SKIPUNZIP=0
 
-ui_print "- Installing Samsung Daily Optimizer..."
+ui_print "- Installing Vertex..."
 ui_print "- Scheduled time: 05:00 AM daily"
 ui_print "- Note: Immediate boot-run disabled (Temproot safe)"
 
@@ -57,7 +57,7 @@ fi
 
 if [ -n "$RAM_PLUS_SIZE" ]; then
   cat << EOF > "$MODPATH/config.prop"
-# Samsung Daily Optimizer Configuration
+# Vertex Configuration (samsung_daily_optimizer)
 RAM_PLUS_ENABLED=$RAM_PLUS_ENABLED
 RAM_PLUS_SIZE=$RAM_PLUS_SIZE
 TUNE_SWAPPINESS=1

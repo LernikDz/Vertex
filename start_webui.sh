@@ -23,7 +23,7 @@ SERVER_PID=$!
 echo $SERVER_PID > "$PID_FILE"
 
 echo "============================================="
-echo " Samsung Daily Optimizer WebUI Started"
+echo " Vertex WebUI Started"
 echo "============================================="
 echo " Open in Chrome or any browser on your device:"
 echo " -> http://127.0.0.1:$PORT"

@@ -13,5 +13,5 @@ fi
 nohup sh "$SCRIPT_DIR/daemon.sh" >/dev/null 2>&1 &
 NEW_PID=$!
 echo $NEW_PID > "$SCRIPT_DIR/daemon.pid"
-echo "Samsung Daily Optimizer daemon started in background (PID $NEW_PID)."
+echo "Vertex daemon started in background (PID $NEW_PID)."
 echo "It will run daily at 05:00 AM."

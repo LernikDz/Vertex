@@ -1,5 +1,5 @@
 #!/system/bin/sh
-# Samsung Daily Optimizer Scheduler Daemon
+# Vertex Scheduler Daemon
 # Sleeps until 05:00 AM daily, executes optimizer.sh, then repeats.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
