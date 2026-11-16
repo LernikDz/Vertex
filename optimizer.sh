@@ -91,6 +91,7 @@ fi
 log "Configuring wireless radio scans and Doze whitelists..."
 if [ "$DISABLE_BACKGROUND_BLE_SCAN" = "1" ]; then
     settings put global ble_scan_always_enabled 0 2>/dev/null && log "  [OK] Background BLE scanning disabled"
+    settings put system nearby_scanning_enabled 0 2>/dev/null && log "  [OK] Samsung nearby device scanning disabled"
 fi
 if [ "$DISABLE_BACKGROUND_WIFI_SCAN" = "1" ]; then
     settings put global wifi_scan_always_enabled 0 2>/dev/null && log "  [OK] Background Wi-Fi scanning disabled"
