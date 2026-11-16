@@ -27,6 +27,18 @@ DISABLE_BACKGROUND_BLE_SCAN="${DISABLE_BACKGROUND_BLE_SCAN:-1}"
 DISABLE_BACKGROUND_WIFI_SCAN="${DISABLE_BACKGROUND_WIFI_SCAN:-1}"
 WHITELIST_AUDIO_APPS="${WHITELIST_AUDIO_APPS:-1}"
 ENHANCED_CPU_RESPONSIVENESS="${ENHANCED_CPU_RESPONSIVENESS:-1}"
+SHOW_NOTIFICATIONS="${SHOW_NOTIFICATIONS:-1}"
+
+# Notification helpers (Live NowBar / Dynamic Island notification while running, static on finish)
+notify_live() {
+    [ "$SHOW_NOTIFICATIONS" != "1" ] && return 0
+    cmd notification post -S media -i @android:drawable/stat_notify_sync -t "Samsung Daily Optimizer" "samsung_optimizer" "$1" >/dev/null 2>&1
+}
+
+notify_done() {
+    [ "$SHOW_NOTIFICATIONS" != "1" ] && return 0
+    cmd notification post -i @android:drawable/ic_dialog_info -t "Samsung Daily Optimizer" "samsung_optimizer" "$1" >/dev/null 2>&1
+}
 
 # Determine log file path
 if [ -d "/data/adb/modules/samsung_daily_optimizer" ]; then
@@ -54,8 +66,11 @@ log "======================================================"
 log "Starting Samsung Daily Optimization..."
 log "======================================================"
 
+notify_live "⚡ Starting daily optimization routine..."
+
 # 1. RAM Plus Configuration
 log "Configuring RAM Plus settings..."
+notify_live "⚙️ Tuning RAM Plus & kernel parameters..."
 if [ "$RAM_PLUS_ENABLED" = "0" ] || [ "$RAM_PLUS_SIZE" = "0" ]; then
     settings put global ram_expand_size 0 2>/dev/null && log "  [OK] RAM Plus DISABLED (0 MB)" || log "  [WARN] Failed to disable RAM Plus"
 else
@@ -89,6 +104,7 @@ fi
 
 # 4. Wireless & Audio Stability (Reduce 2.4GHz interference)
 log "Configuring wireless radio scans and Doze whitelists..."
+notify_live "📶 Stabilizing wireless radio & audio streaming..."
 if [ "$DISABLE_BACKGROUND_BLE_SCAN" = "1" ]; then
     settings put global ble_scan_always_enabled 0 2>/dev/null && log "  [OK] Background BLE scanning disabled"
     settings put system nearby_scanning_enabled 0 2>/dev/null && log "  [OK] Samsung nearby device scanning disabled"
@@ -118,6 +134,7 @@ fi
 # 6. Crash Logs & Stale Cache Cleanup
 if [ "$PURGE_CRASH_LOGS" = "1" ]; then
     log "Purging crash dumps, ANR traces, and dropbox logs..."
+    notify_live "🧹 Purging crash logs & trimming app caches..."
     rm -f /data/anr/* 2>/dev/null
     rm -f /data/tombstones/* 2>/dev/null
     rm -f /data/system/dropbox/* 2>/dev/null
@@ -131,6 +148,7 @@ fi
 
 # 7. Kernel Memory Compaction & Storage Trim
 log "Executing kernel memory maintenance and storage trim..."
+notify_live "💾 Compacting kernel memory & running fstrim..."
 sync
 if [ -w /proc/sys/vm/compact_memory ]; then
     echo 1 > /proc/sys/vm/compact_memory 2>/dev/null && log "  [OK] Kernel memory compacted"
@@ -145,6 +163,7 @@ fstrim -v /cache 2>/dev/null | while read -r line; do log "  [TRIM] /cache: $lin
 # 8. Safe Selective ART AOT / Profile Compilation
 # NOTE: com.android.systemui is strictly excluded to prevent breaking Dynamic Island / Xposed
 log "Running selective ART profile compilation (excluding SystemUI)..."
+notify_live "🚀 Profile compiling apps (Speed-profile)..."
 COMPILE_PKGS="com.sec.android.app.launcher com.android.bluetooth com.google.android.apps.youtube.music com.metrolist.music com.samsung.accessory.budsunitemgr"
 for pkg in $COMPILE_PKGS; do
     if pm list packages 2>/dev/null | grep -q "$pkg"; then
@@ -156,3 +175,5 @@ done
 log "======================================================"
 log "Optimization completed successfully."
 log "======================================================"
+
+notify_done "✅ Optimization complete! Memory compacted & storage trimmed."

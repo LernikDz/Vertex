@@ -23,3 +23,6 @@ WHITELIST_AUDIO_APPS=1
 
 # Samsung Enhanced CPU Responsiveness (1 = Faster CPU ramp-up, 0 = Standard)
 ENHANCED_CPU_RESPONSIVENESS=1
+
+# Notifications (1 = Live NowBar/Dynamic Island notification while running + Static on finish)
+SHOW_NOTIFICATIONS=1

@@ -688,14 +688,14 @@
 
     async function compactMemory() {
       showToast("Compacting memory & trimming storage...");
-      await execCmd("sync; echo 1 > /proc/sys/vm/compact_memory 2>/dev/null; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null; fstrim -v /data 2>/dev/null");
+      await execCmd("cmd notification post -S media -i @android:drawable/stat_notify_sync -t 'Samsung Daily Optimizer' 'samsung_optimizer' '💾 Compacting memory & trimming storage...' 2>/dev/null; sync; echo 1 > /proc/sys/vm/compact_memory 2>/dev/null; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null; fstrim -v /data 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Samsung Daily Optimizer' 'samsung_optimizer' '✅ Memory compacted & storage trimmed!' 2>/dev/null");
       showToast("Memory compacted & storage trimmed!");
       refreshData();
     }
 
     async function purgeLogs() {
       showToast("Purging crash logs...");
-      await execCmd("rm -f /data/anr/* /data/tombstones/* /data/system/dropbox/* 2>/dev/null; pm trim-caches 4096M 2>/dev/null");
+      await execCmd("rm -f /data/anr/* /data/tombstones/* /data/system/dropbox/* 2>/dev/null; pm trim-caches 4096M 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Samsung Daily Optimizer' 'samsung_optimizer' '🗑️ Logs purged & dead caches trimmed!' 2>/dev/null");
       showToast("Logs purged & dead caches trimmed!");
       refreshData();
     }
