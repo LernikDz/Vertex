@@ -37,18 +37,25 @@
       -webkit-touch-callout: none;
     }
 
-    html, body {
+    html {
       background-color: var(--bg);
       color: var(--text-primary);
-      min-height: 100vh;
+      height: 100%;
       overflow-x: hidden;
-      overscroll-behavior-y: contain;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       font-size: 15px;
-      touch-action: pan-y;
     }
 
     body {
-      padding-bottom: 50px;
+      background-color: var(--bg);
+      color: var(--text-primary);
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: visible;
+      font-size: 15px;
+      padding-bottom: 60px;
+      position: relative;
     }
 
     /* Pinned Top Navigation Bar (Collapses and shows title on scroll) */
@@ -406,14 +413,16 @@
       -webkit-backdrop-filter: blur(14px);
       z-index: 1000;
       opacity: 0;
+      visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.3s var(--spring-smooth);
+      transition: opacity 0.3s var(--spring-smooth), visibility 0.3s;
       display: flex;
       align-items: flex-end;
     }
 
     .sheet-scrim.open {
       opacity: 1;
+      visibility: visible;
       pointer-events: auto;
     }
 
@@ -427,12 +436,16 @@
       transition: transform 0.32s var(--spring-smooth);
       max-height: 85vh;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      pointer-events: none;
       touch-action: pan-y;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .sheet-scrim.open .oneui-sheet {
       transform: translateY(0);
+      pointer-events: auto;
     }
 
     .sheet-handle-bar {
@@ -1032,7 +1045,7 @@
 
     // One UI Collapsible Header Scroll Physics
     window.addEventListener("scroll", () => {
-      const scrollY = window.scrollY;
+      const scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
       const appbar = document.getElementById("appbar");
       const viewingArea = document.getElementById("viewingArea");
       if (scrollY > 30) {
@@ -1093,6 +1106,8 @@
 
     document.querySelectorAll(".oneui-sheet").forEach(sheet => {
       sheet.addEventListener("touchstart", (e) => {
+        const scrim = sheet.closest('.sheet-scrim');
+        if (!scrim || !scrim.classList.contains('open')) return;
         if (sheet.scrollTop <= 0) {
           touchStartY = e.touches[0].clientY;
           currentSheet = sheet;
@@ -1129,18 +1144,22 @@
     // Sheet Controllers
     function openRamSheet() {
       document.getElementById('sheet-ramplus').classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
 
     function openZramSheet() {
       document.getElementById('sheet-zram').classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
 
     function openSystemSheet() {
       document.getElementById('sheet-system').classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
 
     function openLogSheet() {
       document.getElementById('sheet-log').classList.add('open');
+      document.body.style.overflow = 'hidden';
       loadLogs();
     }
 
@@ -1151,6 +1170,7 @@
         const sheet = s.querySelector(".oneui-sheet");
         if (sheet) sheet.style.transform = "";
       });
+      document.body.style.overflow = '';
     }
 
     // Master Toggle (Daemon start / stop)
