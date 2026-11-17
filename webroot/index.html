@@ -1040,12 +1040,15 @@
     }, { passive: true });
 
     // Toast Messenger
+    let toastTimeout = null;
     function showToast(msg) {
-      haptic([15, 30, 20]);
+      haptic(15);
       const t = document.getElementById("toast");
+      if (!t) return;
       t.innerText = msg;
       t.classList.add("show");
-      setTimeout(() => t.classList.remove("show"), 2800);
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => t.classList.remove("show"), 2600);
     }
 
     // Universal Command Executor (KernelSU / APatch / WebUI micro-server)
@@ -1155,13 +1158,27 @@
     // Master Toggle (Daemon start / stop)
     async function toggleMasterDaemon(e) {
       if (e) e.stopPropagation();
-      haptic(20);
+      haptic(25);
+      const masterToggle = document.getElementById("master-toggle");
+      const title = document.getElementById("master-status-text");
+      const desc = document.getElementById("master-status-desc");
+
+      // Instant optimistic UI feedback
+      isDaemonRunning = !isDaemonRunning;
       if (isDaemonRunning) {
-        showToast("Stopping 5:00 AM daemon...");
-        await execCmd("sh /data/adb/modules/samsung_daily_optimizer/stop_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/stop_daemon.sh 2>/dev/null");
-      } else {
+        if (masterToggle) masterToggle.classList.add("active");
+        if (title) title.innerText = "On";
+        if (desc) desc.innerText = "Starting 5:00 AM daily daemon...";
         showToast("Starting 5:00 AM daily daemon...");
         await execCmd("sh /data/adb/modules/samsung_daily_optimizer/start_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/start_daemon.sh 2>/dev/null");
+        showToast("5:00 AM daily maintenance scheduled!");
+      } else {
+        if (masterToggle) masterToggle.classList.remove("active");
+        if (title) title.innerText = "Off";
+        if (desc) desc.innerText = "Stopping daily daemon...";
+        showToast("Stopping 5:00 AM daemon...");
+        await execCmd("sh /data/adb/modules/samsung_daily_optimizer/stop_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/stop_daemon.sh 2>/dev/null");
+        showToast("Daily scheduler stopped (Manual only).");
       }
       setTimeout(refreshData, 600);
     }
@@ -1179,8 +1196,22 @@
 
     async function quickToggleRam(e) {
       if (e) e.stopPropagation();
-      haptic(20);
+      haptic(25);
+      const toggle = document.getElementById("toggle-ramplus");
+      const sub = document.getElementById("card-ramplus-sub");
       const nextSize = currentRamChoice === 0 ? 2048 : 0;
+      currentRamChoice = nextSize;
+
+      // Instant optimistic UI feedback
+      if (nextSize > 0) {
+        if (toggle) toggle.classList.add("active");
+        if (sub) sub.innerText = (nextSize / 1024) + " GB • Applying...";
+        showToast(`Enabling RAM Plus (${nextSize / 1024} GB)...`);
+      } else {
+        if (toggle) toggle.classList.remove("active");
+        if (sub) sub.innerText = "Disabling RAM Plus...";
+        showToast("Disabling RAM Plus (0 GB)...");
+      }
       chooseRam(nextSize);
       await saveRamChoice();
     }
@@ -1265,15 +1296,24 @@
     // Display 120Hz Toggle
     async function toggleRefreshRate(e) {
       if (e) e.stopPropagation();
-      haptic(20);
+      haptic(25);
+      const toggle = document.getElementById("toggle-refresh");
+      const sub = document.getElementById("card-refresh-sub");
+
+      // Instant optimistic UI feedback
+      is120HzLocked = !is120HzLocked;
       if (is120HzLocked) {
-        showToast("Restoring dynamic LTPO (1Hz - 120Hz)...");
-        await execCmd("settings put system min_refresh_rate 1.0 2>/dev/null; settings put system peak_refresh_rate 120.0 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🌱 Dynamic LTPO Restored (1Hz - 120Hz)' 2>/dev/null");
-        showToast("Dynamic LTPO (1Hz - 120Hz) active!");
-      } else {
+        if (toggle) toggle.classList.add("active");
+        if (sub) sub.innerText = "120Hz Locked • Zero micro-stutter";
         showToast("Locking 120Hz Smooth Scroll...");
         await execCmd("settings put system min_refresh_rate 120.0 2>/dev/null; settings put system peak_refresh_rate 120.0 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚡ 120Hz Smooth Scroll Locked' 2>/dev/null");
-        showToast("120Hz Smooth Scroll locked!");
+        showToast("⚡ 120Hz Smooth Scroll locked!");
+      } else {
+        if (toggle) toggle.classList.remove("active");
+        if (sub) sub.innerText = "Dynamic LTPO (1-120Hz) • Power saving";
+        showToast("Restoring dynamic LTPO (1Hz - 120Hz)...");
+        await execCmd("settings put system min_refresh_rate 1.0 2>/dev/null; settings put system peak_refresh_rate 120.0 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🌱 Dynamic LTPO Restored (1Hz - 120Hz)' 2>/dev/null");
+        showToast("🌱 Dynamic LTPO (1Hz - 120Hz) active!");
       }
       refreshData();
     }
@@ -1281,8 +1321,24 @@
     // Bypass Charging Toggle
     async function toggleBypassCharging(e) {
       if (e) e.stopPropagation();
-      haptic(20);
+      haptic(25);
+      const toggle = document.getElementById("toggle-bypass");
+      const sub = document.getElementById("card-bypass-sub");
+
+      // Instant optimistic UI feedback
+      isBypassActive = !isBypassActive;
       if (isBypassActive) {
+        if (toggle) toggle.classList.add("active");
+        if (sub) sub.innerText = "Bypass Active (Wall power) • Desk Mode";
+        showToast("Enabling Bypass Charging (Desk Mode)...");
+        await execCmd(`
+          echo 1 > /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || echo 0 > /sys/class/power_supply/battery/charging_enabled 2>/dev/null || echo 0 > /sys/class/power_supply/battery/battery_charging_enabled 2>/dev/null
+          cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚡ Bypass Charging Active (Desk Mode)' 2>/dev/null
+        `);
+        showToast("⚡ Bypass Charging active! Battery not charging.");
+      } else {
+        if (toggle) toggle.classList.remove("active");
+        if (sub) sub.innerText = "Normal Charging Resumed";
         showToast("Resuming normal battery charging...");
         await execCmd(`
           echo 0 > /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null
@@ -1290,14 +1346,7 @@
           echo 1 > /sys/class/power_supply/battery/battery_charging_enabled 2>/dev/null
           cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🔋 Normal Battery Charging Resumed' 2>/dev/null
         `);
-        showToast("Normal charging resumed!");
-      } else {
-        showToast("Enabling Bypass Charging (Desk Mode)...");
-        await execCmd(`
-          echo 1 > /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || echo 0 > /sys/class/power_supply/battery/charging_enabled 2>/dev/null || echo 0 > /sys/class/power_supply/battery/battery_charging_enabled 2>/dev/null
-          cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚡ Bypass Charging Active (Desk Mode)' 2>/dev/null
-        `);
-        showToast("Bypass Charging active! Battery not charging.");
+        showToast("🔋 Normal battery charging resumed!");
       }
       refreshData();
     }
@@ -1305,8 +1354,10 @@
     // Audio Boost
     async function boostAudioPriority(e) {
       if (e) e.stopPropagation();
-      haptic(20);
-      showToast("Boosting audio, HAL & Bluetooth priorities...");
+      haptic(25);
+      const toggle = document.getElementById("toggle-audio");
+      if (toggle) toggle.classList.add("active");
+      showToast("Boosting Audio & Bluetooth to Real-Time...");
       const cmd = `
         for apid in $(pidof audioserver secaudiohalaidl android.hardware.audio.service com.android.bluetooth com.sec.android.app.soundalive android.hardware.bluetooth@1.1-service-qti 2>/dev/null); do
           renice -n -16 -p "$apid" 2>/dev/null
@@ -1322,15 +1373,17 @@
         cmd notification post -i @android:drawable/stat_sys_headset -t 'Vertex' 'samsung_optimizer' '🎧 Audio HAL & Bluetooth boosted to Real-Time (Lock stutter guard active)' 2>/dev/null
       `;
       await execCmd(cmd);
-      showToast("Audio HAL, SoundAlive & BT boosted (Zero lock stutter)!");
+      showToast("🎧 Audio HAL, SoundAlive & BT boosted (Zero lock stutter)!");
       refreshData();
     }
 
     // Network Boost
     async function toggleNetworkBoost(e) {
       if (e) e.stopPropagation();
-      haptic(20);
-      showToast("Applying TCP BBR & Audio Radio Boost...");
+      haptic(25);
+      const toggle = document.getElementById("toggle-net");
+      if (toggle) toggle.classList.add("active");
+      showToast("Applying TCP BBR & Bluetooth radio boost...");
       const cmd = `
         if grep -q "bbr" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
           echo "bbr" > /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null
@@ -1341,15 +1394,17 @@
         cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🌐 TCP BBR active & BT snoop log disabled' 2>/dev/null
       `;
       await execCmd(cmd);
-      showToast("TCP BBR & Bluetooth audio boost applied!");
+      showToast("🌐 TCP BBR & Bluetooth audio boost applied!");
       refreshData();
     }
 
     // Telemetry Restriction
     async function toggleTelemetry(e) {
       if (e) e.stopPropagation();
-      haptic(20);
-      showToast("Restricting Samsung diagnostic & telemetry daemons...");
+      haptic(25);
+      const toggle = document.getElementById("toggle-telemetry");
+      if (toggle) toggle.classList.add("active");
+      showToast("Hibernating Samsung telemetry services...");
       const cmd = `
         for pkg in com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence; do
           if pm list packages 2>/dev/null | grep -q "$pkg"; then
@@ -1360,18 +1415,31 @@
         cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🛡️ Samsung diagnostic & telemetry daemons hibernated' 2>/dev/null
       `;
       await execCmd(cmd);
-      showToast("Samsung telemetry services hibernated!");
+      showToast("🛡️ Samsung diagnostic & telemetry daemons hibernated!");
       refreshData();
     }
 
     // Enhanced CPU
     async function toggleEnhancedCpu(e) {
       if (e) e.stopPropagation();
-      haptic(20);
-      const cur = await execCmd("settings get global sem_enhanced_cpu_responsiveness 2>/dev/null");
-      const next = cur.trim() === "1" ? "0" : "1";
-      await execCmd(`settings put global sem_enhanced_cpu_responsiveness ${next}`);
-      showToast(`Enhanced CPU: ${next === "1" ? "Enabled" : "Standard"}`);
+      haptic(25);
+      const toggle = document.getElementById("toggle-cpu");
+      const sub = document.getElementById("card-cpu-sub");
+      isEnhancedCpu = !isEnhancedCpu;
+
+      // Instant optimistic UI feedback
+      if (isEnhancedCpu) {
+        if (toggle) toggle.classList.add("active");
+        if (sub) sub.innerText = "Fast clock ramp • Low UI latency";
+        showToast("Enabling Enhanced CPU responsiveness...");
+      } else {
+        if (toggle) toggle.classList.remove("active");
+        if (sub) sub.innerText = "Standard clock ramp";
+        showToast("Restoring Standard CPU responsiveness...");
+      }
+
+      await execCmd(`settings put global sem_enhanced_cpu_responsiveness ${isEnhancedCpu ? "1" : "0"}`);
+      showToast(`⚡ Enhanced CPU: ${isEnhancedCpu ? "Enabled" : "Standard"}`);
       refreshData();
     }
 
