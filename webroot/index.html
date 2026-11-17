@@ -6,24 +6,25 @@
   <title>Vertex</title>
   <style>
     :root {
-      --bg: #121213;
-      --card-bg: #1e1e20;
-      --status-bg: #3c3c3f;
-      --pill-active: #353842;
+      --bg: #000000;
+      --surface: #1e1e22;
+      --surface-card: #28282c;
+      --master-bg: #2d2d31;
       --text-primary: #ffffff;
-      --text-secondary: #9c9ca2;
-      --text-muted: #6e6e73;
-      --accent: #5e97f6;
-      --radius-status: 22px;
+      --text-secondary: rgba(255, 255, 255, 0.65);
+      --text-muted: rgba(255, 255, 255, 0.45);
+      --oneui-blue: #2c7bf6;
+      --toggle-track-off: #434348;
+      --radius-sheet: 30px;
       --radius-card: 26px;
-      --radius-item: 16px;
+      --radius-item: 18px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Google Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: "Samsung Sans", "SamsungOne", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
@@ -32,821 +33,918 @@
       background-color: var(--bg);
       color: var(--text-primary);
       min-height: 100vh;
-      padding-bottom: 96px;
+      padding-bottom: 40px;
       overflow-x: hidden;
       font-size: 15px;
     }
 
-    /* Top App Bar */
-    .app-header {
-      padding: 24px 20px 16px 20px;
-    }
-
-    .app-header h1 {
-      font-size: 24px;
-      font-weight: 400;
-      color: var(--text-primary);
-      letter-spacing: -0.2px;
-    }
-
-    /* Container */
-    .container {
-      padding: 0 16px;
-    }
-
-    /* Status Card (Top Banner) */
-    .status-card {
-      background: var(--status-bg);
-      border-radius: var(--radius-status);
-      padding: 18px 22px;
+    /* One UI Large Top Header */
+    .header-area {
+      padding: 44px 20px 18px 20px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 16px;
+      position: relative;
     }
 
-    .status-icon {
+    .header-title {
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.4px;
+      text-align: center;
+    }
+
+    .header-subtitle {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    .header-actions {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 18px;
+      padding: 0 4px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 28px;
-      height: 28px;
-      color: var(--text-primary);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      transition: background 0.2s;
     }
 
-    .status-text {
-      font-size: 21px;
-      font-weight: 500;
-      color: var(--text-primary);
-      letter-spacing: -0.2px;
+    .icon-btn:active {
+      background: rgba(255, 255, 255, 0.1);
     }
 
-    /* Details Card */
-    .details-card {
-      background: var(--card-bg);
-      border-radius: var(--radius-card);
-      padding: 24px;
-      margin-bottom: 16px;
+    .icon-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 2.2;
     }
 
-    /* Section Subheaders */
-    .section-title {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--text-secondary);
-      margin-top: 22px;
-      margin-bottom: 14px;
-    }
-
-    .section-title:first-child {
-      margin-top: 0;
-    }
-
-    /* Items */
-    .info-group {
-      margin-bottom: 16px;
-    }
-
-    .info-group:last-child {
-      margin-bottom: 0;
-    }
-
-    .info-label {
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--text-primary);
-      line-height: 1.3;
-    }
-
-    .info-value {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-top: 4px;
-      line-height: 1.3;
-      word-break: break-word;
-    }
-
-    /* Tab Page Views */
-    .tab-page {
-      display: none;
-    }
-
-    .tab-page.active {
-      display: block;
-    }
-
-    /* Selection Pills / Cards for RAM Plus */
-    .option-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 14px;
-      margin-bottom: 20px;
-    }
-
-    .option-card {
-      background: #28282b;
-      border: 2px solid transparent;
-      border-radius: var(--radius-item);
-      padding: 16px;
+    /* Home Up Style Master Toggle Banner */
+    .master-banner {
+      background: var(--master-bg);
+      border-radius: 30px;
+      padding: 18px 22px;
+      margin: 0 16px 16px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
       cursor: pointer;
-      transition: all 0.2s ease;
     }
 
-    .option-card.selected {
-      background: #32353e;
-      border-color: var(--accent);
+    .master-text-group {
+      display: flex;
+      flex-direction: column;
     }
 
-    .option-card-title {
-      font-size: 17px;
+    .master-title {
+      font-size: 19px;
       font-weight: 600;
       color: var(--text-primary);
     }
 
-    .option-card-desc {
+    .master-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Samsung One UI Toggle Switch */
+    .oneui-toggle {
+      width: 50px;
+      height: 28px;
+      background-color: var(--toggle-track-off);
+      border-radius: 14px;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      flex-shrink: 0;
+    }
+
+    .oneui-toggle.active {
+      background-color: var(--oneui-blue);
+    }
+
+    .oneui-toggle-thumb {
+      width: 22px;
+      height: 22px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .oneui-toggle.active .oneui-toggle-thumb {
+      transform: translateX(22px);
+    }
+
+    /* 2-Column Home Up Jewel Card Grid */
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 16px 18px 16px;
+    }
+
+    .homeup-card {
+      border-radius: var(--radius-card);
+      padding: 18px 16px;
+      min-height: 146px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s ease, filter 0.15s ease;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    .homeup-card:active {
+      transform: scale(0.97);
+      filter: brightness(0.92);
+    }
+
+    /* Home Up Distinct Jewel Palette */
+    .card-navy { background-color: #12284c; }        /* Home screen style */
+    .card-slate { background-color: #13213d; }       /* Backup/Restore style */
+    .card-crimson { background-color: #4b1425; }     /* Task Changer style */
+    .card-forest { background-color: #143818; }      /* Gesture settings style */
+    .card-teal { background-color: #0b3438; }        /* Edge panel style */
+    .card-amber { background-color: #3f280e; }       /* Share Manager style */
+    .card-purple { background-color: #271442; }      /* Applock style */
+    .card-plum { background-color: #3b1338; }        /* QuickStar style */
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .card-icon {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+
+    .card-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .card-bottom {
+      display: flex;
+      flex-direction: column;
+      margin-top: 14px;
+    }
+
+    .card-title {
+      font-size: 16.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.25;
+    }
+
+    .card-subtitle {
       font-size: 12px;
       color: var(--text-secondary);
       margin-top: 4px;
+      line-height: 1.35;
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    /* Action List Items */
-    .action-item {
-      background: #28282b;
-      border-radius: var(--radius-item);
-      padding: 16px 18px;
-      margin-bottom: 12px;
+    /* Section Title for One UI Layout */
+    .section-header {
+      padding: 14px 20px 10px 20px;
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Maintenance Actions List (One UI Settings Group) */
+    .action-group {
+      background: var(--master-bg);
+      border-radius: var(--radius-card);
+      margin: 0 16px 18px 16px;
+      overflow: hidden;
+    }
+
+    .action-row {
+      padding: 16px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: background 0.15s;
     }
 
-    .action-item:active {
-      background: #333338;
+    .action-row:not(:last-child) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    .action-text {
-      flex: 1;
-      padding-right: 12px;
+    .action-row:active {
+      background: rgba(255, 255, 255, 0.08);
     }
 
-    .action-title {
+    .action-row-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .action-row-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--oneui-blue);
+      flex-shrink: 0;
+    }
+
+    .action-row-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .action-row-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .action-row-title {
       font-size: 16px;
       font-weight: 500;
       color: var(--text-primary);
     }
 
-    .action-desc {
+    .action-row-desc {
       font-size: 13px;
       color: var(--text-secondary);
-      margin-top: 3px;
+      margin-top: 2px;
     }
 
-    .action-btn-icon {
+    .action-chevron {
+      color: var(--text-muted);
+      width: 18px;
+      height: 18px;
+    }
+
+    /* One UI Bottom Sheet Modal */
+    .sheet-scrim {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .sheet-scrim.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .oneui-sheet {
+      width: 100%;
+      background: #1e1e22;
+      border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+      padding: 20px 20px 36px 20px;
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6);
+      transform: translateY(100%);
+      transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .sheet-scrim.open .oneui-sheet {
+      transform: translateY(0);
+    }
+
+    .sheet-handle {
+      width: 44px;
+      height: 4.5px;
+      background: rgba(255, 255, 255, 0.22);
+      border-radius: 3px;
+      margin: 0 auto 16px auto;
+    }
+
+    .sheet-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .sheet-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      margin-bottom: 20px;
+    }
+
+    .sheet-option-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .sheet-option {
+      background: #2a2a2f;
+      border-radius: var(--radius-item);
+      padding: 15px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .sheet-option.selected {
+      background: #26334a;
+      border-color: var(--oneui-blue);
+    }
+
+    .sheet-opt-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .sheet-opt-desc {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .sheet-radio {
       width: 22px;
       height: 22px;
-      color: var(--text-secondary);
-    }
-
-    /* Standard Button */
-    .m3-button {
-      background: var(--status-bg);
-      color: var(--text-primary);
-      border: none;
-      border-radius: 20px;
-      padding: 12px 24px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      display: inline-flex;
+      border-radius: 50%;
+      border: 2px solid var(--text-muted);
+      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .sheet-option.selected .sheet-radio {
+      border-color: var(--oneui-blue);
+      background: var(--oneui-blue);
+    }
+
+    .sheet-option.selected .sheet-radio::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: #ffffff;
+      border-radius: 50%;
+    }
+
+    .sheet-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .oneui-btn {
       width: 100%;
+      border: none;
+      border-radius: 22px;
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
       transition: opacity 0.2s;
     }
 
-    .m3-button:active {
+    .oneui-btn-primary {
+      background: var(--oneui-blue);
+      color: #ffffff;
+    }
+
+    .oneui-btn-danger {
+      background: rgba(242, 184, 181, 0.15);
+      color: #f2b8b5;
+      border: 1px solid rgba(242, 184, 181, 0.3);
+    }
+
+    .oneui-btn-secondary {
+      background: #2f2f35;
+      color: var(--text-primary);
+    }
+
+    .oneui-btn-flat {
+      background: transparent;
+      color: var(--text-secondary);
+    }
+
+    .oneui-btn:active {
       opacity: 0.8;
     }
 
-    /* Terminal Log View */
-    .log-box {
-      background: #111112;
-      border: 1px solid #28282b;
+    /* Terminal Log View inside Bottom Sheet */
+    .terminal-box {
+      background: #111114;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-item);
       padding: 14px;
       font-family: monospace;
       font-size: 12px;
-      color: #9cdcfe;
+      color: #8be9fd;
       height: 380px;
       overflow-y: auto;
       white-space: pre-wrap;
       word-break: break-all;
       user-select: text;
+      margin-bottom: 16px;
     }
 
-    /* Toast Notification */
+    /* One UI Floating Toast */
     .toast {
       position: fixed;
-      bottom: 90px;
+      bottom: 30px;
       left: 50%;
-      transform: translateX(-50%) translateY(30px);
-      background: #323235;
-      color: #fff;
-      padding: 12px 24px;
+      transform: translateX(-50%) translateY(40px);
+      background: #2b2b2f;
+      color: #ffffff;
+      padding: 13px 24px;
       border-radius: 24px;
       font-size: 14px;
       font-weight: 500;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
       opacity: 0;
       pointer-events: none;
-      transition: all 0.25s cubic-bezier(0.1, 1, 0.1, 1);
-      z-index: 999;
+      transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+      z-index: 2000;
       white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .toast.show {
       transform: translateX(-50%) translateY(0);
       opacity: 1;
     }
-
-    /* Material 3 Confirmation Dialog / Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.72);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s cubic-bezier(0.2, 0, 0, 1);
-    }
-
-    .modal-overlay.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-dialog {
-      background: #1e1e22;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 28px;
-      padding: 24px;
-      max-width: 380px;
-      width: 100%;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65);
-      transform: scale(0.92);
-      transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
-    }
-
-    .modal-overlay.open .modal-dialog {
-      transform: scale(1);
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .modal-icon {
-      width: 28px;
-      height: 28px;
-      color: #f2b8b5;
-      flex-shrink: 0;
-    }
-
-    .modal-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0;
-    }
-
-    .modal-body {
-      font-size: 13.5px;
-      line-height: 1.5;
-      color: var(--text-secondary);
-      margin-bottom: 20px;
-    }
-
-    .modal-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .modal-btn {
-      border: none;
-      border-radius: 20px;
-      padding: 12px 18px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      text-align: center;
-    }
-
-    .modal-btn-primary {
-      background: var(--status-bg);
-      color: var(--text-primary);
-    }
-
-    .modal-btn-danger {
-      background: rgba(242, 184, 181, 0.12);
-      color: #f2b8b5;
-      border: 1px solid rgba(242, 184, 181, 0.28);
-    }
-
-    .modal-btn-cancel {
-      background: transparent;
-      color: var(--text-secondary);
-    }
-
-    .modal-btn:active {
-      opacity: 0.8;
-    }
-
-    /* Bottom Navigation Bar (Material 3) */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 76px;
-      background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      border-top: 1px solid #1a1a1c;
-      z-index: 100;
-      padding-bottom: env(safe-area-inset-bottom, 0);
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      width: 25%;
-      transition: color 0.15s ease;
-    }
-
-    .nav-pill {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 56px;
-      height: 30px;
-      border-radius: 16px;
-      transition: background-color 0.2s ease;
-    }
-
-    .nav-label {
-      font-size: 12px;
-      font-weight: 400;
-      margin-top: 4px;
-      transition: font-weight 0.2s, color 0.2s;
-    }
-
-    .nav-item.active .nav-pill {
-      background-color: var(--pill-active);
-    }
-
-    .nav-item.active {
-      color: var(--text-primary);
-    }
-
-    .nav-item.active .nav-label {
-      font-weight: 500;
-      color: var(--text-primary);
-    }
-
-    .nav-icon {
-      width: 22px;
-      height: 22px;
-      stroke-width: 2;
-    }
   </style>
 </head>
 <body>
 
-  <!-- Top App Header -->
-  <div class="app-header">
-    <h1 id="page-title">Vertex</h1>
+  <!-- Top One UI Header Area -->
+  <div class="header-area">
+    <div class="header-actions">
+      <button class="icon-btn" onclick="window.history.back()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);">VERTEX</div>
+      <button class="icon-btn" onclick="openSystemSheet()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </button>
+    </div>
+    <div class="header-title">Vertex</div>
+    <div class="header-subtitle" id="val-module-ver">One UI Performance Suite &bull; v1.3</div>
   </div>
 
-  <div class="container">
+  <!-- Home Up Master Toggle Banner (Controls Daily 5:00 AM Scheduler) -->
+  <div class="master-banner" onclick="toggleMasterDaemon(event)">
+    <div class="master-text-group">
+      <div class="master-title" id="master-status-text">On</div>
+      <div class="master-subtitle" id="master-status-desc">Daily maintenance scheduled for 05:00 AM</div>
+    </div>
+    <div class="oneui-toggle" id="master-toggle">
+      <div class="oneui-toggle-thumb"></div>
+    </div>
+  </div>
 
-    <!-- TAB 1: HOME (Exact match of ReZygisk / KSU Manager Screen) -->
-    <div id="tab-home" class="tab-page active">
-      
-      <!-- Status Card -->
-      <div class="status-card">
-        <div class="status-icon">
-          <!-- Circle Checkmark SVG matching screenshot -->
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" style="width:26px; height:26px;">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="m9 12 2 2 4-4"></path>
+  <!-- Home Up 2-Column Jewel Cards Grid -->
+  <div class="grid-container">
+
+    <!-- Card 1: RAM Plus (Deep Royal Blue) -->
+    <div class="homeup-card card-navy" onclick="openRamSheet()">
+      <div class="card-top">
+        <div class="card-icon">
+          <!-- RAM / Chip SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+            <rect x="9" y="9" width="6" height="6"/>
+            <line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/>
+            <line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/>
+            <line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/>
+            <line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/>
           </svg>
         </div>
-        <div class="status-text" id="main-status-text">Working</div>
+        <div class="oneui-toggle" id="toggle-ramplus" onclick="quickToggleRam(event)">
+          <div class="oneui-toggle-thumb"></div>
+        </div>
       </div>
-
-      <!-- Main Info Card -->
-      <div class="details-card">
-        
-        <!-- Category: ROM / Kernel -->
-        <div class="section-title">ROM / Kernel</div>
-        
-        <div class="info-group">
-          <div class="info-label">Android Version</div>
-          <div class="info-value" id="val-android-ver">17</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Linux Kernel Version</div>
-          <div class="info-value" id="val-kernel-ver">6.1.162-android14-11</div>
-        </div>
-
-        <!-- Category: Root / Optimizer -->
-        <div class="section-title">Root / Optimizer</div>
-
-        <div class="info-group">
-          <div class="info-label">Version</div>
-          <div class="info-value" id="val-module-ver">v1.3 (Vertex)</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Root Implementation</div>
-          <div class="info-value" id="val-root-impl">KernelSU Next / Temproot</div>
-        </div>
-
-        <!-- Category: Daily Daemon -->
-        <div class="section-title">Daemon Status</div>
-
-        <div class="info-group">
-          <div class="info-label">5:00 AM Maintenance Timer</div>
-          <div class="info-value" id="val-daemon-status">Active (Scheduled daily)</div>
-        </div>
-
-        <!-- Category: Memory / RAM Plus -->
-        <div class="section-title">Memory / Swap</div>
-
-        <div class="info-group">
-          <div class="info-label">Physical RAM</div>
-          <div class="info-value" id="val-ram-usage">Loading memory metrics...</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Swap / ZRAM Allocation</div>
-          <div class="info-value" id="val-swap-usage">Loading swap metrics...</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">ZRAM Compression Engine</div>
-          <div class="info-value" id="val-zram-alg">Loading compression engine...</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">RAM Plus Configuration</div>
-          <div class="info-value" id="val-ramplus-config">Loading...</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Kernel VM & VFS Cache</div>
-          <div class="info-value" id="val-vfs-cache">vfs_cache_pressure: 50 &bull; schedstats: disabled</div>
-        </div>
-
-        <!-- Category: Display & Power Management -->
-        <div class="section-title">Display & Power</div>
-
-        <div class="info-group">
-          <div class="info-label">Display Refresh Rate (LTPO)</div>
-          <div class="info-value" id="val-refresh-rate">Loading refresh rate...</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Battery & Power Routing</div>
-          <div class="info-value" id="val-battery-status">Loading power metrics...</div>
-        </div>
-
-        <!-- Category: Audio & System Guard -->
-        <div class="section-title">Audio & System Guard</div>
-
-        <div class="info-group">
-          <div class="info-label">Bluetooth Radio Stutter Guard</div>
-          <div class="info-value" id="val-radio-status">Nearby & BLE scanning disabled (Protected)</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Network TCP & Audio Latency</div>
-          <div class="info-value" id="val-tcp-status">TCP BBR &bull; BT snoop log disabled</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Samsung Telemetry & Analytics</div>
-          <div class="info-value" id="val-telemetry-status">Restricted (Diagmon & Survey Hibernated)</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">SystemUI Dexopt Safety</div>
-          <div class="info-value">Protected (Excluded for Dynamic Island)</div>
-        </div>
-
+      <div class="card-bottom">
+        <div class="card-title">RAM Plus</div>
+        <div class="card-subtitle" id="card-ramplus-sub">0 GB &bull; Disabled (Zero swap lag)</div>
       </div>
     </div>
 
-    <!-- TAB 2: RAM PLUS (Configuration) -->
-    <div id="tab-ramplus" class="tab-page">
-      <div class="details-card">
-        <div class="section-title" style="margin-top:0;">Virtual RAM (Swap) Allocation</div>
-        <div class="info-value" style="margin-bottom: 16px;">
-          RAM Plus swaps inactive app pages onto internal flash storage. Disabling it (0 GB) completely prevents kernel swap thrashing and background audio stutter.
+    <!-- Card 2: ZRAM Engine (Deep Purple / Violet) -->
+    <div class="homeup-card card-purple" onclick="openZramSheet()">
+      <div class="card-top">
+        <div class="card-icon">
+          <!-- Lightning / Compression SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
         </div>
-
-        <div class="option-grid">
-          <div class="option-card" id="opt-0" onclick="selectRamOption(0)">
-            <div class="option-card-title">0 GB</div>
-            <div class="option-card-desc">Off &bull; Lowest lag (Recommended)</div>
-          </div>
-          <div class="option-card" id="opt-2048" onclick="selectRamOption(2048)">
-            <div class="option-card-title">2 GB</div>
-            <div class="option-card-desc">Minimal swap</div>
-          </div>
-          <div class="option-card" id="opt-4096" onclick="selectRamOption(4096)">
-            <div class="option-card-title">4 GB</div>
-            <div class="option-card-desc">Default balanced</div>
-          </div>
-          <div class="option-card" id="opt-8192" onclick="selectRamOption(8192)">
-            <div class="option-card-title">8 GB</div>
-            <div class="option-card-desc">Maximum swap</div>
-          </div>
+        <div style="font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.18); padding: 4px 9px; border-radius: 12px; color: #fff;" id="chip-zram-alg">
+          ZSTD
         </div>
-
-        <button class="m3-button" onclick="applyRamSetting()">Apply & Save Configuration</button>
       </div>
-
-      <div class="details-card">
-        <div class="section-title" style="margin-top:0;">ZRAM Compression Engine</div>
-        <div class="info-value" style="margin-bottom: 16px;">
-          ZSTD provides ~35% higher compression ratio on modern ARMv9 CPU cores (S24), storing significantly more compressed memory in RAM before swapping.
-        </div>
-
-        <div class="option-grid">
-          <div class="option-card" id="opt-alg-zstd" onclick="selectAlgOption('zstd')">
-            <div class="option-card-title">ZSTD</div>
-            <div class="option-card-desc">High ratio (~35% more RAM)</div>
-          </div>
-          <div class="option-card" id="opt-alg-lz4" onclick="selectAlgOption('lz4')">
-            <div class="option-card-title">LZ4</div>
-            <div class="option-card-desc">Ultra-fast decompression</div>
-          </div>
-          <div class="option-card" id="opt-alg-lzo-rle" onclick="selectAlgOption('lzo-rle')">
-            <div class="option-card-title">LZO-RLE</div>
-            <div class="option-card-desc">Samsung stock default</div>
-          </div>
-        </div>
-
-        <button class="m3-button" onclick="confirmSwitchEngine()">Switch ZRAM Engine</button>
-      </div>
-
-      <div class="details-card">
-        <div class="section-title" style="margin-top:0;">Swappiness & Dirty Ratios</div>
-        <div class="info-group">
-          <div class="info-label">vm.swappiness</div>
-          <div class="info-value" id="val-swappiness-setting">60 (Balanced / Low swap bias)</div>
-        </div>
-        <div class="info-group" style="margin-top: 14px;">
-          <div class="info-label">UFS Read-Ahead</div>
-          <div class="info-value">512 KB (Fast cold start)</div>
-        </div>
+      <div class="card-bottom">
+        <div class="card-title">ZRAM Engine</div>
+        <div class="card-subtitle" id="card-zram-sub">ZSTD &bull; ~35% higher ratio (Tap to switch)</div>
       </div>
     </div>
 
-    <!-- TAB 3: ACTIONS -->
-    <div id="tab-actions" class="tab-page">
-      <div class="details-card" style="padding: 16px;">
-        <div class="section-title" style="margin: 8px 8px 16px 8px;">Quick Actions</div>
-
-        <div class="action-item" onclick="runOptimizeNow()">
-          <div class="action-text">
-            <div class="action-title">Run Daily Optimization</div>
-            <div class="action-desc">Executes full maintenance, trimming, and memory compaction.</div>
-          </div>
-          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <!-- Card 3: 120Hz Smooth Scroll (Deep Crimson / Burgundy) -->
+    <div class="homeup-card card-crimson" onclick="toggleRefreshRate(event)">
+      <div class="card-top">
+        <div class="card-icon">
+          <!-- Display Refresh SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
         </div>
-
-        <div class="action-item" onclick="compactMemory()">
-          <div class="action-text">
-            <div class="action-title">Compact Memory & Trim</div>
-            <div class="action-desc">Frees inactive page caches and runs fstrim on /data.</div>
-          </div>
-          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <div class="oneui-toggle" id="toggle-refresh" onclick="toggleRefreshRate(event)">
+          <div class="oneui-toggle-thumb"></div>
         </div>
-
-        <div class="action-item" onclick="purgeLogs()">
-          <div class="action-text">
-            <div class="action-title">Purge Crash Dumps & Caches</div>
-            <div class="action-desc">Deletes stale ANRs, tombstones, and trims dead app caches.</div>
-          </div>
-          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        </div>
-
-        <div class="action-item" onclick="toggleEnhancedCpu()">
-          <div class="action-text">
-            <div class="action-title">Toggle Enhanced CPU</div>
-            <div class="action-desc">Switches sem_enhanced_cpu_responsiveness for faster clock ramp.</div>
-          </div>
-          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-
-        <div class="action-item" onclick="restrictTelemetry()">
-          <div class="action-text">
-            <div class="action-title">Hibernate Samsung Telemetry</div>
-            <div class="action-desc">Places Diagmon and Survey services into restricted standby.</div>
-          </div>
-          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-
-        <div class="action-item" onclick="applyNetworkBoost()">
-          <div class="action-text">
-            <div class="action-title">Apply Network & Audio Boost</div>
-            <div class="action-desc">Enables TCP BBR, disables BT snoop log, and optimizes Wi-Fi sleep.</div>
-          </div>
-          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        </div>
-
-        <div class="action-item" onclick="boostAudioPriority()">
-          <div class="action-text">
-            <div class="action-title">Boost Audio & BT Priority</div>
-            <div class="action-desc">Grants real-time scheduling to audio and Bluetooth to fix earbud desync.</div>
-          </div>
-          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-        </div>
-
-        <div class="action-item" onclick="toggleRefreshRateLock()">
-          <div class="action-text">
-            <div class="action-title" id="action-refresh-title">Lock 120Hz Smooth Scroll</div>
-            <div class="action-desc" id="action-refresh-desc">Forces 120Hz minimum refresh rate to eliminate scrolling micro-stutters.</div>
-          </div>
-          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        </div>
-
-        <div class="action-item" onclick="toggleBypassCharging()">
-          <div class="action-text">
-            <div class="action-title" id="action-bypass-title">Bypass Charging (Desk Mode)</div>
-            <div class="action-desc" id="action-bypass-desc">Powers device from wall adapter without charging battery to stop heat & degradation.</div>
-          </div>
-          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        </div>
-
-        <div class="action-item" onclick="toggleDaemonState()">
-          <div class="action-text">
-            <div class="action-title" id="action-daemon-title">Toggle 5:00 AM Daemon</div>
-            <div class="action-desc" id="action-daemon-desc">Start or stop the background daily schedule daemon.</div>
-          </div>
-          <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-        </div>
-
+      </div>
+      <div class="card-bottom">
+        <div class="card-title">Smooth Scroll</div>
+        <div class="card-subtitle" id="card-refresh-sub">120Hz Locked &bull; Zero micro-stutter</div>
       </div>
     </div>
 
-    <!-- TAB 4: LOGS (Settings / Terminal) -->
-    <div id="tab-logs" class="tab-page">
-      <div class="details-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
-          <div class="section-title" style="margin:0;">Optimization Log</div>
-          <button onclick="loadLogs()" class="m3-button" style="width:auto; padding:6px 14px; font-size:13px; border-radius:12px;">Refresh ⟳</button>
+    <!-- Card 4: Bypass Charging (Deep Forest Green) -->
+    <div class="homeup-card card-forest" onclick="toggleBypassCharging(event)">
+      <div class="card-top">
+        <div class="card-icon">
+          <!-- Power Plug / Wall Power SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/>
+          </svg>
         </div>
-        <div class="log-box" id="terminal-log">Loading activity log...</div>
+        <div class="oneui-toggle" id="toggle-bypass" onclick="toggleBypassCharging(event)">
+          <div class="oneui-toggle-thumb"></div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-title">Bypass Charging</div>
+        <div class="card-subtitle" id="card-bypass-sub">Desk & Game mode &bull; No battery heat</div>
+      </div>
+    </div>
+
+    <!-- Card 5: Audio Thread Guard (Deep Teal) -->
+    <div class="homeup-card card-teal" onclick="boostAudioPriority(event)">
+      <div class="card-top">
+        <div class="card-icon">
+          <!-- Headset SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+          </svg>
+        </div>
+        <div class="oneui-toggle active" id="toggle-audio" onclick="boostAudioPriority(event)">
+          <div class="oneui-toggle-thumb"></div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-title">Audio Guard</div>
+        <div class="card-subtitle">Real-time nice -16 &bull; Fix Buds3 desync</div>
+      </div>
+    </div>
+
+    <!-- Card 6: Network & TCP BBR (Deep Cobalt) -->
+    <div class="homeup-card card-slate" onclick="toggleNetworkBoost(event)">
+      <div class="card-top">
+        <div class="card-icon">
+          <!-- Globe / Network SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+        </div>
+        <div class="oneui-toggle active" id="toggle-network" onclick="toggleNetworkBoost(event)">
+          <div class="oneui-toggle-thumb"></div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-title">TCP BBR & Radio</div>
+        <div class="card-subtitle">Google BBR &bull; BT snoop log off</div>
+      </div>
+    </div>
+
+    <!-- Card 7: Telemetry Sleep (Deep Amber / Warm Brown) -->
+    <div class="homeup-card card-amber" onclick="toggleTelemetry(event)">
+      <div class="card-top">
+        <div class="card-icon">
+          <!-- Shield SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="oneui-toggle active" id="toggle-telemetry" onclick="toggleTelemetry(event)">
+          <div class="oneui-toggle-thumb"></div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-title">Telemetry Sleep</div>
+        <div class="card-subtitle">Diagmon & Survey daemons hibernated</div>
+      </div>
+    </div>
+
+    <!-- Card 8: Enhanced CPU (Deep Plum / Magenta) -->
+    <div class="homeup-card card-plum" onclick="toggleEnhancedCpu(event)">
+      <div class="card-top">
+        <div class="card-icon">
+          <!-- Speedometer SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="oneui-toggle active" id="toggle-cpu" onclick="toggleEnhancedCpu(event)">
+          <div class="oneui-toggle-thumb"></div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-title">Enhanced CPU</div>
+        <div class="card-subtitle" id="card-cpu-sub">Faster clock ramp &bull; Low UI latency</div>
       </div>
     </div>
 
   </div>
 
-  <!-- Material 3 Confirmation Dialog / Sheet -->
-  <div class="modal-overlay" id="confirm-modal" onclick="closeConfirmModal(event)">
-    <div class="modal-dialog" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
-        <h3 class="modal-title" id="modal-title">Switch ZRAM Engine?</h3>
-      </div>
-      <div class="modal-body" id="modal-body">
-        Changing the active compression algorithm requires flushing ZRAM swap space (<code>swapoff</code>), which forces compressed memory back into physical RAM.<br><br>
-        ⚠️ <strong>Warning:</strong> Live switching may cause temporary device lag or freeze for 5–15 seconds while memory is uncompressed.<br><br>
-        We strongly recommend saving the setting to apply cleanly on next reboot.
-      </div>
-      <div class="modal-actions">
-        <button class="modal-btn modal-btn-primary" onclick="applyAlgOnReboot()">Save for Next Reboot (Recommended)</button>
-        <button class="modal-btn modal-btn-danger" onclick="applyAlgLive()">Switch Live Now (May Freeze)</button>
-        <button class="modal-btn modal-btn-cancel" onclick="closeConfirmModal()">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast Notification -->
-  <div id="toast" class="toast">Action completed</div>
-
-  <!-- Bottom Navigation Bar (Matching ReZygisk / KernelSU Navigation) -->
-  <div class="bottom-nav">
+  <!-- One UI Maintenance Section -->
+  <div class="section-header">Maintenance & Diagnostics</div>
+  <div class="action-group">
     
-    <!-- Home Tab -->
-    <div class="nav-item active" onclick="switchTab('home')">
-      <div class="nav-pill">
-        <!-- Home SVG -->
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-        </svg>
+    <div class="action-row" onclick="runOptimizeNow()">
+      <div class="action-row-left">
+        <div class="action-row-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="action-row-text">
+          <div class="action-row-title">Run Daily Optimization Now</div>
+          <div class="action-row-desc">Full memory compaction, storage trim & compile pass</div>
+        </div>
       </div>
-      <span class="nav-label">Home</span>
+      <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
-    <!-- Modules / RAM Plus Tab -->
-    <div class="nav-item" onclick="switchTab('ramplus')">
-      <div class="nav-pill">
-        <!-- Cube/Box SVG matching screenshot -->
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-          <line x1="12" y1="22.08" x2="12" y2="12"/>
-        </svg>
+    <div class="action-row" onclick="compactMemory()">
+      <div class="action-row-left">
+        <div class="action-row-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div class="action-row-text">
+          <div class="action-row-title">Compact Memory & Trim Storage</div>
+          <div class="action-row-desc">Flush inactive caches & execute fstrim on /data</div>
+        </div>
       </div>
-      <span class="nav-label">RAM Plus</span>
+      <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
-    <!-- Actions Tab -->
-    <div class="nav-item" onclick="switchTab('actions')">
-      <div class="nav-pill">
-        <!-- Play / Actions SVG matching screenshot -->
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <circle cx="12" cy="12" r="10"/>
-          <polygon points="10 8 16 12 10 16 10 8"/>
-        </svg>
+    <div class="action-row" onclick="purgeLogs()">
+      <div class="action-row-left">
+        <div class="action-row-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </div>
+        <div class="action-row-text">
+          <div class="action-row-title">Purge Crash Logs & Dead Caches</div>
+          <div class="action-row-desc">Clean /data/anr, tombstones & trim caches</div>
+        </div>
       </div>
-      <span class="nav-label">Actions</span>
+      <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
-    <!-- Logs / Settings Tab -->
-    <div class="nav-item" onclick="switchTab('logs')">
-      <div class="nav-pill">
-        <!-- Cog / Settings SVG matching screenshot -->
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
+    <div class="action-row" onclick="openLogSheet()">
+      <div class="action-row-left">
+        <div class="action-row-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="action-row-text">
+          <div class="action-row-title">Terminal Activity Log</div>
+          <div class="action-row-desc">Inspect real-time optimization logs</div>
+        </div>
       </div>
-      <span class="nav-label">Logs</span>
+      <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
   </div>
+
+  <!-- Bottom Sheet 1: RAM Plus Selector -->
+  <div class="sheet-scrim" id="sheet-ramplus" onclick="closeSheets(event)">
+    <div class="oneui-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">RAM Plus</div>
+      <div class="sheet-desc">Swapping pages onto flash storage can trigger kernel swap thrashing. Disabling it (0 GB) completely eliminates background audio and UI stutter.</div>
+
+      <div class="sheet-option-list">
+        <div class="sheet-option" id="sheet-opt-0" onclick="chooseRam(0)">
+          <div>
+            <div class="sheet-opt-title">0 GB</div>
+            <div class="sheet-opt-desc">Off &bull; Lowest latency (Recommended)</div>
+          </div>
+          <div class="sheet-radio"></div>
+        </div>
+        <div class="sheet-option" id="sheet-opt-2048" onclick="chooseRam(2048)">
+          <div>
+            <div class="sheet-opt-title">2 GB</div>
+            <div class="sheet-opt-desc">Minimal swap</div>
+          </div>
+          <div class="sheet-radio"></div>
+        </div>
+        <div class="sheet-option" id="sheet-opt-4096" onclick="chooseRam(4096)">
+          <div>
+            <div class="sheet-opt-title">4 GB</div>
+            <div class="sheet-opt-desc">Samsung stock balanced</div>
+          </div>
+          <div class="sheet-radio"></div>
+        </div>
+        <div class="sheet-option" id="sheet-opt-8192" onclick="chooseRam(8192)">
+          <div>
+            <div class="sheet-opt-title">8 GB</div>
+            <div class="sheet-opt-desc">Maximum swap headroom</div>
+          </div>
+          <div class="sheet-radio"></div>
+        </div>
+      </div>
+
+      <div class="sheet-buttons">
+        <button class="oneui-btn oneui-btn-primary" onclick="saveRamChoice()">Apply Setting (Reboot to take effect)</button>
+        <button class="oneui-btn oneui-btn-flat" onclick="closeSheets()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Sheet 2: ZRAM Compression Engine Selector -->
+  <div class="sheet-scrim" id="sheet-zram" onclick="closeSheets(event)">
+    <div class="oneui-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">ZRAM Engine</div>
+      <div class="sheet-desc">Choose the kernel compression algorithm. ZSTD offers ~35% higher compression ratio on modern ARMv9 CPUs (Snapdragon 8 Gen 3 / Exynos 2400).</div>
+
+      <div class="sheet-option-list">
+        <div class="sheet-option" id="sheet-alg-zstd" onclick="chooseAlg('zstd')">
+          <div>
+            <div class="sheet-opt-title">ZSTD</div>
+            <div class="sheet-opt-desc">High compression (~35% more RAM headroom)</div>
+          </div>
+          <div class="sheet-radio"></div>
+        </div>
+        <div class="sheet-option" id="sheet-alg-lz4" onclick="chooseAlg('lz4')">
+          <div>
+            <div class="sheet-opt-title">LZ4</div>
+            <div class="sheet-opt-desc">Ultra-fast decompression</div>
+          </div>
+          <div class="sheet-radio"></div>
+        </div>
+        <div class="sheet-option" id="sheet-alg-lzo-rle" onclick="chooseAlg('lzo-rle')">
+          <div>
+            <div class="sheet-opt-title">LZO-RLE</div>
+            <div class="sheet-opt-desc">Samsung stock default</div>
+          </div>
+          <div class="sheet-radio"></div>
+        </div>
+      </div>
+
+      <div class="sheet-buttons">
+        <button class="oneui-btn oneui-btn-primary" onclick="confirmZramSwitch('reboot')">Save for Next Reboot (Recommended &bull; Zero Lag)</button>
+        <button class="oneui-btn oneui-btn-danger" onclick="confirmZramSwitch('live')">Switch Live Now (May cause 5-10s freeze)</button>
+        <button class="oneui-btn oneui-btn-flat" onclick="closeSheets()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Sheet 3: System Overview -->
+  <div class="sheet-scrim" id="sheet-system" onclick="closeSheets(event)">
+    <div class="oneui-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">System Metrics</div>
+      <div class="sheet-desc">Live device status, memory residency, and subsystem diagnostics.</div>
+
+      <div class="sheet-option-list">
+        <div class="sheet-option" style="cursor:default;">
+          <div>
+            <div class="sheet-opt-title">Android / Kernel</div>
+            <div class="sheet-opt-desc" id="sys-kernel">Android 14 &bull; Linux 6.1</div>
+          </div>
+        </div>
+        <div class="sheet-option" style="cursor:default;">
+          <div>
+            <div class="sheet-opt-title">Physical RAM Usage</div>
+            <div class="sheet-opt-desc" id="sys-ram">Loading RAM metrics...</div>
+          </div>
+        </div>
+        <div class="sheet-option" style="cursor:default;">
+          <div>
+            <div class="sheet-opt-title">Swap / ZRAM Allocation</div>
+            <div class="sheet-opt-desc" id="sys-swap">Loading swap metrics...</div>
+          </div>
+        </div>
+        <div class="sheet-option" style="cursor:default;">
+          <div>
+            <div class="sheet-opt-title">Battery & Power</div>
+            <div class="sheet-opt-desc" id="sys-batt">Loading battery metrics...</div>
+          </div>
+        </div>
+        <div class="sheet-option" style="cursor:default;">
+          <div>
+            <div class="sheet-opt-title">VFS Cache & Schedstats</div>
+            <div class="sheet-opt-desc" id="sys-vfs">vfs_cache_pressure: 50 &bull; schedstats: 0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-buttons">
+        <button class="oneui-btn oneui-btn-secondary" onclick="closeSheets()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Sheet 4: Activity Log -->
+  <div class="sheet-scrim" id="sheet-log" onclick="closeSheets(event)">
+    <div class="oneui-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+        <div class="sheet-title" style="margin-bottom:0;">Terminal Log</div>
+        <button onclick="loadLogs()" class="oneui-btn oneui-btn-secondary" style="width:auto; padding:6px 14px; font-size:12.5px; border-radius:14px;">Refresh ⟳</button>
+      </div>
+      <div class="terminal-box" id="terminal-log">Loading activity log...</div>
+      <div class="sheet-buttons">
+        <button class="oneui-btn oneui-btn-secondary" onclick="closeSheets()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification -->
+  <div id="toast" class="toast">Action applied</div>
 
   <script>
-    let currentRamChoice = 2048;
-    let currentAlgChoice = 'zstd';
     let isDaemonRunning = false;
+    let currentRamChoice = 0;
+    let currentAlgChoice = 'zstd';
     let is120HzLocked = false;
     let isBypassActive = false;
+    let isEnhancedCpu = true;
 
-    // Tab Navigation Switcher
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-page').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
-      const activePage = document.getElementById('tab-' + tabId);
-      if (activePage) activePage.classList.add('active');
-
-      const tabs = ['home', 'ramplus', 'actions', 'logs'];
-      const index = tabs.indexOf(tabId);
-      if (index >= 0) {
-        document.querySelectorAll('.nav-item')[index].classList.add('active');
-      }
-
-      if (tabId === 'logs') {
-        loadLogs();
-      }
+    // Toast Messenger
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.innerText = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2800);
     }
 
-    // Universal Command Executor
+    // Universal Command Executor (KernelSU / APatch / WebUI micro-server)
     async function execCmd(cmd) {
       if (window.ksu && window.ksu.exec) {
         return new Promise((resolve) => {
@@ -863,115 +961,156 @@
             } catch (err) { resolve(""); }
           }
         });
-      } else {
-        try {
-          const res = await fetch("/api/exec", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cmd })
-          });
-          const data = await res.json();
-          return data.stdout || "";
-        } catch (e) {
-          return "";
-        }
+      }
+      try {
+        const resp = await fetch("/api/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cmd })
+        });
+        const data = await resp.json();
+        return data.stdout || "";
+      } catch (e) {
+        return "";
       }
     }
 
-    function showToast(msg) {
-      const t = document.getElementById("toast");
-      t.innerText = msg;
-      t.classList.add("show");
-      setTimeout(() => t.classList.remove("show"), 2800);
+    // Sheet Controllers
+    function openRamSheet() {
+      document.getElementById('sheet-ramplus').classList.add('open');
     }
 
-    function selectRamOption(size) {
+    function openZramSheet() {
+      document.getElementById('sheet-zram').classList.add('open');
+    }
+
+    function openSystemSheet() {
+      document.getElementById('sheet-system').classList.add('open');
+    }
+
+    function openLogSheet() {
+      document.getElementById('sheet-log').classList.add('open');
+      loadLogs();
+    }
+
+    function closeSheets(e) {
+      if (e && e.target !== e.currentTarget && !e.target.classList.contains('sheet-scrim')) return;
+      document.querySelectorAll('.sheet-scrim').forEach(s => s.classList.remove('open'));
+    }
+
+    // Master Toggle (Daemon start / stop)
+    async function toggleMasterDaemon(e) {
+      if (e) e.stopPropagation();
+      if (isDaemonRunning) {
+        showToast("Stopping 5:00 AM daemon...");
+        await execCmd("sh /data/adb/modules/samsung_daily_optimizer/stop_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/stop_daemon.sh 2>/dev/null");
+      } else {
+        showToast("Starting 5:00 AM daily daemon...");
+        await execCmd("sh /data/adb/modules/samsung_daily_optimizer/start_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/start_daemon.sh 2>/dev/null");
+      }
+      setTimeout(refreshData, 600);
+    }
+
+    // RAM Plus Logic
+    function chooseRam(size) {
       currentRamChoice = size;
-      document.querySelectorAll('.option-card').forEach(c => {
-        if (c.id.startsWith('opt-') && !c.id.startsWith('opt-alg-')) c.classList.remove('selected');
-      });
-      const activeCard = document.getElementById('opt-' + size);
-      if (activeCard) activeCard.classList.add('selected');
-    }
-
-    function selectAlgOption(alg, isUserSelect = true) {
-      currentAlgChoice = alg;
-      ['zstd', 'lz4', 'lzo-rle'].forEach(a => {
-        const el = document.getElementById('opt-alg-' + a);
+      ['0', '2048', '4096', '8192'].forEach(s => {
+        const el = document.getElementById('sheet-opt-' + s);
         if (el) el.classList.remove('selected');
       });
-      const active = document.getElementById('opt-alg-' + alg);
+      const active = document.getElementById('sheet-opt-' + size);
       if (active) active.classList.add('selected');
     }
 
-    function confirmSwitchEngine() {
-      const title = document.getElementById('modal-title');
-      if (title) title.innerText = `Switch ZRAM Engine to ${currentAlgChoice.toUpperCase()}?`;
-      const modal = document.getElementById('confirm-modal');
-      if (modal) modal.classList.add('open');
+    async function quickToggleRam(e) {
+      if (e) e.stopPropagation();
+      const nextSize = currentRamChoice === 0 ? 2048 : 0;
+      chooseRam(nextSize);
+      await saveRamChoice();
     }
 
-    function closeConfirmModal(e) {
-      if (e && e.target !== e.currentTarget && e.target.id !== 'confirm-modal' && !e.target.classList.contains('modal-btn-cancel')) return;
-      const modal = document.getElementById('confirm-modal');
-      if (modal) modal.classList.remove('open');
-    }
-
-    async function applyAlgOnReboot() {
-      const modal = document.getElementById('confirm-modal');
-      if (modal) modal.classList.remove('open');
-      showToast("Saving " + currentAlgChoice.toUpperCase() + " for next reboot...");
+    async function saveRamChoice() {
+      closeSheets();
+      showToast("Saving RAM Plus setting...");
+      await execCmd(`settings put global ram_expand_size ${currentRamChoice}`);
       const script = `
         for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
           if [ -d "$dir" ] && [ -f "$dir/config.prop" ]; then
-            if grep -q "^ZRAM_COMP_ALGORITHM=" "$dir/config.prop"; then
-              sed -i "s/^ZRAM_COMP_ALGORITHM=.*/ZRAM_COMP_ALGORITHM=${currentAlgChoice}/" "$dir/config.prop" 2>/dev/null
-            else
-              echo "ZRAM_COMP_ALGORITHM=${currentAlgChoice}" >> "$dir/config.prop" 2>/dev/null
-            fi
+            sed -i "s/^RAM_PLUS_SIZE=.*/RAM_PLUS_SIZE=${currentRamChoice}/" "$dir/config.prop" 2>/dev/null
+            [ "${currentRamChoice}" = "0" ] && sed -i "s/^RAM_PLUS_ENABLED=.*/RAM_PLUS_ENABLED=0/" "$dir/config.prop" 2>/dev/null || sed -i "s/^RAM_PLUS_ENABLED=.*/RAM_PLUS_ENABLED=1/" "$dir/config.prop" 2>/dev/null
           fi
         done
-        cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚙️ ZRAM Engine will switch to ${currentAlgChoice.toUpperCase()} on reboot' 2>/dev/null
       `;
       await execCmd(script);
-      showToast("Saved! Will switch to " + currentAlgChoice.toUpperCase() + " on next reboot (Zero lag).");
-    }
-
-    async function applyAlgLive() {
-      const modal = document.getElementById('confirm-modal');
-      if (modal) modal.classList.remove('open');
-      showToast("Compacting memory & switching ZRAM engine...");
-      const script = `
-        cmd notification post -S media -i @android:drawable/stat_notify_sync -t 'Vertex' 'samsung_optimizer' '⚡ Switching ZRAM to ${currentAlgChoice.toUpperCase()} (Please wait...)' 2>/dev/null
-        sync
-        echo 3 > /proc/sys/vm/drop_caches 2>/dev/null
-        echo 1 > /proc/sys/vm/compact_memory 2>/dev/null
-        ZRAM_SIZE=$(cat /sys/block/zram0/disksize 2>/dev/null)
-        swapoff /dev/block/zram0 2>/dev/null
-        echo 1 > /sys/block/zram0/reset 2>/dev/null
-        echo '${currentAlgChoice}' > /sys/block/zram0/comp_algorithm 2>/dev/null
-        [ -n "$ZRAM_SIZE" ] && [ "$ZRAM_SIZE" -gt 0 ] && echo "$ZRAM_SIZE" > /sys/block/zram0/disksize 2>/dev/null
-        mkswap /dev/block/zram0 2>/dev/null
-        swapon /dev/block/zram0 2>/dev/null
-        for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
-          if [ -d "$dir" ] && [ -f "$dir/config.prop" ]; then
-            if grep -q "^ZRAM_COMP_ALGORITHM=" "$dir/config.prop"; then
-              sed -i "s/^ZRAM_COMP_ALGORITHM=.*/ZRAM_COMP_ALGORITHM=${currentAlgChoice}/" "$dir/config.prop" 2>/dev/null
-            else
-              echo "ZRAM_COMP_ALGORITHM=${currentAlgChoice}" >> "$dir/config.prop" 2>/dev/null
-            fi
-          fi
-        done
-        cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚡ ZRAM Engine set to ${currentAlgChoice.toUpperCase()}' 2>/dev/null
-      `;
-      await execCmd(script);
-      showToast("ZRAM engine switched to " + currentAlgChoice.toUpperCase() + "!");
+      showToast(currentRamChoice === 0 ? "RAM Plus Disabled (Reboot to apply)" : `RAM Plus set to ${currentRamChoice/1024} GB (Reboot to apply)`);
       refreshData();
     }
 
-    async function toggleRefreshRateLock() {
+    // ZRAM Logic
+    function chooseAlg(alg) {
+      currentAlgChoice = alg;
+      ['zstd', 'lz4', 'lzo-rle'].forEach(a => {
+        const el = document.getElementById('sheet-alg-' + a);
+        if (el) el.classList.remove('selected');
+      });
+      const active = document.getElementById('sheet-alg-' + alg);
+      if (active) active.classList.add('selected');
+    }
+
+    async function confirmZramSwitch(mode) {
+      closeSheets();
+      if (mode === 'reboot') {
+        showToast("Saving " + currentAlgChoice.toUpperCase() + " for next reboot...");
+        const script = `
+          for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
+            if [ -d "$dir" ] && [ -f "$dir/config.prop" ]; then
+              if grep -q "^ZRAM_COMP_ALGORITHM=" "$dir/config.prop"; then
+                sed -i "s/^ZRAM_COMP_ALGORITHM=.*/ZRAM_COMP_ALGORITHM=${currentAlgChoice}/" "$dir/config.prop" 2>/dev/null
+              else
+                echo "ZRAM_COMP_ALGORITHM=${currentAlgChoice}" >> "$dir/config.prop" 2>/dev/null
+              fi
+            fi
+          done
+          cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚙️ ZRAM will switch to ${currentAlgChoice.toUpperCase()} on reboot' 2>/dev/null
+        `;
+        await execCmd(script);
+        showToast("Saved! Will switch to " + currentAlgChoice.toUpperCase() + " cleanly on next reboot.");
+      } else {
+        showToast("Compacting memory & switching ZRAM live...");
+        const script = `
+          cmd notification post -S media -i @android:drawable/stat_notify_sync -t 'Vertex' 'samsung_optimizer' '⚡ Switching ZRAM to ${currentAlgChoice.toUpperCase()}...' 2>/dev/null
+          sync
+          echo 3 > /proc/sys/vm/drop_caches 2>/dev/null
+          echo 1 > /proc/sys/vm/compact_memory 2>/dev/null
+          ZRAM_SIZE=$(cat /sys/block/zram0/disksize 2>/dev/null)
+          swapoff /dev/block/zram0 2>/dev/null
+          echo 1 > /sys/block/zram0/reset 2>/dev/null
+          echo '${currentAlgChoice}' > /sys/block/zram0/comp_algorithm 2>/dev/null
+          [ -n "$ZRAM_SIZE" ] && [ "$ZRAM_SIZE" -gt 0 ] && echo "$ZRAM_SIZE" > /sys/block/zram0/disksize 2>/dev/null
+          mkswap /dev/block/zram0 2>/dev/null
+          swapon /dev/block/zram0 2>/dev/null
+          for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
+            if [ -d "$dir" ] && [ -f "$dir/config.prop" ]; then
+              if grep -q "^ZRAM_COMP_ALGORITHM=" "$dir/config.prop"; then
+                sed -i "s/^ZRAM_COMP_ALGORITHM=.*/ZRAM_COMP_ALGORITHM=${currentAlgChoice}/" "$dir/config.prop" 2>/dev/null
+              else
+                echo "ZRAM_COMP_ALGORITHM=${currentAlgChoice}" >> "$dir/config.prop" 2>/dev/null
+              fi
+            fi
+          done
+          cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚡ ZRAM Engine set to ${currentAlgChoice.toUpperCase()}' 2>/dev/null
+        `;
+        await execCmd(script);
+        showToast("ZRAM switched to " + currentAlgChoice.toUpperCase() + "!");
+      }
+      refreshData();
+    }
+
+    // Display 120Hz Toggle
+    async function toggleRefreshRate(e) {
+      if (e) e.stopPropagation();
       if (is120HzLocked) {
-        showToast("Restoring dynamic LTPO refresh rate (1Hz - 120Hz)...");
+        showToast("Restoring dynamic LTPO (1Hz - 120Hz)...");
         await execCmd("settings put system min_refresh_rate 1.0 2>/dev/null; settings put system peak_refresh_rate 120.0 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🌱 Dynamic LTPO Restored (1Hz - 120Hz)' 2>/dev/null");
         showToast("Dynamic LTPO (1Hz - 120Hz) active!");
       } else {
@@ -982,7 +1121,9 @@
       refreshData();
     }
 
-    async function toggleBypassCharging() {
+    // Bypass Charging Toggle
+    async function toggleBypassCharging(e) {
+      if (e) e.stopPropagation();
       if (isBypassActive) {
         showToast("Resuming normal battery charging...");
         await execCmd(`
@@ -1003,85 +1144,9 @@
       refreshData();
     }
 
-    async function applyRamSetting() {
-      showToast("Applying RAM Plus setting...");
-      await execCmd(`settings put global ram_expand_size ${currentRamChoice}`);
-      const cfgCmd = `
-        for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
-          if [ -d "$dir" ]; then
-            sed -i "s/^RAM_PLUS_SIZE=.*/RAM_PLUS_SIZE=${currentRamChoice}/" "$dir/config.prop" 2>/dev/null
-            [ "${currentRamChoice}" = "0" ] && sed -i "s/^RAM_PLUS_ENABLED=.*/RAM_PLUS_ENABLED=0/" "$dir/config.prop" 2>/dev/null || sed -i "s/^RAM_PLUS_ENABLED=.*/RAM_PLUS_ENABLED=1/" "$dir/config.prop" 2>/dev/null
-          fi
-        done
-      `;
-      await execCmd(cfgCmd);
-      showToast(currentRamChoice === 0 ? "RAM Plus Disabled (Reboot to take effect)" : `RAM Plus set to ${currentRamChoice / 1024} GB (Reboot to take effect)`);
-      refreshData();
-    }
-
-    async function runOptimizeNow() {
-      showToast("Executing daily optimization...");
-      const res = await execCmd("sh /data/adb/modules/samsung_daily_optimizer/run_now.sh 2>&1 || sh /data/local/tmp/SamsungDailyOptimizer/run_now.sh 2>&1");
-      showToast("Optimization pass complete!");
-      refreshData();
-      loadLogs();
-    }
-
-    async function compactMemory() {
-      showToast("Compacting memory & trimming storage...");
-      await execCmd("cmd notification post -S media -i @android:drawable/stat_notify_sync -t 'Vertex' 'samsung_optimizer' '💾 Compacting memory & trimming storage...' 2>/dev/null; sync; echo 1 > /proc/sys/vm/compact_memory 2>/dev/null; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null; fstrim -v /data 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '✅ Memory compacted & storage trimmed!' 2>/dev/null");
-      showToast("Memory compacted & storage trimmed!");
-      refreshData();
-    }
-
-    async function purgeLogs() {
-      showToast("Purging crash logs...");
-      await execCmd("rm -f /data/anr/* /data/tombstones/* /data/system/dropbox/* 2>/dev/null; pm trim-caches 4096M 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🗑️ Logs purged & dead caches trimmed!' 2>/dev/null");
-      showToast("Logs purged & dead caches trimmed!");
-      refreshData();
-    }
-
-    async function toggleEnhancedCpu() {
-      const cur = await execCmd("settings get global sem_enhanced_cpu_responsiveness 2>/dev/null");
-      const next = cur.trim() === "1" ? "0" : "1";
-      await execCmd(`settings put global sem_enhanced_cpu_responsiveness ${next}`);
-      showToast(`Enhanced CPU: ${next === "1" ? "Enabled" : "Standard"}`);
-      refreshData();
-    }
-
-    async function restrictTelemetry() {
-      showToast("Restricting Samsung diagnostic & telemetry daemons...");
-      const cmd = `
-        for pkg in com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence; do
-          if pm list packages 2>/dev/null | grep -q "$pkg"; then
-            am set-standby-bucket "$pkg" restricted 2>/dev/null
-            cmd appops set "$pkg" RUN_IN_BACKGROUND ignore 2>/dev/null
-          fi
-        done
-        cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🛡️ Samsung diagnostic & telemetry daemons hibernated' 2>/dev/null
-      `;
-      await execCmd(cmd);
-      showToast("Samsung telemetry services hibernated!");
-      refreshData();
-    }
-
-    async function applyNetworkBoost() {
-      showToast("Applying TCP BBR & Audio Radio Boost...");
-      const cmd = `
-        if grep -q "bbr" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
-          echo "bbr" > /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null
-        fi
-        settings put global bluetooth_btsnoop_default_mode disabled 2>/dev/null
-        setprop persist.bluetooth.btsnoopenable false 2>/dev/null
-        settings put global wifi_sleep_policy 2 2>/dev/null
-        cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🌐 TCP BBR active & BT snoop log disabled' 2>/dev/null
-      `;
-      await execCmd(cmd);
-      showToast("TCP BBR & Bluetooth audio boost applied!");
-      refreshData();
-    }
-
-    async function boostAudioPriority() {
+    // Audio Boost
+    async function boostAudioPriority(e) {
+      if (e) e.stopPropagation();
       showToast("Boosting audio & Bluetooth real-time priorities...");
       const cmd = `
         for apid in $(pidof audioserver android.hardware.audio.service com.android.bluetooth android.hardware.bluetooth@1.1-service-qti 2>/dev/null); do
@@ -1099,15 +1164,72 @@
       refreshData();
     }
 
-    async function toggleDaemonState() {
-      if (isDaemonRunning) {
-        showToast("Stopping 5:00 AM daemon...");
-        await execCmd("sh /data/adb/modules/samsung_daily_optimizer/stop_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/stop_daemon.sh 2>/dev/null");
-      } else {
-        showToast("Starting 5:00 AM daemon...");
-        await execCmd("sh /data/adb/modules/samsung_daily_optimizer/start_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/start_daemon.sh 2>/dev/null");
-      }
-      setTimeout(refreshData, 500);
+    // Network Boost
+    async function toggleNetworkBoost(e) {
+      if (e) e.stopPropagation();
+      showToast("Applying TCP BBR & Audio Radio Boost...");
+      const cmd = `
+        if grep -q "bbr" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
+          echo "bbr" > /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null
+        fi
+        settings put global bluetooth_btsnoop_default_mode disabled 2>/dev/null
+        setprop persist.bluetooth.btsnoopenable false 2>/dev/null
+        settings put global wifi_sleep_policy 2 2>/dev/null
+        cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🌐 TCP BBR active & BT snoop log disabled' 2>/dev/null
+      `;
+      await execCmd(cmd);
+      showToast("TCP BBR & Bluetooth audio boost applied!");
+      refreshData();
+    }
+
+    // Telemetry Restriction
+    async function toggleTelemetry(e) {
+      if (e) e.stopPropagation();
+      showToast("Restricting Samsung diagnostic & telemetry daemons...");
+      const cmd = `
+        for pkg in com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence; do
+          if pm list packages 2>/dev/null | grep -q "$pkg"; then
+            am set-standby-bucket "$pkg" restricted 2>/dev/null
+            cmd appops set "$pkg" RUN_IN_BACKGROUND ignore 2>/dev/null
+          fi
+        done
+        cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🛡️ Samsung diagnostic & telemetry daemons hibernated' 2>/dev/null
+      `;
+      await execCmd(cmd);
+      showToast("Samsung telemetry services hibernated!");
+      refreshData();
+    }
+
+    // Enhanced CPU
+    async function toggleEnhancedCpu(e) {
+      if (e) e.stopPropagation();
+      const cur = await execCmd("settings get global sem_enhanced_cpu_responsiveness 2>/dev/null");
+      const next = cur.trim() === "1" ? "0" : "1";
+      await execCmd(`settings put global sem_enhanced_cpu_responsiveness ${next}`);
+      showToast(`Enhanced CPU: ${next === "1" ? "Enabled" : "Standard"}`);
+      refreshData();
+    }
+
+    // Maintenance Actions
+    async function runOptimizeNow() {
+      showToast("Executing daily optimization...");
+      await execCmd("sh /data/adb/modules/samsung_daily_optimizer/run_now.sh 2>&1 || sh /data/local/tmp/SamsungDailyOptimizer/run_now.sh 2>&1");
+      showToast("Optimization pass complete!");
+      refreshData();
+    }
+
+    async function compactMemory() {
+      showToast("Compacting memory & trimming storage...");
+      await execCmd("cmd notification post -S media -i @android:drawable/stat_notify_sync -t 'Vertex' 'samsung_optimizer' '💾 Compacting memory & trimming storage...' 2>/dev/null; sync; echo 1 > /proc/sys/vm/compact_memory 2>/dev/null; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null; fstrim -v /data 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '✅ Memory compacted & storage trimmed!' 2>/dev/null");
+      showToast("Memory compacted & storage trimmed!");
+      refreshData();
+    }
+
+    async function purgeLogs() {
+      showToast("Purging crash logs...");
+      await execCmd("rm -f /data/anr/* /data/tombstones/* /data/system/dropbox/* 2>/dev/null; pm trim-caches 4096M 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🗑️ Logs purged & dead caches trimmed!' 2>/dev/null");
+      showToast("Logs purged & dead caches trimmed!");
+      refreshData();
     }
 
     async function loadLogs() {
@@ -1119,15 +1241,98 @@
       }
     }
 
+    // Live Metrics Updater
     async function refreshData() {
-      // 1. Android & Kernel Version
-      const androidVer = (await execCmd("getprop ro.build.version.release 2>/dev/null")).trim();
-      if (androidVer) document.getElementById("val-android-ver").innerText = androidVer;
+      // 1. Daemon Status
+      const daemonPid = (await execCmd("cat /data/adb/modules/samsung_daily_optimizer/daemon.pid 2>/dev/null || cat /data/local/tmp/SamsungDailyOptimizer/daemon.pid 2>/dev/null")).trim();
+      const masterToggle = document.getElementById("master-toggle");
+      if (daemonPid && !isNaN(parseInt(daemonPid))) {
+        isDaemonRunning = true;
+        masterToggle.classList.add("active");
+        document.getElementById("master-status-text").innerText = "On";
+        document.getElementById("master-status-desc").innerText = "Active (PID " + daemonPid + ") • Daily at 05:00 AM";
+      } else {
+        isDaemonRunning = false;
+        masterToggle.classList.remove("active");
+        document.getElementById("master-status-text").innerText = "Off";
+        document.getElementById("master-status-desc").innerText = "Manual trigger only (Tap to schedule 05:00 AM)";
+      }
 
+      // 2. RAM Plus Status
+      const ramSizeRaw = (await execCmd("settings get global ram_expand_size 2>/dev/null")).trim();
+      const ramSize = parseInt(ramSizeRaw) || 0;
+      currentRamChoice = ramSize;
+      chooseRam(ramSize);
+      const ramToggle = document.getElementById("toggle-ramplus");
+      if (ramSize > 0) {
+        ramToggle.classList.add("active");
+        document.getElementById("card-ramplus-sub").innerText = (ramSize/1024) + " GB • Active (Tap to tune)";
+      } else {
+        ramToggle.classList.remove("active");
+        document.getElementById("card-ramplus-sub").innerText = "0 GB • Disabled (Zero swap lag)";
+      }
+
+      // 3. ZRAM Engine Status
+      const zramAlgRaw = (await execCmd("cat /sys/block/zram0/comp_algorithm 2>/dev/null")).trim();
+      if (zramAlgRaw) {
+        const match = zramAlgRaw.match(/\[([^\]]+)\]/);
+        const activeAlg = match ? match[1] : "lzo-rle";
+        document.getElementById("chip-zram-alg").innerText = activeAlg.toUpperCase();
+        document.getElementById("card-zram-sub").innerText = activeAlg.toUpperCase() + " (Active) • Tap to switch";
+        chooseAlg(activeAlg);
+      }
+
+      // 4. Refresh Rate
+      const minRate = (await execCmd("settings get system min_refresh_rate 2>/dev/null")).trim();
+      const refToggle = document.getElementById("toggle-refresh");
+      if (parseFloat(minRate) >= 120.0) {
+        is120HzLocked = true;
+        refToggle.classList.add("active");
+        document.getElementById("card-refresh-sub").innerText = "120Hz Locked • Zero micro-stutter";
+      } else {
+        is120HzLocked = false;
+        refToggle.classList.remove("active");
+        document.getElementById("card-refresh-sub").innerText = "Dynamic LTPO (1-120Hz) • Power saving";
+      }
+
+      // 5. Battery & Bypass
+      const battInfo = await execCmd("dumpsys battery 2>/dev/null");
+      const slate = (await execCmd("cat /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || cat /sys/class/power_supply/battery/charging_enabled 2>/dev/null")).trim();
+      const bypassToggle = document.getElementById("toggle-bypass");
+      if (battInfo) {
+        const mLevel = battInfo.match(/level:\s*(\d+)/);
+        const mUsb = battInfo.match(/USB powered:\s*(true|false)/i);
+        const mAc = battInfo.match(/AC powered:\s*(true|false)/i);
+        const level = mLevel ? mLevel[1] + "%" : "--%";
+        const plugged = (mUsb && mUsb[1] === "true") || (mAc && mAc[1] === "true");
+
+        isBypassActive = (slate === "1");
+        if (isBypassActive) {
+          bypassToggle.classList.add("active");
+          document.getElementById("card-bypass-sub").innerText = level + " • Bypass Active (Wall power)";
+        } else {
+          bypassToggle.classList.remove("active");
+          document.getElementById("card-bypass-sub").innerText = level + (plugged ? " • Charging" : " • Battery");
+        }
+        document.getElementById("sys-batt").innerText = level + (plugged ? " (Plugged in)" : " (Discharging)") + (isBypassActive ? " • Bypass Slate Active" : "");
+      }
+
+      // 6. Enhanced CPU
+      const cpuVal = (await execCmd("settings get global sem_enhanced_cpu_responsiveness 2>/dev/null")).trim();
+      const cpuToggle = document.getElementById("toggle-cpu");
+      if (cpuVal === "1") {
+        cpuToggle.classList.add("active");
+        document.getElementById("card-cpu-sub").innerText = "Fast clock ramp • Low UI latency";
+      } else {
+        cpuToggle.classList.remove("active");
+        document.getElementById("card-cpu-sub").innerText = "Standard clock ramp";
+      }
+
+      // 7. System Sheet info
       const kernelVer = (await execCmd("uname -r 2>/dev/null")).trim();
-      if (kernelVer) document.getElementById("val-kernel-ver").innerText = kernelVer;
+      const androidVer = (await execCmd("getprop ro.build.version.release 2>/dev/null")).trim();
+      if (kernelVer) document.getElementById("sys-kernel").innerText = "Android " + (androidVer || "14") + " • " + kernelVer;
 
-      // 2. RAM & Swap Stats
       const meminfo = await execCmd("cat /proc/meminfo 2>/dev/null");
       if (meminfo) {
         const getVal = (key) => {
@@ -1138,129 +1343,27 @@
         const memFree = getVal("MemFree") + getVal("Buffers") + getVal("Cached");
         const memUsed = memTotal - memFree;
         const ramPct = memTotal ? Math.round((memUsed / memTotal) * 100) : 0;
-
         if (memTotal > 0) {
-          document.getElementById("val-ram-usage").innerText = 
-            (memUsed / (1024 * 1024)).toFixed(1) + " GB / " + (memTotal / (1024 * 1024)).toFixed(1) + " GB (" + ramPct + "% used)";
+          document.getElementById("sys-ram").innerText = (memUsed / (1024*1024)).toFixed(1) + " GB / " + (memTotal / (1024*1024)).toFixed(1) + " GB (" + ramPct + "% used)";
         }
-
         const swapTotal = getVal("SwapTotal");
         const swapFree = getVal("SwapFree");
         const swapUsed = swapTotal - swapFree;
-        const swapPct = swapTotal ? Math.round((swapUsed / swapTotal) * 100) : 0;
-
         if (swapTotal > 0) {
-          document.getElementById("val-swap-usage").innerText = 
-            (swapUsed / 1024).toFixed(0) + " MB / " + (swapTotal / 1024).toFixed(0) + " MB (" + swapPct + "% swap used)";
+          document.getElementById("sys-swap").innerText = (swapUsed / 1024).toFixed(0) + " MB / " + (swapTotal / 1024).toFixed(0) + " MB";
         } else {
-          document.getElementById("val-swap-usage").innerText = "0 MB (Swap disabled)";
+          document.getElementById("sys-swap").innerText = "0 MB (Swap disabled)";
         }
       }
 
-      // 2b. ZRAM Compression Algorithm
-      const zramAlgRaw = (await execCmd("cat /sys/block/zram0/comp_algorithm 2>/dev/null")).trim();
-      if (zramAlgRaw) {
-        const match = zramAlgRaw.match(/\[([^\]]+)\]/);
-        const activeAlg = match ? match[1] : "lzo-rle";
-        document.getElementById("val-zram-alg").innerText = activeAlg.toUpperCase() + " (Active) \u2022 [" + zramAlgRaw.replace(/\[|\]/g, "") + "]";
-        selectAlgOption(activeAlg, false);
-      }
-
-      // 3. RAM Plus Setting
-      const ramSizeRaw = (await execCmd("settings get global ram_expand_size 2>/dev/null")).trim();
-      const ramSize = parseInt(ramSizeRaw) || 0;
-      selectRamOption(ramSize);
-      document.getElementById("val-ramplus-config").innerText = 
-        ramSize === 0 ? "Disabled (0 GB - Zero swap lag)" : (ramSize / 1024) + " GB (" + ramSize + " MB)";
-
-      // 4. Daemon Status
-      const daemonPid = (await execCmd("cat /data/adb/modules/samsung_daily_optimizer/daemon.pid 2>/dev/null || cat /data/local/tmp/SamsungDailyOptimizer/daemon.pid 2>/dev/null")).trim();
-      if (daemonPid && !isNaN(parseInt(daemonPid))) {
-        isDaemonRunning = true;
-        document.getElementById("val-daemon-status").innerText = "Active (PID " + daemonPid + " &bull; 5:00 AM Daily)";
-        document.getElementById("main-status-text").innerText = "Working";
-        document.getElementById("action-daemon-title").innerText = "Stop 5:00 AM Daemon";
-        document.getElementById("action-daemon-desc").innerText = "Daemon currently running (PID " + daemonPid + "). Tap to stop.";
-      } else {
-        isDaemonRunning = false;
-        document.getElementById("val-daemon-status").innerText = "Idle (Manual trigger only)";
-        document.getElementById("action-daemon-title").innerText = "Start 5:00 AM Daemon";
-        document.getElementById("action-daemon-desc").innerText = "Schedule automated daily maintenance at 5:00 AM.";
-      }
-
-      // 5. Radio Status
-      const nearby = (await execCmd("settings get system nearby_scanning_enabled 2>/dev/null")).trim();
-      const ble = (await execCmd("settings get global ble_scan_always_enabled 2>/dev/null")).trim();
-      if (nearby === "0" && ble === "0") {
-        document.getElementById("val-radio-status").innerText = "Protected (Nearby & background BLE scanning disabled)";
-      } else {
-        document.getElementById("val-radio-status").innerText = "Scanning active (Nearby: " + nearby + ", BLE: " + ble + ")";
-      }
-
-      // 6. Kernel VFS, Schedstats & Stat Interval
       const vfs = (await execCmd("cat /proc/sys/vm/vfs_cache_pressure 2>/dev/null")).trim();
       const sched = (await execCmd("cat /proc/sys/kernel/sched_schedstats 2>/dev/null")).trim();
-      if (vfs) {
-        document.getElementById("val-vfs-cache").innerText = "vfs_cache_pressure: " + vfs + " \u2022 schedstats: " + (sched === "0" ? "disabled" : "enabled");
-      }
-
-      // 7. Network TCP & BT Snoop Log
-      const tcp = (await execCmd("cat /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null")).trim();
-      const btSnoop = (await execCmd("settings get global bluetooth_btsnoop_default_mode 2>/dev/null")).trim();
-      document.getElementById("val-tcp-status").innerText = "TCP " + (tcp ? tcp.toUpperCase() : "BBR") + " \u2022 BT snoop: " + (btSnoop === "disabled" ? "disabled" : "default");
-
-      // 8. Telemetry Status
-      const diagmon = (await execCmd("am get-standby-bucket com.sec.android.diagmonagent 2>/dev/null")).trim();
-      document.getElementById("val-telemetry-status").innerText = (diagmon === "45" || diagmon.toLowerCase().includes("restricted")) ? "Restricted (Diagmon & Survey Hibernated)" : "Active (Standard)";
-
-      // 9. Display Refresh Rate (LTPO)
-      const minRate = (await execCmd("settings get system min_refresh_rate 2>/dev/null")).trim();
-      const peakRate = (await execCmd("settings get system peak_refresh_rate 2>/dev/null")).trim();
-      if (parseFloat(minRate) >= 120.0) {
-        is120HzLocked = true;
-        document.getElementById("val-refresh-rate").innerText = "120Hz Locked (Zero micro-stutter)";
-        document.getElementById("action-refresh-title").innerText = "Restore Dynamic LTPO (1-120Hz)";
-        document.getElementById("action-refresh-desc").innerText = "Currently locked at 120Hz. Tap to restore variable refresh rate.";
-      } else {
-        is120HzLocked = false;
-        document.getElementById("val-refresh-rate").innerText = (minRate ? minRate + "Hz" : "1Hz") + " - " + (peakRate ? peakRate + "Hz" : "120Hz") + " (Dynamic LTPO)";
-        document.getElementById("action-refresh-title").innerText = "Lock 120Hz Smooth Scroll";
-        document.getElementById("action-refresh-desc").innerText = "Forces 120Hz minimum refresh rate to eliminate scrolling micro-stutters.";
-      }
-
-      // 10. Battery & Power Routing (Bypass Charging)
-      const battInfo = await execCmd("dumpsys battery 2>/dev/null");
-      const slate = (await execCmd("cat /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || cat /sys/class/power_supply/battery/charging_enabled 2>/dev/null")).trim();
-      if (battInfo) {
-        const mLevel = battInfo.match(/level:\s*(\d+)/);
-        const mUsb = battInfo.match(/USB powered:\s*(true|false)/i);
-        const mAc = battInfo.match(/AC powered:\s*(true|false)/i);
-        const level = mLevel ? mLevel[1] + "%" : "--%";
-        const plugged = (mUsb && mUsb[1] === "true") || (mAc && mAc[1] === "true");
-
-        isBypassActive = (slate === "1");
-
-        let statusText = level;
-        if (isBypassActive) {
-          statusText += " \u2022 Bypass Charging Active (Desk Mode)";
-          document.getElementById("action-bypass-title").innerText = "Resume Normal Charging";
-          document.getElementById("action-bypass-desc").innerText = "Bypass active (device running off charger). Tap to charge battery.";
-        } else if (plugged) {
-          statusText += " \u2022 Charging (Plugged In)";
-          document.getElementById("action-bypass-title").innerText = "Bypass Charging (Desk Mode)";
-          document.getElementById("action-bypass-desc").innerText = "Power phone directly from charger without charging battery to stop heat.";
-        } else {
-          statusText += " \u2022 Discharging (Battery Power)";
-          document.getElementById("action-bypass-title").innerText = "Bypass Charging (Requires Charger)";
-          document.getElementById("action-bypass-desc").innerText = "Connect USB-C charger to enable bypass wall power mode.";
-        }
-        document.getElementById("val-battery-status").innerText = statusText;
-      }
+      if (vfs) document.getElementById("sys-vfs").innerText = "vfs_cache_pressure: " + vfs + " • schedstats: " + (sched === "0" ? "disabled" : "enabled");
     }
 
     // Initial Load & polling
     refreshData();
-    setInterval(refreshData, 4000);
+    setInterval(refreshData, 3500);
   </script>
 </body>
 </html>
