@@ -623,7 +623,7 @@
 
   <!-- Home Up Action Row (< Back and ⋮ Settings) -->
   <div class="nav-action-row">
-    <button class="icon-btn" onclick="haptic(15); window.history.back()" aria-label="Back">
+    <button class="icon-btn" onclick="handleBack()" aria-label="Back">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <button class="icon-btn" onclick="haptic(15); openSystemSheet()" aria-label="Settings">
@@ -1022,6 +1022,42 @@
         try {
           window.navigator.vibrate(ms);
         } catch (e) {}
+      }
+    }
+
+    // Close / Back Navigation Handler
+    async function handleBack() {
+      haptic(15);
+      
+      // 1. If any modal bottom sheet is open, close it first (native One UI behavior)
+      const openSheet = document.querySelector('.sheet-scrim.open');
+      if (openSheet) {
+        closeSheets();
+        return;
+      }
+
+      // 2. Try KernelSU's native WebUI exit API
+      if (window.ksu && typeof window.ksu.exit === 'function') {
+        try {
+          window.ksu.exit();
+          return;
+        } catch (e) {}
+      }
+
+      // 3. Try standard window.close()
+      try { window.close(); } catch (e) {}
+
+      // 4. Simulate Android system Back keypress via root shell
+      if (window.ksu && window.ksu.exec) {
+        try {
+          await execCmd("input keyevent 4");
+          return;
+        } catch (e) {}
+      }
+
+      // 5. Fallback for standard browser tabs
+      if (window.history.length > 1) {
+        window.history.back();
       }
     }
 
