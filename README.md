@@ -63,7 +63,7 @@ Samsung's "RAM Plus" uses your phone's storage flash drive as extra memory. Beca
 **No.** Vertex does not stay running heavy tasks in the background. It schedules a quick 3-second cleanup at 5:00 AM, and if you are using your phone, it politely waits until the screen turns off. Hibernating Samsung diagnostic background trackers often *improves* standby battery life.
 
 ### Which devices are supported?
-All modern Samsung Galaxy devices running **One UI 5, 6, 6.1, or 7** (Galaxy S24, S23, S22, S21, Z Fold, Z Flip, A-series, and Galaxy Tabs).
+All modern Samsung Galaxy devices running **Any One Ui Version** (Galaxy S24, S23, S22, S21, Z Fold, Z Flip, A-series, and Galaxy Tabs).
 
 ---
 
