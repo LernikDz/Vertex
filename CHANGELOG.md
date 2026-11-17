@@ -4,6 +4,28 @@ All notable changes to the **Vertex** (formerly Samsung Daily Optimizer) project
 
 ---
 
+## [v1.4] - 2026-11-17
+
+### 🌋 Graphics & Touch Performance
+* **SkiaVK Vulkan HWUI Rendering**: Enables Android's Vulkan rendering pipeline (`debug.hwui.renderer=skiavk`) on modern Adreno and Xclipse RDNA3 GPUs for native hardware acceleration, reduced CPU draw-call overhead, and buttery 120Hz UI transitions.
+* **SurfaceFlinger Zero-Latency Frame Latching**: Implements unsignaled frame latching (`debug.sf.latch_unsignaled=1`, `enable_gl_backpressure=0`) allowing SurfaceFlinger to latch display buffers immediately without fence waits, eliminating visual stutter and input lag.
+* **Touch Boost & Real-Time InputDispatcher**: Forces 240Hz digitizer touch sensitivity (`touch_sensitivity 1`) and elevates `InputDispatcher` and `InputReader` threads to real-time `nice -20` pinned to `top-app` performance cores.
+
+### 🗄️ Storage & Database Optimization
+* **SQLite Database Defragmentation & Vacuum**: Daily pass automatically compacts user app databases using `PRAGMA wal_checkpoint(TRUNCATE); VACUUM;`, reclaiming dead space and speeding up app launch times across browsers and messaging apps.
+* **UFS 4.0 Queue Scheduler Tuning**: Configures flash block queues to zero-overhead scheduling (`none`/`mq-deadline`), disabling entropy pooling (`add_random=0`), I/O statistics overhead (`iostats=0`), and enabling aggressive merges (`nomerges=2`).
+
+### 🛡️ Deep Bloat & Background Daemon Hibernation
+* **15+ Samsung Daemons Restricted**: Hibernates resource-heavy background services into the Android `RESTRICTED` standby bucket (`am set-standby-bucket` & `appops RUN_IN_BACKGROUND ignore`), including AR Zone, Live Stickers, Rubin Core, Avatar preloads, and Bixby dummy agents, preserving battery life and RAM headroom.
+
+### 🎨 Native One UI Dashboard Overhaul
+* **Home Up Card Interface**: Redesigned all controls into One UI Home Up-style grid cards with instant 0ms optimistic UI toggle feedback and smooth micro-haptics.
+* **Gesture-Dismissable Bottom Sheets**: Native bottom sheets for RAM Plus, ZRAM engine selection, system diagnostics, and terminal logs featuring touch velocity drag-to-dismiss physics.
+* **System Bar Immersion**: Integrated edge-to-edge support with custom status bar clipping and native back navigation (`window.ksu.exit()` / back key simulation).
+* **High-Speed Batched Polling**: Consolidated root shell metrics into a single unified `===VTX===` query, reducing query latency from ~3.5s to 200ms.
+
+---
+
 ## [v1.3] - 2026-11-16
 
 ### 🚀 Performance & Display

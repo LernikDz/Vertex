@@ -37,11 +37,17 @@ ENABLE_TCP_BBR="${ENABLE_TCP_BBR:-1}"
 DISABLE_BT_SNOOP_LOG="${DISABLE_BT_SNOOP_LOG:-1}"
 TUNE_WIFI_SLEEP="${TUNE_WIFI_SLEEP:-1}"
 RESTRICT_SAMSUNG_TELEMETRY="${RESTRICT_SAMSUNG_TELEMETRY:-1}"
+DEEP_BLOAT_HIBERNATION="${DEEP_BLOAT_HIBERNATION:-1}"
 BOOST_AUDIO_PRIORITY="${BOOST_AUDIO_PRIORITY:-1}"
 PREVENT_LOCKSCREEN_AUDIO_STUTTER="${PREVENT_LOCKSCREEN_AUDIO_STUTTER:-1}"
 TUNE_ZRAM_ALGORITHM="${TUNE_ZRAM_ALGORITHM:-1}"
 ZRAM_COMP_ALGORITHM="${ZRAM_COMP_ALGORITHM:-zstd}"
 FORCE_120HZ_REFRESH="${FORCE_120HZ_REFRESH:-0}"
+VULKAN_UI_ENABLED="${VULKAN_UI_ENABLED:-1}"
+SF_ZERO_LATENCY_LATCHING="${SF_ZERO_LATENCY_LATCHING:-1}"
+TUNE_UFS_SCHEDULER="${TUNE_UFS_SCHEDULER:-1}"
+SQLITE_VACUUM_ENABLED="${SQLITE_VACUUM_ENABLED:-1}"
+TOUCH_BOOST_ENABLED="${TOUCH_BOOST_ENABLED:-1}"
 
 # Notification helpers (Live NowBar / Dynamic Island notification while running, static on finish)
 notify_live() {
@@ -114,15 +120,31 @@ if [ "$TUNE_SWAPPINESS" = "1" ]; then
     fi
 fi
 
-# 3. Flash Storage Read-Ahead
+# 3. Flash Storage Read-Ahead & UFS 4.0 Scheduler Tuning
 if [ "$TUNE_READ_AHEAD" = "1" ]; then
     log "Optimizing flash storage read-ahead queue..."
-    for q in /sys/block/sd*/queue/read_ahead_kb; do
+    for q in /sys/block/sd*/queue/read_ahead_kb /sys/block/nvme*/queue/read_ahead_kb; do
         if [ -w "$q" ]; then
             echo "$READ_AHEAD_KB" > "$q" 2>/dev/null
         fi
     done
     log "  [OK] Block read-ahead set to ${READ_AHEAD_KB} KB"
+fi
+
+if [ "$TUNE_UFS_SCHEDULER" = "1" ]; then
+    log "Optimizing UFS storage queue schedulers & merge limits..."
+    for q in /sys/block/sd*/queue /sys/block/nvme*/queue; do
+        [ -d "$q" ] || continue
+        if grep -q "none" "$q/scheduler" 2>/dev/null; then
+            echo "none" > "$q/scheduler" 2>/dev/null
+        elif grep -q "mq-deadline" "$q/scheduler" 2>/dev/null; then
+            echo "mq-deadline" > "$q/scheduler" 2>/dev/null
+        fi
+        [ -w "$q/nomerges" ] && echo 2 > "$q/nomerges" 2>/dev/null
+        [ -w "$q/add_random" ] && echo 0 > "$q/add_random" 2>/dev/null
+        [ -w "$q/iostats" ] && echo 0 > "$q/iostats" 2>/dev/null
+    done
+    log "  [OK] UFS I/O scheduler set to zero-overhead queueing"
 fi
 
 # 4. Wireless & Audio Stability (Reduce 2.4GHz interference)
@@ -173,16 +195,16 @@ if [ "$ENHANCED_CPU_RESPONSIVENESS" = "1" ]; then
     settings put global sem_enhanced_cpu_responsiveness 1 2>/dev/null && log "  [OK] Enhanced CPU responsiveness enabled"
 fi
 
-# 6. Samsung Diagnostics & Telemetry Hibernation
-if [ "$RESTRICT_SAMSUNG_TELEMETRY" = "1" ]; then
-    log "Restricting Samsung diagnostic and telemetry services..."
-    notify_live "🛡️ Restricting Samsung diagnostic & telemetry services..."
-    TELEMETRY_PKGS="com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence"
-    for tpkg in $TELEMETRY_PKGS; do
-        if pm list packages 2>/dev/null | grep -q "$tpkg"; then
-            am set-standby-bucket "$tpkg" restricted 2>/dev/null
-            cmd appops set "$tpkg" RUN_IN_BACKGROUND ignore 2>/dev/null
-            log "  [RESTRICTED] $tpkg placed into restricted standby"
+# 6. Samsung Diagnostics, AR Zone & Bloat Deep Hibernation
+if [ "$RESTRICT_SAMSUNG_TELEMETRY" = "1" ] || [ "$DEEP_BLOAT_HIBERNATION" = "1" ]; then
+    log "Restricting Samsung diagnostic, AR Zone, and bloat services..."
+    notify_live "🛡️ Hibernating Samsung diagnostic & background bloat daemons..."
+    BLOAT_PKGS="com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence com.samsung.android.visionarapps com.samsung.android.aremoji com.samsung.android.aremojieditor com.samsung.android.livestickers com.samsung.android.stickercenter com.samsung.android.app.camera.sticker.facearavatar.preload com.samsung.android.rubin.app com.samsung.android.kidsinstaller com.sec.android.app.billing com.samsung.android.spaymini com.samsung.android.bixby.agent.dummy"
+    for bpkg in $BLOAT_PKGS; do
+        if pm list packages 2>/dev/null | grep -q "$bpkg"; then
+            am set-standby-bucket "$bpkg" restricted 2>/dev/null
+            cmd appops set "$bpkg" RUN_IN_BACKGROUND ignore 2>/dev/null
+            log "  [RESTRICTED] $bpkg placed into restricted standby"
         fi
     done
 fi
@@ -287,6 +309,62 @@ if [ "$FORCE_120HZ_REFRESH" = "1" ]; then
     settings put system min_refresh_rate 120.0 2>/dev/null
     settings put system peak_refresh_rate 120.0 2>/dev/null
     log "  [OK] Display minimum refresh rate locked to 120Hz (zero micro-stutter)"
+fi
+
+# 13. Vulkan Skia UI & SurfaceFlinger Zero-Latency Frame Latching
+if [ "$VULKAN_UI_ENABLED" = "1" ]; then
+    setprop debug.hwui.renderer skiavk
+    log "  [OK] HWUI UI renderer set to SkiaVK (Vulkan hardware acceleration)"
+fi
+if [ "$SF_ZERO_LATENCY_LATCHING" = "1" ]; then
+    setprop debug.sf.latch_unsignaled 1
+    setprop debug.sf.enable_gl_backpressure 0
+    setprop debug.sf.early_phase_offset_ns 500000
+    setprop debug.sf.early_app_phase_offset_ns 500000
+    log "  [OK] SurfaceFlinger unsignaled frame latching enabled (zero input lag)"
+fi
+
+# 14. Touch Digitizer Sampling Boost & InputDispatcher Real-Time Scheduling
+if [ "$TOUCH_BOOST_ENABLED" = "1" ]; then
+    settings put system touch_sensitivity 1 2>/dev/null
+    for spid in $(pidof system_server 2>/dev/null); do
+        if [ -d "/proc/$spid/task" ]; then
+            for tid in /proc/"$spid"/task/*; do
+                t_comm=$(cat "$tid/comm" 2>/dev/null)
+                case "$t_comm" in
+                    *InputDispatcher*|*InputReader*)
+                        t_num=$(basename "$tid")
+                        renice -n -20 -p "$t_num" >/dev/null 2>&1
+                        taskset -p -c 4-9 "$t_num" >/dev/null 2>&1 || taskset -p 0x3f0 "$t_num" >/dev/null 2>&1
+                        [ -d /dev/cpuset/top-app ] && echo "$t_num" > /dev/cpuset/top-app/tasks 2>/dev/null
+                        ;;
+                esac
+            done
+        fi
+    done
+    log "  [OK] Touch sensitivity boosted & InputDispatcher prioritized"
+fi
+
+# 15. SQLite Database Defragmentation & Vacuum Pass
+if [ "$SQLITE_VACUUM_ENABLED" = "1" ]; then
+    SQLITE_BIN=""
+    for bin in /system/bin/sqlite3 /system/xbin/sqlite3 /apex/com.android.runtime/bin/sqlite3 /data/adb/ksu/bin/sqlite3 /data/adb/magisk/sqlite3; do
+        if [ -x "$bin" ]; then
+            SQLITE_BIN="$bin"
+            break
+        fi
+    done
+    if [ -n "$SQLITE_BIN" ]; then
+        log "Defragmenting & vacuuming user app SQLite databases with $SQLITE_BIN..."
+        notify_live "🗄️ Defragmenting SQLite databases..."
+        COUNT=0
+        for db in $(find /data/data -maxdepth 4 -name "*.db" -type f 2>/dev/null | grep -v -E "google\.android\.gms|telephony\.registry"); do
+            "$SQLITE_BIN" "$db" "PRAGMA wal_checkpoint(TRUNCATE); VACUUM;" >/dev/null 2>&1 && COUNT=$((COUNT + 1))
+        done
+        log "  [OK] Defragmented $COUNT SQLite databases (dead indexes cleared & pages compacted)"
+    else
+        log "  [INFO] sqlite3 binary not found in standard system paths, skipping database vacuum"
+    fi
 fi
 
 log "======================================================"

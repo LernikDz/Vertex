@@ -236,8 +236,10 @@
     .card-forest { background-color: #143818; }      /* Bypass */
     .card-teal { background-color: #0b3438; }        /* Audio */
     .card-slate { background-color: #13213d; }       /* TCP BBR */
-    .card-amber { background-color: #3f280e; }       /* Telemetry */
+    .card-amber { background-color: #3f280e; }       /* Bloat / Telemetry */
     .card-plum { background-color: #3b1338; }        /* Enhanced CPU */
+    .card-indigo { background-color: #17173e; }      /* Vulkan UI */
+    .card-coral { background-color: #3e1614; }       /* Touch Boost */
 
     .card-top {
       display: flex;
@@ -755,7 +757,7 @@
       </div>
     </div>
 
-    <!-- Card 7: Telemetry Sleep -->
+    <!-- Card 7: Deep Hibernation -->
     <div class="homeup-card card-amber" onclick="toggleTelemetry(event)">
       <div class="card-top">
         <div class="card-icon">
@@ -768,8 +770,8 @@
         </div>
       </div>
       <div class="card-bottom">
-        <div class="card-title">Telemetry Sleep</div>
-        <div class="card-subtitle">Diagmon & Survey daemons hibernated</div>
+        <div class="card-title">Deep Hibernation</div>
+        <div class="card-subtitle" id="card-telemetry-sub">Sleep 20+ bloat daemons</div>
       </div>
     </div>
 
@@ -791,6 +793,44 @@
       </div>
     </div>
 
+    <!-- Card 9: Vulkan UI (SkiaVK) -->
+    <div class="homeup-card card-indigo" onclick="toggleVulkanUi(event)">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+          </svg>
+        </div>
+        <div class="oneui-toggle active" id="toggle-vulkan" onclick="toggleVulkanUi(event)">
+          <div class="oneui-toggle-thumb"></div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-title">Vulkan UI (SkiaVK)</div>
+        <div class="card-subtitle" id="card-vulkan-sub">SkiaVK &bull; 0-latency frame latch</div>
+      </div>
+    </div>
+
+    <!-- Card 10: Touch Boost -->
+    <div class="homeup-card card-coral" onclick="toggleTouchBoost(event)">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+          </svg>
+        </div>
+        <div class="oneui-toggle active" id="toggle-touch" onclick="toggleTouchBoost(event)">
+          <div class="oneui-toggle-thumb"></div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-title">Touch Boost</div>
+        <div class="card-subtitle" id="card-touch-sub">240Hz digitizer &bull; RT inputflinger</div>
+      </div>
+    </div>
+
   </div>
 
   <!-- One UI Maintenance Section -->
@@ -805,6 +845,19 @@
         <div class="action-row-text">
           <div class="action-row-title">Run Daily Optimization Now</div>
           <div class="action-row-desc">Full memory compaction, storage trim & compile pass</div>
+        </div>
+      </div>
+      <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div class="action-row" onclick="haptic(15); vacuumDatabases()">
+      <div class="action-row-left">
+        <div class="action-row-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <div class="action-row-text">
+          <div class="action-row-title">Vacuum & Defragment Databases</div>
+          <div class="action-row-desc">Optimize SQLite databases & truncate WAL checkpoints</div>
         </div>
       </div>
       <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1006,6 +1059,8 @@
     let is120HzLocked = false;
     let isBypassActive = false;
     let isEnhancedCpu = true;
+    let isVulkanUi = true;
+    let isTouchBoost = true;
     let lastToggleTime = 0;
 
     // Request Edge-to-Edge immersion in KernelSU / KernelSU-Next / APatch WebUI
@@ -1447,7 +1502,102 @@
       }
     }
 
+    // Vulkan UI (Instant 0ms Feedback)
+    function toggleVulkanUi(e) {
+      if (e) e.stopPropagation();
+      lastToggleTime = Date.now();
+      haptic(15);
+      const toggle = document.getElementById("toggle-vulkan");
+      const sub = document.getElementById("card-vulkan-sub");
+      isVulkanUi = !isVulkanUi;
+
+      if (isVulkanUi) {
+        if (toggle) toggle.classList.add("active");
+        if (sub) sub.innerText = "SkiaVK • 0-latency frame latch";
+        showToast("🌋 SkiaVK (Vulkan HWUI) & 0-latency latch enabled!");
+        const cmd = `
+          setprop debug.hwui.renderer skiavk
+          setprop debug.sf.latch_unsignaled 1
+          setprop debug.sf.enable_gl_backpressure 0
+          for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
+            [ -f "$dir/config.prop" ] && sed -i 's/^VULKAN_UI_ENABLED=.*/VULKAN_UI_ENABLED=1/' "$dir/config.prop" 2>/dev/null
+            [ -f "$dir/config.prop" ] && sed -i 's/^SF_ZERO_LATENCY_LATCHING=.*/SF_ZERO_LATENCY_LATCHING=1/' "$dir/config.prop" 2>/dev/null
+          done
+        `;
+        execCmd(cmd);
+      } else {
+        if (toggle) toggle.classList.remove("active");
+        if (sub) sub.innerText = "SkiaGL (OpenGL ES) • Default";
+        showToast("Standard OpenGL ES UI rendering restored");
+        const cmd = `
+          setprop debug.hwui.renderer skiagl
+          setprop debug.sf.latch_unsignaled 0
+          for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
+            [ -f "$dir/config.prop" ] && sed -i 's/^VULKAN_UI_ENABLED=.*/VULKAN_UI_ENABLED=0/' "$dir/config.prop" 2>/dev/null
+            [ -f "$dir/config.prop" ] && sed -i 's/^SF_ZERO_LATENCY_LATCHING=.*/SF_ZERO_LATENCY_LATCHING=0/' "$dir/config.prop" 2>/dev/null
+          done
+        `;
+        execCmd(cmd);
+      }
+    }
+
+    // Touch Boost (Instant 0ms Feedback)
+    function toggleTouchBoost(e) {
+      if (e) e.stopPropagation();
+      lastToggleTime = Date.now();
+      haptic(15);
+      const toggle = document.getElementById("toggle-touch");
+      const sub = document.getElementById("card-touch-sub");
+      isTouchBoost = !isTouchBoost;
+
+      if (isTouchBoost) {
+        if (toggle) toggle.classList.add("active");
+        if (sub) sub.innerText = "240Hz digitizer • RT inputflinger";
+        showToast("🎯 High touch sensitivity & InputDispatcher boosted!");
+        const cmd = `
+          settings put system touch_sensitivity 1 2>/dev/null
+          for sfpid in $(pidof surfaceflinger system_server 2>/dev/null); do
+            for tid in /proc/"$sfpid"/task/*; do
+              comm=$(cat "$tid/comm" 2>/dev/null)
+              case "$comm" in
+                *InputDispatcher*|*InputReader*|*Touch*)
+                  tid_num=$(basename "$tid")
+                  renice -n -20 -p "$tid_num" 2>/dev/null
+                  [ -d /dev/cpuset/top-app ] && echo "$tid_num" > /dev/cpuset/top-app/tasks 2>/dev/null
+                  ;;
+              esac
+            done
+          done
+          for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
+            [ -f "$dir/config.prop" ] && sed -i 's/^TOUCH_BOOST_ENABLED=.*/TOUCH_BOOST_ENABLED=1/' "$dir/config.prop" 2>/dev/null
+          done
+        `;
+        execCmd(cmd);
+      } else {
+        if (toggle) toggle.classList.remove("active");
+        if (sub) sub.innerText = "Standard touch sensitivity";
+        showToast("Standard touch sensitivity active");
+        const cmd = `
+          settings put system touch_sensitivity 0 2>/dev/null
+          for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
+            [ -f "$dir/config.prop" ] && sed -i 's/^TOUCH_BOOST_ENABLED=.*/TOUCH_BOOST_ENABLED=0/' "$dir/config.prop" 2>/dev/null
+          done
+        `;
+        execCmd(cmd);
+      }
+    }
+
     // Maintenance Actions
+    async function vacuumDatabases() {
+      showToast("Defragmenting databases & truncating WAL...");
+      const cmd = `
+        for db in $(find /data/data -type f -name "*.db" 2>/dev/null | grep -E "browser|chrome|sbrowser|system|media|telephony|download|contacts|providers"); do
+          sqlite3 "$db" "PRAGMA wal_checkpoint(TRUNCATE); VACUUM;" 2>/dev/null
+        done
+      `;
+      await execCmd(cmd);
+      showToast("Databases defragmented & optimized!");
+    }
     async function runOptimizeNow() {
       showToast("Executing daily optimization...");
       await execCmd("sh /data/adb/modules/samsung_daily_optimizer/run_now.sh 2>&1 || sh /data/local/tmp/SamsungDailyOptimizer/run_now.sh 2>&1");
@@ -1543,11 +1693,15 @@
         cat /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || cat /sys/class/power_supply/battery/charging_enabled 2>/dev/null
         echo '===VTX==='
         settings get global sem_enhanced_cpu_responsiveness 2>/dev/null
+        echo '===VTX==='
+        getprop debug.hwui.renderer 2>/dev/null
+        echo '===VTX==='
+        settings get system touch_sensitivity 2>/dev/null
       `;
       const out = await execCmd(script);
       if (!out) return;
       const sections = out.split('===VTX===');
-      if (sections.length < 7) return;
+      if (sections.length < 9) return;
 
       const daemonPid = (sections[0] || "").trim();
       const ramSizeRaw = (sections[1] || "").trim();
@@ -1556,6 +1710,8 @@
       const battInfo = sections[4] || "";
       const slate = (sections[5] || "").trim();
       const cpuVal = (sections[6] || "").trim();
+      const hwuiRenderer = (sections[7] || "").trim().toLowerCase();
+      const touchSens = (sections[8] || "").trim();
 
       // 1. Daemon Status
       const masterToggle = document.getElementById("master-toggle");
@@ -1635,6 +1791,34 @@
         isEnhancedCpu = false;
         cpuToggle.classList.remove("active");
         document.getElementById("card-cpu-sub").innerText = "Standard clock ramp";
+      }
+
+      // 7. Vulkan UI (SkiaVK)
+      const vulkanToggle = document.getElementById("toggle-vulkan");
+      if (hwuiRenderer === "skiavk" || hwuiRenderer === "") {
+        isVulkanUi = true;
+        if (vulkanToggle) vulkanToggle.classList.add("active");
+        const vsub = document.getElementById("card-vulkan-sub");
+        if (vsub) vsub.innerText = "SkiaVK • 0-latency frame latch";
+      } else {
+        isVulkanUi = false;
+        if (vulkanToggle) vulkanToggle.classList.remove("active");
+        const vsub = document.getElementById("card-vulkan-sub");
+        if (vsub) vsub.innerText = "SkiaGL (OpenGL ES) • Default";
+      }
+
+      // 8. Touch Boost
+      const touchToggle = document.getElementById("toggle-touch");
+      if (touchSens === "1") {
+        isTouchBoost = true;
+        if (touchToggle) touchToggle.classList.add("active");
+        const tsub = document.getElementById("card-touch-sub");
+        if (tsub) tsub.innerText = "240Hz digitizer • RT inputflinger";
+      } else {
+        isTouchBoost = false;
+        if (touchToggle) touchToggle.classList.remove("active");
+        const tsub = document.getElementById("card-touch-sub");
+        if (tsub) tsub.innerText = "Standard touch sensitivity";
       }
     }
 

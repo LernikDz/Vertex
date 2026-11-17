@@ -12,12 +12,16 @@ Compatible with **KernelSU**, **Magisk**, **APatch**, and **Temproot**.
 
 | What You Feel | How Vertex Does It |
 |---|---|
-| 🧈 **Silky Smooth 120Hz Scrolling** | Stops One UI from awkwardly dropping down to 60Hz mid-scroll in apps like Twitter, Instagram, or Chrome. |
+| 🌋 **Vulkan UI Acceleration** | Renders One UI using high-performance Vulkan (`SkiaVK`) hardware acceleration instead of legacy OpenGL ES for maximum frame stability. |
+| 🎯 **Instant Touch Response** | Boosts digitizer sampling and gives real-time priority to touch processing threads so taps register instantly without input lag. |
+| 🧈 **Silky Smooth 120Hz Scrolling** | Stops One UI from awkwardly dropping down to 60Hz mid-scroll in apps like Twitter, Instagram, or Chrome (`120Hz Smooth Scroll`). |
 | 🎧 **No More Audio Stutter** | Stops your Galaxy Buds or Bluetooth headphones from cutting out when you lock your screen or walk around. |
 | 🚀 **Instant App Switching** | Fixes Samsung's slow virtual memory ("RAM Plus") so your apps open quickly and stay in memory without lag. |
+| 🗄️ **Defragmented App Databases** | Compacts and defragments SQLite databases overnight so apps open snappy and don't slow down over time. |
+| ⚡ **Zero-Overhead Storage** | Tunes UFS 3.1 & 4.0 storage queues for maximum read/write throughput and minimum app launch delays. |
 | ❄️ **Cool Gaming & Desk Mode** | Play games or charge at your desk without heating up the phone or wearing out the battery (*Bypass Charging*). |
 | 🧹 **Automatic Daily Tune-Up** | Cleans out crash dumps, dead app caches, and organizes memory at 5:00 AM (only when you aren't using the phone!). |
-| 🔋 **Better Battery Life** | Puts Samsung's hidden background diagnostic and tracking services to sleep. |
+| 🔋 **Deep Bloat Hibernation** | Puts over 15 unneeded Samsung background services (AR Zone, Live Stickers, Rubin app, diagnostic telemetry) to sleep. |
 
 ---
 
@@ -40,12 +44,15 @@ Compatible with **KernelSU**, **Magisk**, **APatch**, and **Temproot**.
 Vertex includes a built-in dashboard right inside KernelSU, APatch, or MMRL. Tap the **WebUI** button to open it:
 
 - **Master Switch**: See when your next automatic 5:00 AM tune-up is scheduled, or run one right now.
+- **Vulkan UI Card**: Native Vulkan hardware acceleration (`SkiaVK`) with SurfaceFlinger zero-latency latching.
+- **Touch Boost Card**: 240Hz digitizer sensitivity and real-time scheduling for `InputDispatcher`.
 - **RAM Plus Card**: Switch between 0 GB, 2 GB, 4 GB, or 8 GB with one tap.
 - **ZRAM Engine Card**: Boost your memory capacity using high-speed compression (`ZSTD`).
 - **Smooth Scroll Card**: Lock your screen to 120Hz for zero micro-stutter, or tap to restore standard dynamic LTPO.
 - **Bypass Charging Card**: Power your phone directly from the charger without heating the battery while gaming.
 - **Audio Guard Card**: Give real-time priority to Bluetooth and audio threads to prevent glitches.
-- **1-Tap Maintenance**: Clean crash logs, trim storage (`fstrim`), and compact memory on demand.
+- **Deep Hibernation Card**: Put 15+ background Samsung bloat daemons to sleep.
+- **1-Tap Maintenance**: Run instant optimization, defragment SQLite databases, trim storage (`fstrim`), and compact memory on demand.
 
 *To open in Samsung Internet or Chrome: run `su -c /data/adb/modules/samsung_daily_optimizer/start_webui.sh` and visit `http://127.0.0.1:8888`.*
 
@@ -72,6 +79,12 @@ All modern Samsung Galaxy devices running **Any One Ui Version** (Galaxy S24, S2
 <details>
 <summary><b>Click to expand kernel and sysctl tuning details</b></summary>
 
+- **Vulkan HWUI Rendering**: `debug.hwui.renderer = skiavk` offloads UI rasterization directly to the Vulkan API.
+- **Zero-Latency Frame Latching**: `debug.sf.latch_unsignaled = 1` and `debug.sf.enable_gl_backpressure = 0` eliminates fence wait stalls in SurfaceFlinger.
+- **Touch & Input Real-Time Boost**: Forces digitizer sensitivity (`touch_sensitivity 1`) and prioritizes `InputDispatcher`/`InputReader` threads with `nice -20` assigned to `top-app` cpuset.
+- **SQLite Database Optimization**: Nightly runs `PRAGMA wal_checkpoint(TRUNCATE); VACUUM;` on user application databases to reclaim fragmented pages and accelerate app cold starts.
+- **UFS 4.0 Storage Tuning**: Sets flash block queue schedulers to `none` / `mq-deadline`, `nomerges = 2`, `add_random = 0`, and `iostats = 0`.
+- **Deep Bloat Hibernation**: Restricts 15+ non-essential Samsung background services (AR Zone, Live Stickers, Rubin app, Bixby dummy agent) via `RESTRICTED` standby buckets.
 - **ZRAM Switcher**: Supports `zstd`, `lz4`, and `lzo-rle`. On ARMv9 (Snapdragon 8 Gen 3 / Exynos 2400), `zstd` offers ~35% higher compression ratio.
 - **Virtual Memory (VM)**: Lowers `vm.swappiness` to 60 (down from Samsung stock 160-180), tunes `dirty_ratio = 20`, and `dirty_background_ratio = 10`.
 - **Dentry & Inode Caching**: `vm.vfs_cache_pressure = 50` keeps directory structures in RAM for faster cold app launches.

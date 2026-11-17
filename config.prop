@@ -1,4 +1,4 @@
-# Vertex Configuration (formerly Samsung Daily Optimizer)
+# Vertex Configuration (v1.4)
 # Set RAM_PLUS_ENABLED=0 or RAM_PLUS_SIZE=0 to disable RAM Plus completely.
 # Set RAM_PLUS_SIZE=2048 for 2GB, 4096 for 4GB, 8192 for 8GB.
 RAM_PLUS_ENABLED=1
@@ -47,8 +47,9 @@ DISABLE_BT_SNOOP_LOG=1
 # Wi-Fi Sleep Policy (2 = never sleep during screen-off audio streaming)
 TUNE_WIFI_SLEEP=1
 
-# Samsung Diagnostics & Telemetry Hibernation (Puts diagmon & survey daemons into restricted standby)
+# Samsung Diagnostics, AR Zone & Bloat Hibernation (Restricts background services to save battery)
 RESTRICT_SAMSUNG_TELEMETRY=1
+DEEP_BLOAT_HIBERNATION=1
 
 # Audio & Bluetooth Real-Time Scheduling (nice -16 + top-app cpuset to prevent L/R earbud desync)
 BOOST_AUDIO_PRIORITY=1
@@ -65,3 +66,16 @@ FORCE_120HZ_REFRESH=0
 
 # Smart Screen-Off / Idle Aware Daemon (1 = wait until screen is off/idle before running 5 AM pass)
 SMART_SCREEN_AWARE=1
+
+# Vulkan Skia UI Renderer & SurfaceFlinger Zero-Latency Latching (1 = SkiaVK + unsignaled frame latch)
+VULKAN_UI_ENABLED=1
+SF_ZERO_LATENCY_LATCHING=1
+
+# UFS 4.0 Storage I/O Scheduler & Queue Tuning (Sets zero-overhead scheduler 'none' or 'mq-deadline')
+TUNE_UFS_SCHEDULER=1
+
+# SQLite Database Defragmentation & Vacuum (Clean fragmented app databases during daily pass)
+SQLITE_VACUUM_ENABLED=1
+
+# Touch Digitizer Sensitivity & InputDispatcher Real-Time Boost (240Hz High Sampling Rate)
+TOUCH_BOOST_ENABLED=1
