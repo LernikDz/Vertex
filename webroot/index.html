@@ -273,6 +273,112 @@
       opacity: 1;
     }
 
+    /* Material 3 Confirmation Dialog / Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-dialog {
+      background: #1e1e22;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 28px;
+      padding: 24px;
+      max-width: 380px;
+      width: 100%;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65);
+      transform: scale(0.92);
+      transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .modal-overlay.open .modal-dialog {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .modal-icon {
+      width: 28px;
+      height: 28px;
+      color: #f2b8b5;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .modal-body {
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      border: none;
+      border-radius: 20px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      text-align: center;
+    }
+
+    .modal-btn-primary {
+      background: var(--status-bg);
+      color: var(--text-primary);
+    }
+
+    .modal-btn-danger {
+      background: rgba(242, 184, 181, 0.12);
+      color: #f2b8b5;
+      border: 1px solid rgba(242, 184, 181, 0.28);
+    }
+
+    .modal-btn-cancel {
+      background: transparent;
+      color: var(--text-secondary);
+    }
+
+    .modal-btn:active {
+      opacity: 0.8;
+    }
+
     /* Bottom Navigation Bar (Material 3) */
     .bottom-nav {
       position: fixed;
@@ -517,7 +623,7 @@
           </div>
         </div>
 
-        <button class="m3-button" onclick="applyAlgSetting()">Switch ZRAM Engine</button>
+        <button class="m3-button" onclick="confirmSwitchEngine()">Switch ZRAM Engine</button>
       </div>
 
       <div class="details-card">
@@ -632,6 +738,30 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- Material 3 Confirmation Dialog / Sheet -->
+  <div class="modal-overlay" id="confirm-modal" onclick="closeConfirmModal(event)">
+    <div class="modal-dialog" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <h3 class="modal-title" id="modal-title">Switch ZRAM Engine?</h3>
+      </div>
+      <div class="modal-body" id="modal-body">
+        Changing the active compression algorithm requires flushing ZRAM swap space (<code>swapoff</code>), which forces compressed memory back into physical RAM.<br><br>
+        ⚠️ <strong>Warning:</strong> Live switching may cause temporary device lag or freeze for 5–15 seconds while memory is uncompressed.<br><br>
+        We strongly recommend saving the setting to apply cleanly on next reboot.
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-primary" onclick="applyAlgOnReboot()">Save for Next Reboot (Recommended)</button>
+        <button class="modal-btn modal-btn-danger" onclick="applyAlgLive()">Switch Live Now (May Freeze)</button>
+        <button class="modal-btn modal-btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <!-- Toast Notification -->
@@ -774,9 +904,48 @@
       if (active) active.classList.add('selected');
     }
 
-    async function applyAlgSetting() {
-      showToast("Switching ZRAM engine to " + currentAlgChoice + "...");
+    function confirmSwitchEngine() {
+      const title = document.getElementById('modal-title');
+      if (title) title.innerText = `Switch ZRAM Engine to ${currentAlgChoice.toUpperCase()}?`;
+      const modal = document.getElementById('confirm-modal');
+      if (modal) modal.classList.add('open');
+    }
+
+    function closeConfirmModal(e) {
+      if (e && e.target !== e.currentTarget && e.target.id !== 'confirm-modal' && !e.target.classList.contains('modal-btn-cancel')) return;
+      const modal = document.getElementById('confirm-modal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    async function applyAlgOnReboot() {
+      const modal = document.getElementById('confirm-modal');
+      if (modal) modal.classList.remove('open');
+      showToast("Saving " + currentAlgChoice.toUpperCase() + " for next reboot...");
       const script = `
+        for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
+          if [ -d "$dir" ] && [ -f "$dir/config.prop" ]; then
+            if grep -q "^ZRAM_COMP_ALGORITHM=" "$dir/config.prop"; then
+              sed -i "s/^ZRAM_COMP_ALGORITHM=.*/ZRAM_COMP_ALGORITHM=${currentAlgChoice}/" "$dir/config.prop" 2>/dev/null
+            else
+              echo "ZRAM_COMP_ALGORITHM=${currentAlgChoice}" >> "$dir/config.prop" 2>/dev/null
+            fi
+          fi
+        done
+        cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '⚙️ ZRAM Engine will switch to ${currentAlgChoice.toUpperCase()} on reboot' 2>/dev/null
+      `;
+      await execCmd(script);
+      showToast("Saved! Will switch to " + currentAlgChoice.toUpperCase() + " on next reboot (Zero lag).");
+    }
+
+    async function applyAlgLive() {
+      const modal = document.getElementById('confirm-modal');
+      if (modal) modal.classList.remove('open');
+      showToast("Compacting memory & switching ZRAM engine...");
+      const script = `
+        cmd notification post -S media -i @android:drawable/stat_notify_sync -t 'Vertex' 'samsung_optimizer' '⚡ Switching ZRAM to ${currentAlgChoice.toUpperCase()} (Please wait...)' 2>/dev/null
+        sync
+        echo 3 > /proc/sys/vm/drop_caches 2>/dev/null
+        echo 1 > /proc/sys/vm/compact_memory 2>/dev/null
         ZRAM_SIZE=$(cat /sys/block/zram0/disksize 2>/dev/null)
         swapoff /dev/block/zram0 2>/dev/null
         echo 1 > /sys/block/zram0/reset 2>/dev/null
