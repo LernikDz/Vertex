@@ -64,6 +64,9 @@ ZRAM_COMP_ALGORITHM=zstd
 # Display Smooth Scroll Lock (1 = Force 120Hz minimum refresh rate, 0 = Stock dynamic LTPO 1-120Hz)
 FORCE_120HZ_REFRESH=0
 
+# Bypass Charging (1 = Power phone directly from charger without battery charging)
+BYPASS_CHARGING_ENABLED=0
+
 # Smart Screen-Off / Idle Aware Daemon (1 = wait until screen is off/idle before running 5 AM pass)
 SMART_SCREEN_AWARE=1
 

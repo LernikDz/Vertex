@@ -43,6 +43,7 @@ PREVENT_LOCKSCREEN_AUDIO_STUTTER="${PREVENT_LOCKSCREEN_AUDIO_STUTTER:-1}"
 TUNE_ZRAM_ALGORITHM="${TUNE_ZRAM_ALGORITHM:-1}"
 ZRAM_COMP_ALGORITHM="${ZRAM_COMP_ALGORITHM:-zstd}"
 FORCE_120HZ_REFRESH="${FORCE_120HZ_REFRESH:-0}"
+BYPASS_CHARGING_ENABLED="${BYPASS_CHARGING_ENABLED:-0}"
 VULKAN_UI_ENABLED="${VULKAN_UI_ENABLED:-1}"
 SF_ZERO_LATENCY_LATCHING="${SF_ZERO_LATENCY_LATCHING:-1}"
 TUNE_UFS_SCHEDULER="${TUNE_UFS_SCHEDULER:-1}"
@@ -309,6 +310,11 @@ if [ "$FORCE_120HZ_REFRESH" = "1" ]; then
     settings put system min_refresh_rate 120.0 2>/dev/null
     settings put system peak_refresh_rate 120.0 2>/dev/null
     log "  [OK] Display minimum refresh rate locked to 120Hz (zero micro-stutter)"
+fi
+
+if [ "$BYPASS_CHARGING_ENABLED" = "1" ]; then
+    echo 1 > /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || echo 0 > /sys/class/power_supply/battery/charging_enabled 2>/dev/null
+    log "  [OK] Bypass charging mode maintained (battery charging stopped)"
 fi
 
 # 13. Vulkan Skia UI & SurfaceFlinger Zero-Latency Frame Latching

@@ -734,7 +734,7 @@
       </div>
       <div class="card-bottom">
         <div class="card-title">Audio Guard</div>
-        <div class="card-subtitle">Real-time nice -16 &bull; Fix Buds3 desync</div>
+        <div class="card-subtitle" id="card-audio-sub">Real-time nice -16 &bull; Fix Buds3 desync</div>
       </div>
     </div>
 
@@ -753,7 +753,7 @@
       </div>
       <div class="card-bottom">
         <div class="card-title">TCP BBR & Radio</div>
-        <div class="card-subtitle">Google BBR &bull; BT snoop log off</div>
+        <div class="card-subtitle" id="card-network-sub">Google BBR &bull; BT snoop log off</div>
       </div>
     </div>
 
@@ -1058,10 +1058,138 @@
     let currentAlgChoice = 'zstd';
     let is120HzLocked = false;
     let isBypassActive = false;
+    let isAudioBoost = true;
+    let isNetworkBoost = true;
+    let isTelemetryRestricted = true;
     let isEnhancedCpu = true;
     let isVulkanUi = true;
     let isTouchBoost = true;
     let lastToggleTime = 0;
+
+    // Persistent State Helper for disk config.prop
+    function updateConfigProp(key, val) {
+      const script = `
+        for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
+          if [ -d "$dir" ] && [ -f "$dir/config.prop" ]; then
+            if grep -q "^${key}=" "$dir/config.prop"; then
+              sed -i "s/^${key}=.*/${key}=${val}/" "$dir/config.prop" 2>/dev/null
+            else
+              echo "${key}=${val}" >> "$dir/config.prop" 2>/dev/null
+            fi
+          fi
+        done
+      `;
+      execCmd(script);
+    }
+
+    // Synchronously restore cached toggle states on initial view (0ms latency, zero flicker)
+    function restoreCachedState() {
+      try {
+        const sMaster = localStorage.getItem('vtx_master');
+        if (sMaster !== null) {
+          isDaemonRunning = (sMaster === '1');
+          const el = document.getElementById("master-toggle");
+          if (el) el.classList.toggle("active", isDaemonRunning);
+          const t = document.getElementById("master-status-text");
+          const d = document.getElementById("master-status-desc");
+          if (t) t.innerText = isDaemonRunning ? "On" : "Off";
+          if (d) d.innerText = isDaemonRunning ? "Active • Daily at 05:00 AM" : "Manual trigger only (Tap to schedule 05:00 AM)";
+        }
+
+        const sRam = localStorage.getItem('vtx_ramplus');
+        if (sRam !== null) {
+          const sz = parseInt(sRam) || 0;
+          currentRamChoice = sz;
+          chooseRam(sz);
+          const el = document.getElementById("toggle-ramplus");
+          const sub = document.getElementById("card-ramplus-sub");
+          if (el) el.classList.toggle("active", sz > 0);
+          if (sub) sub.innerText = sz > 0 ? (sz / 1024) + " GB • Active (Tap to tune)" : "0 GB • Disabled (Zero swap lag)";
+        }
+
+        const sAlg = localStorage.getItem('vtx_zram');
+        if (sAlg) {
+          currentAlgChoice = sAlg;
+          chooseAlg(sAlg);
+          const chip = document.getElementById("chip-zram-alg");
+          const sub = document.getElementById("card-zram-sub");
+          if (chip) chip.innerText = sAlg.toUpperCase();
+          if (sub) sub.innerText = sAlg.toUpperCase() + " (Active) • Tap to switch";
+        }
+
+        const s120 = localStorage.getItem('vtx_120hz');
+        if (s120 !== null) {
+          is120HzLocked = (s120 === '1');
+          const el = document.getElementById("toggle-refresh");
+          const sub = document.getElementById("card-refresh-sub");
+          if (el) el.classList.toggle("active", is120HzLocked);
+          if (sub) sub.innerText = is120HzLocked ? "120Hz Locked • Zero micro-stutter" : "Dynamic LTPO (1-120Hz) • Power saving";
+        }
+
+        const sBypass = localStorage.getItem('vtx_bypass');
+        if (sBypass !== null) {
+          isBypassActive = (sBypass === '1');
+          const el = document.getElementById("toggle-bypass");
+          const sub = document.getElementById("card-bypass-sub");
+          if (el) el.classList.toggle("active", isBypassActive);
+          if (sub) sub.innerText = isBypassActive ? "Bypass Active (Wall power) • Desk Mode" : "Normal Charging Resumed";
+        }
+
+        const sAudio = localStorage.getItem('vtx_audio');
+        if (sAudio !== null) {
+          isAudioBoost = (sAudio === '1');
+          const el = document.getElementById("toggle-audio");
+          const sub = document.getElementById("card-audio-sub");
+          if (el) el.classList.toggle("active", isAudioBoost);
+          if (sub) sub.innerText = isAudioBoost ? "Real-time nice -16 • Fix Buds3 desync" : "Standard audio priority";
+        }
+
+        const sNet = localStorage.getItem('vtx_network');
+        if (sNet !== null) {
+          isNetworkBoost = (sNet === '1');
+          const el = document.getElementById("toggle-network");
+          const sub = document.getElementById("card-network-sub");
+          if (el) el.classList.toggle("active", isNetworkBoost);
+          if (sub) sub.innerText = isNetworkBoost ? "Google BBR • BT snoop log off" : "Standard network stack";
+        }
+
+        const sTelem = localStorage.getItem('vtx_telemetry');
+        if (sTelem !== null) {
+          isTelemetryRestricted = (sTelem === '1');
+          const el = document.getElementById("toggle-telemetry");
+          const sub = document.getElementById("card-telemetry-sub");
+          if (el) el.classList.toggle("active", isTelemetryRestricted);
+          if (sub) sub.innerText = isTelemetryRestricted ? "Sleep 20+ bloat daemons" : "Bloat daemons active";
+        }
+
+        const sCpu = localStorage.getItem('vtx_cpu');
+        if (sCpu !== null) {
+          isEnhancedCpu = (sCpu === '1');
+          const el = document.getElementById("toggle-cpu");
+          const sub = document.getElementById("card-cpu-sub");
+          if (el) el.classList.toggle("active", isEnhancedCpu);
+          if (sub) sub.innerText = isEnhancedCpu ? "Fast clock ramp • Low UI latency" : "Standard clock ramp";
+        }
+
+        const sVulkan = localStorage.getItem('vtx_vulkan');
+        if (sVulkan !== null) {
+          isVulkanUi = (sVulkan === '1');
+          const el = document.getElementById("toggle-vulkan");
+          const sub = document.getElementById("card-vulkan-sub");
+          if (el) el.classList.toggle("active", isVulkanUi);
+          if (sub) sub.innerText = isVulkanUi ? "SkiaVK • 0-latency frame latch" : "SkiaGL (OpenGL ES) • Default";
+        }
+
+        const sTouch = localStorage.getItem('vtx_touch');
+        if (sTouch !== null) {
+          isTouchBoost = (sTouch === '1');
+          const el = document.getElementById("toggle-touch");
+          const sub = document.getElementById("card-touch-sub");
+          if (el) el.classList.toggle("active", isTouchBoost);
+          if (sub) sub.innerText = isTouchBoost ? "240Hz digitizer • RT inputflinger" : "Standard touch sensitivity";
+        }
+      } catch (e) {}
+    }
 
     // Request Edge-to-Edge immersion in KernelSU / KernelSU-Next / APatch WebUI
     if (window.ksu && typeof window.ksu.enableEdgeToEdge === "function") {
@@ -1383,16 +1511,20 @@
       const sub = document.getElementById("card-refresh-sub");
 
       is120HzLocked = !is120HzLocked;
+      try { localStorage.setItem('vtx_120hz', is120HzLocked ? '1' : '0'); } catch (e) {}
+
       if (is120HzLocked) {
         if (toggle) toggle.classList.add("active");
         if (sub) sub.innerText = "120Hz Locked • Zero micro-stutter";
         showToast("⚡ 120Hz Smooth Scroll locked!");
         execCmd("settings put system min_refresh_rate 120.0 2>/dev/null; settings put system peak_refresh_rate 120.0 2>/dev/null");
+        updateConfigProp('FORCE_120HZ_REFRESH', '1');
       } else {
         if (toggle) toggle.classList.remove("active");
         if (sub) sub.innerText = "Dynamic LTPO (1-120Hz) • Power saving";
         showToast("🌱 Dynamic LTPO (1Hz - 120Hz) active!");
         execCmd("settings put system min_refresh_rate 1.0 2>/dev/null; settings put system peak_refresh_rate 120.0 2>/dev/null");
+        updateConfigProp('FORCE_120HZ_REFRESH', '0');
       }
     }
 
@@ -1405,16 +1537,20 @@
       const sub = document.getElementById("card-bypass-sub");
 
       isBypassActive = !isBypassActive;
+      try { localStorage.setItem('vtx_bypass', isBypassActive ? '1' : '0'); } catch (e) {}
+
       if (isBypassActive) {
         if (toggle) toggle.classList.add("active");
         if (sub) sub.innerText = "Bypass Active (Wall power) • Desk Mode";
         showToast("⚡ Bypass Charging active! Battery not charging.");
         execCmd("echo 1 > /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || echo 0 > /sys/class/power_supply/battery/charging_enabled 2>/dev/null || echo 0 > /sys/class/power_supply/battery/battery_charging_enabled 2>/dev/null");
+        updateConfigProp('BYPASS_CHARGING_ENABLED', '1');
       } else {
         if (toggle) toggle.classList.remove("active");
         if (sub) sub.innerText = "Normal Charging Resumed";
         showToast("🔋 Normal battery charging resumed!");
         execCmd("echo 0 > /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null; echo 1 > /sys/class/power_supply/battery/charging_enabled 2>/dev/null; echo 1 > /sys/class/power_supply/battery/battery_charging_enabled 2>/dev/null");
+        updateConfigProp('BYPASS_CHARGING_ENABLED', '0');
       }
     }
 
@@ -1424,22 +1560,37 @@
       lastToggleTime = Date.now();
       haptic(15);
       const toggle = document.getElementById("toggle-audio");
-      if (toggle) toggle.classList.add("active");
-      showToast("🎧 Audio HAL & Bluetooth boosted (Zero lock stutter)!");
-      const cmd = `
-        for apid in $(pidof audioserver secaudiohalaidl android.hardware.audio.service com.android.bluetooth com.sec.android.app.soundalive 2>/dev/null); do
-          renice -n -16 -p "$apid" 2>/dev/null
-          if [ -d "/proc/$apid/task" ]; then
-            for atid in /proc/"$apid"/task/*; do
-              tid_num=$(basename "$atid")
-              [ -d /dev/cpuset/foreground-boost ] && echo "$tid_num" > /dev/cpuset/foreground-boost/tasks 2>/dev/null
-              [ -d /dev/cpuset/top-app ] && echo "$tid_num" > /dev/cpuset/top-app/tasks 2>/dev/null
-            done
-          fi
-        done
-        settings put system lockscreen_sounds_enabled 0 2>/dev/null
-      `;
-      execCmd(cmd);
+      const sub = document.getElementById("card-audio-sub");
+
+      isAudioBoost = !isAudioBoost;
+      try { localStorage.setItem('vtx_audio', isAudioBoost ? '1' : '0'); } catch (e) {}
+
+      if (isAudioBoost) {
+        if (toggle) toggle.classList.add("active");
+        if (sub) sub.innerText = "Real-time nice -16 • Fix Buds3 desync";
+        showToast("🎧 Audio HAL & Bluetooth boosted (Zero lock stutter)!");
+        const cmd = `
+          for apid in $(pidof audioserver secaudiohalaidl android.hardware.audio.service com.android.bluetooth com.sec.android.app.soundalive 2>/dev/null); do
+            renice -n -16 -p "$apid" 2>/dev/null
+            if [ -d "/proc/$apid/task" ]; then
+              for atid in /proc/"$apid"/task/*; do
+                tid_num=$(basename "$atid")
+                [ -d /dev/cpuset/foreground-boost ] && echo "$tid_num" > /dev/cpuset/foreground-boost/tasks 2>/dev/null
+                [ -d /dev/cpuset/top-app ] && echo "$tid_num" > /dev/cpuset/top-app/tasks 2>/dev/null
+              done
+            fi
+          done
+          settings put system lockscreen_sounds_enabled 0 2>/dev/null
+        `;
+        execCmd(cmd);
+        updateConfigProp('BOOST_AUDIO_PRIORITY', '1');
+      } else {
+        if (toggle) toggle.classList.remove("active");
+        if (sub) sub.innerText = "Standard audio priority";
+        showToast("Standard audio scheduling restored");
+        execCmd("settings put system lockscreen_sounds_enabled 1 2>/dev/null");
+        updateConfigProp('BOOST_AUDIO_PRIORITY', '0');
+      }
     }
 
     // Network Boost (Instant 0ms Feedback)
@@ -1447,18 +1598,33 @@
       if (e) e.stopPropagation();
       lastToggleTime = Date.now();
       haptic(15);
-      const toggle = document.getElementById("toggle-net");
-      if (toggle) toggle.classList.add("active");
-      showToast("🌐 TCP BBR active & Bluetooth radio boosted!");
-      const cmd = `
-        if grep -q "bbr" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
-          echo "bbr" > /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null
-        fi
-        settings put global bluetooth_btsnoop_default_mode disabled 2>/dev/null
-        setprop persist.bluetooth.btsnoopenable false 2>/dev/null
-        settings put global wifi_sleep_policy 2 2>/dev/null
-      `;
-      execCmd(cmd);
+      const toggle = document.getElementById("toggle-network") || document.getElementById("toggle-net");
+      const sub = document.getElementById("card-network-sub");
+
+      isNetworkBoost = !isNetworkBoost;
+      try { localStorage.setItem('vtx_network', isNetworkBoost ? '1' : '0'); } catch (e) {}
+
+      if (isNetworkBoost) {
+        if (toggle) toggle.classList.add("active");
+        if (sub) sub.innerText = "Google BBR • BT snoop log off";
+        showToast("🌐 TCP BBR active & Bluetooth radio boosted!");
+        const cmd = `
+          if grep -q "bbr" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
+            echo "bbr" > /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null
+          fi
+          settings put global bluetooth_btsnoop_default_mode disabled 2>/dev/null
+          setprop persist.bluetooth.btsnoopenable false 2>/dev/null
+          settings put global wifi_sleep_policy 2 2>/dev/null
+        `;
+        execCmd(cmd);
+        updateConfigProp('ENABLE_TCP_BBR', '1');
+      } else {
+        if (toggle) toggle.classList.remove("active");
+        if (sub) sub.innerText = "Standard network stack";
+        showToast("Standard TCP congestion control restored");
+        execCmd("echo cubic > /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null; setprop persist.bluetooth.btsnoopenable true 2>/dev/null");
+        updateConfigProp('ENABLE_TCP_BBR', '0');
+      }
     }
 
     // Telemetry Restriction (Instant 0ms Feedback)
@@ -1467,17 +1633,42 @@
       lastToggleTime = Date.now();
       haptic(15);
       const toggle = document.getElementById("toggle-telemetry");
-      if (toggle) toggle.classList.add("active");
-      showToast("🛡️ Samsung telemetry services hibernated!");
-      const cmd = `
-        for pkg in com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence; do
-          if pm list packages 2>/dev/null | grep -q "$pkg"; then
-            am set-standby-bucket "$pkg" restricted 2>/dev/null
-            cmd appops set "$pkg" RUN_IN_BACKGROUND ignore 2>/dev/null
-          fi
-        done
-      `;
-      execCmd(cmd);
+      const sub = document.getElementById("card-telemetry-sub");
+
+      isTelemetryRestricted = !isTelemetryRestricted;
+      try { localStorage.setItem('vtx_telemetry', isTelemetryRestricted ? '1' : '0'); } catch (e) {}
+
+      if (isTelemetryRestricted) {
+        if (toggle) toggle.classList.add("active");
+        if (sub) sub.innerText = "Sleep 20+ bloat daemons";
+        showToast("🛡️ Samsung telemetry & bloat services hibernated!");
+        const cmd = `
+          for pkg in com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence com.samsung.android.visionarapps com.samsung.android.aremoji com.samsung.android.aremojieditor com.samsung.android.livestickers com.samsung.android.stickercenter com.samsung.android.app.camera.sticker.facearavatar.preload com.samsung.android.rubin.app com.samsung.android.kidsinstaller com.sec.android.app.billing com.samsung.android.spaymini com.samsung.android.bixby.agent.dummy; do
+            if pm list packages 2>/dev/null | grep -q "$pkg"; then
+              am set-standby-bucket "$pkg" restricted 2>/dev/null
+              cmd appops set "$pkg" RUN_IN_BACKGROUND ignore 2>/dev/null
+            fi
+          done
+        `;
+        execCmd(cmd);
+        updateConfigProp('DEEP_BLOAT_HIBERNATION', '1');
+        updateConfigProp('RESTRICT_SAMSUNG_TELEMETRY', '1');
+      } else {
+        if (toggle) toggle.classList.remove("active");
+        if (sub) sub.innerText = "Bloat daemons active";
+        showToast("Background daemons restored to active");
+        const cmd = `
+          for pkg in com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence com.samsung.android.visionarapps com.samsung.android.aremoji com.samsung.android.aremojieditor com.samsung.android.livestickers com.samsung.android.stickercenter com.samsung.android.app.camera.sticker.facearavatar.preload com.samsung.android.rubin.app com.samsung.android.kidsinstaller com.sec.android.app.billing com.samsung.android.spaymini com.samsung.android.bixby.agent.dummy; do
+            if pm list packages 2>/dev/null | grep -q "$pkg"; then
+              am set-standby-bucket "$pkg" active 2>/dev/null
+              cmd appops set "$pkg" RUN_IN_BACKGROUND allow 2>/dev/null
+            fi
+          done
+        `;
+        execCmd(cmd);
+        updateConfigProp('DEEP_BLOAT_HIBERNATION', '0');
+        updateConfigProp('RESTRICT_SAMSUNG_TELEMETRY', '0');
+      }
     }
 
     // Enhanced CPU (Instant 0ms Feedback)
@@ -1487,18 +1678,22 @@
       haptic(15);
       const toggle = document.getElementById("toggle-cpu");
       const sub = document.getElementById("card-cpu-sub");
+
       isEnhancedCpu = !isEnhancedCpu;
+      try { localStorage.setItem('vtx_cpu', isEnhancedCpu ? '1' : '0'); } catch (e) {}
 
       if (isEnhancedCpu) {
         if (toggle) toggle.classList.add("active");
         if (sub) sub.innerText = "Fast clock ramp • Low UI latency";
         showToast("⚡ Enhanced CPU enabled!");
         execCmd("settings put global sem_enhanced_cpu_responsiveness 1 2>/dev/null");
+        updateConfigProp('ENHANCED_CPU_RESPONSIVENESS', '1');
       } else {
         if (toggle) toggle.classList.remove("active");
         if (sub) sub.innerText = "Standard clock ramp";
         showToast("Standard CPU responsiveness active");
         execCmd("settings put global sem_enhanced_cpu_responsiveness 0 2>/dev/null");
+        updateConfigProp('ENHANCED_CPU_RESPONSIVENESS', '0');
       }
     }
 
@@ -1509,7 +1704,9 @@
       haptic(15);
       const toggle = document.getElementById("toggle-vulkan");
       const sub = document.getElementById("card-vulkan-sub");
+
       isVulkanUi = !isVulkanUi;
+      try { localStorage.setItem('vtx_vulkan', isVulkanUi ? '1' : '0'); } catch (e) {}
 
       if (isVulkanUi) {
         if (toggle) toggle.classList.add("active");
@@ -1519,12 +1716,10 @@
           setprop debug.hwui.renderer skiavk
           setprop debug.sf.latch_unsignaled 1
           setprop debug.sf.enable_gl_backpressure 0
-          for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
-            [ -f "$dir/config.prop" ] && sed -i 's/^VULKAN_UI_ENABLED=.*/VULKAN_UI_ENABLED=1/' "$dir/config.prop" 2>/dev/null
-            [ -f "$dir/config.prop" ] && sed -i 's/^SF_ZERO_LATENCY_LATCHING=.*/SF_ZERO_LATENCY_LATCHING=1/' "$dir/config.prop" 2>/dev/null
-          done
         `;
         execCmd(cmd);
+        updateConfigProp('VULKAN_UI_ENABLED', '1');
+        updateConfigProp('SF_ZERO_LATENCY_LATCHING', '1');
       } else {
         if (toggle) toggle.classList.remove("active");
         if (sub) sub.innerText = "SkiaGL (OpenGL ES) • Default";
@@ -1532,12 +1727,10 @@
         const cmd = `
           setprop debug.hwui.renderer skiagl
           setprop debug.sf.latch_unsignaled 0
-          for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
-            [ -f "$dir/config.prop" ] && sed -i 's/^VULKAN_UI_ENABLED=.*/VULKAN_UI_ENABLED=0/' "$dir/config.prop" 2>/dev/null
-            [ -f "$dir/config.prop" ] && sed -i 's/^SF_ZERO_LATENCY_LATCHING=.*/SF_ZERO_LATENCY_LATCHING=0/' "$dir/config.prop" 2>/dev/null
-          done
         `;
         execCmd(cmd);
+        updateConfigProp('VULKAN_UI_ENABLED', '0');
+        updateConfigProp('SF_ZERO_LATENCY_LATCHING', '0');
       }
     }
 
@@ -1548,7 +1741,9 @@
       haptic(15);
       const toggle = document.getElementById("toggle-touch");
       const sub = document.getElementById("card-touch-sub");
+
       isTouchBoost = !isTouchBoost;
+      try { localStorage.setItem('vtx_touch', isTouchBoost ? '1' : '0'); } catch (e) {}
 
       if (isTouchBoost) {
         if (toggle) toggle.classList.add("active");
@@ -1568,22 +1763,15 @@
               esac
             done
           done
-          for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
-            [ -f "$dir/config.prop" ] && sed -i 's/^TOUCH_BOOST_ENABLED=.*/TOUCH_BOOST_ENABLED=1/' "$dir/config.prop" 2>/dev/null
-          done
         `;
         execCmd(cmd);
+        updateConfigProp('TOUCH_BOOST_ENABLED', '1');
       } else {
         if (toggle) toggle.classList.remove("active");
         if (sub) sub.innerText = "Standard touch sensitivity";
         showToast("Standard touch sensitivity active");
-        const cmd = `
-          settings put system touch_sensitivity 0 2>/dev/null
-          for dir in /data/adb/modules/samsung_daily_optimizer /data/local/tmp/SamsungDailyOptimizer; do
-            [ -f "$dir/config.prop" ] && sed -i 's/^TOUCH_BOOST_ENABLED=.*/TOUCH_BOOST_ENABLED=0/' "$dir/config.prop" 2>/dev/null
-          done
-        `;
-        execCmd(cmd);
+        execCmd("settings put system touch_sensitivity 0 2>/dev/null");
+        updateConfigProp('TOUCH_BOOST_ENABLED', '0');
       }
     }
 
@@ -1674,7 +1862,7 @@
       if (vfs) document.getElementById("sys-vfs").innerText = "vfs_cache_pressure: " + vfs + " • schedstats: " + (sched === "0" ? "disabled" : "enabled");
     }
 
-    // High-Performance Batched Metrics Polling
+    // High-Performance Batched Metrics Polling with Persistent Config Sync
     async function refreshData() {
       // Do not overwrite UI while user is actively toggling
       if (Date.now() - lastToggleTime < 4500) return;
@@ -1690,28 +1878,39 @@
         echo '===VTX==='
         dumpsys battery 2>/dev/null | head -n 8
         echo '===VTX==='
-        cat /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || cat /sys/class/power_supply/battery/charging_enabled 2>/dev/null
+        cat /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null
+        echo '===VTX==='
+        cat /sys/class/power_supply/battery/charging_enabled 2>/dev/null
         echo '===VTX==='
         settings get global sem_enhanced_cpu_responsiveness 2>/dev/null
         echo '===VTX==='
         getprop debug.hwui.renderer 2>/dev/null
         echo '===VTX==='
         settings get system touch_sensitivity 2>/dev/null
+        echo '===VTX==='
+        cat /data/adb/modules/samsung_daily_optimizer/config.prop 2>/dev/null || cat /data/local/tmp/SamsungDailyOptimizer/config.prop 2>/dev/null
       `;
       const out = await execCmd(script);
       if (!out) return;
       const sections = out.split('===VTX===');
-      if (sections.length < 9) return;
+      if (sections.length < 11) return;
 
       const daemonPid = (sections[0] || "").trim();
       const ramSizeRaw = (sections[1] || "").trim();
       const zramAlgRaw = (sections[2] || "").trim();
       const minRate = (sections[3] || "").trim();
       const battInfo = sections[4] || "";
-      const slate = (sections[5] || "").trim();
-      const cpuVal = (sections[6] || "").trim();
-      const hwuiRenderer = (sections[7] || "").trim().toLowerCase();
-      const touchSens = (sections[8] || "").trim();
+      const battSlate = (sections[5] || "").trim();
+      const chargingEn = (sections[6] || "").trim();
+      const cpuVal = (sections[7] || "").trim();
+      const hwuiRenderer = (sections[8] || "").trim().toLowerCase();
+      const touchSens = (sections[9] || "").trim();
+      const configProp = sections[10] || "";
+
+      const getConfigVal = (k) => {
+        const m = configProp.match(new RegExp("^" + k + "=(\\w+)", "m"));
+        return m ? m[1] : null;
+      };
 
       // 1. Daemon Status
       const masterToggle = document.getElementById("master-toggle");
@@ -1720,11 +1919,13 @@
         masterToggle.classList.add("active");
         document.getElementById("master-status-text").innerText = "On";
         document.getElementById("master-status-desc").innerText = "Active (PID " + daemonPid + ") • Daily at 05:00 AM";
+        try { localStorage.setItem('vtx_master', '1'); } catch (e) {}
       } else {
         isDaemonRunning = false;
         masterToggle.classList.remove("active");
         document.getElementById("master-status-text").innerText = "Off";
         document.getElementById("master-status-desc").innerText = "Manual trigger only (Tap to schedule 05:00 AM)";
+        try { localStorage.setItem('vtx_master', '0'); } catch (e) {}
       }
 
       // 2. RAM Plus Status
@@ -1739,25 +1940,29 @@
         ramToggle.classList.remove("active");
         document.getElementById("card-ramplus-sub").innerText = "0 GB • Disabled (Zero swap lag)";
       }
+      try { localStorage.setItem('vtx_ramplus', ramSize.toString()); } catch (e) {}
 
       // 3. ZRAM Engine Status
       if (zramAlgRaw) {
         const match = zramAlgRaw.match(/\[([^\]]+)\]/);
-        const activeAlg = match ? match[1] : "lzo-rle";
+        const activeAlg = match ? match[1] : (getConfigVal("ZRAM_COMP_ALGORITHM") || "zstd");
         document.getElementById("chip-zram-alg").innerText = activeAlg.toUpperCase();
         document.getElementById("card-zram-sub").innerText = activeAlg.toUpperCase() + " (Active) • Tap to switch";
         chooseAlg(activeAlg);
+        try { localStorage.setItem('vtx_zram', activeAlg); } catch (e) {}
       }
 
       // 4. Refresh Rate
       const refToggle = document.getElementById("toggle-refresh");
-      if (parseFloat(minRate) >= 120.0) {
+      const cfg120 = getConfigVal("FORCE_120HZ_REFRESH");
+      const saved120 = localStorage.getItem('vtx_120hz');
+      if (parseFloat(minRate) >= 120.0 || cfg120 === "1" || saved120 === "1") {
         is120HzLocked = true;
-        refToggle.classList.add("active");
+        if (refToggle) refToggle.classList.add("active");
         document.getElementById("card-refresh-sub").innerText = "120Hz Locked • Zero micro-stutter";
       } else {
         is120HzLocked = false;
-        refToggle.classList.remove("active");
+        if (refToggle) refToggle.classList.remove("active");
         document.getElementById("card-refresh-sub").innerText = "Dynamic LTPO (1-120Hz) • Power saving";
       }
 
@@ -1769,60 +1974,81 @@
         const level = mLevel ? mLevel[1] + "%" : "--%";
         const plugged = (mUsb && mUsb[1] === "true") || (mAc && mAc[1] === "true");
 
-        isBypassActive = (slate === "1");
+        const cfgBypass = getConfigVal("BYPASS_CHARGING_ENABLED");
+        const savedBypass = localStorage.getItem('vtx_bypass');
+        if (battSlate === "1" || (chargingEn === "0" && (cfgBypass === "1" || savedBypass === "1")) || cfgBypass === "1" || savedBypass === "1") {
+          isBypassActive = true;
+        } else {
+          isBypassActive = false;
+        }
         const bypassToggle = document.getElementById("toggle-bypass");
         if (isBypassActive) {
-          bypassToggle.classList.add("active");
+          if (bypassToggle) bypassToggle.classList.add("active");
           document.getElementById("card-bypass-sub").innerText = level + " • Bypass Active (Wall power)";
         } else {
-          bypassToggle.classList.remove("active");
+          if (bypassToggle) bypassToggle.classList.remove("active");
           document.getElementById("card-bypass-sub").innerText = level + (plugged ? " • Charging" : " • Battery");
         }
         document.getElementById("sys-batt").innerText = level + (plugged ? " (Plugged in)" : " (Discharging)") + (isBypassActive ? " • Bypass Slate Active" : "");
       }
 
-      // 6. Enhanced CPU
+      // 6. Audio Guard
+      const audioToggle = document.getElementById("toggle-audio");
+      const cfgAudio = getConfigVal("BOOST_AUDIO_PRIORITY");
+      const savedAudio = localStorage.getItem('vtx_audio');
+      isAudioBoost = cfgAudio !== null ? (cfgAudio === "1") : (savedAudio !== null ? savedAudio === "1" : true);
+      if (audioToggle) audioToggle.classList.toggle("active", isAudioBoost);
+      const asub = document.getElementById("card-audio-sub");
+      if (asub) asub.innerText = isAudioBoost ? "Real-time nice -16 • Fix Buds3 desync" : "Standard audio priority";
+
+      // 7. TCP BBR & Network
+      const netToggle = document.getElementById("toggle-network") || document.getElementById("toggle-net");
+      const cfgNet = getConfigVal("ENABLE_TCP_BBR");
+      const savedNet = localStorage.getItem('vtx_network');
+      isNetworkBoost = cfgNet !== null ? (cfgNet === "1") : (savedNet !== null ? savedNet === "1" : true);
+      if (netToggle) netToggle.classList.toggle("active", isNetworkBoost);
+      const nsub = document.getElementById("card-network-sub");
+      if (nsub) nsub.innerText = isNetworkBoost ? "Google BBR • BT snoop log off" : "Standard network stack";
+
+      // 8. Deep Bloat Hibernation
+      const telemToggle = document.getElementById("toggle-telemetry");
+      const cfgTelem = getConfigVal("DEEP_BLOAT_HIBERNATION") || getConfigVal("RESTRICT_SAMSUNG_TELEMETRY");
+      const savedTelem = localStorage.getItem('vtx_telemetry');
+      isTelemetryRestricted = cfgTelem !== null ? (cfgTelem === "1") : (savedTelem !== null ? savedTelem === "1" : true);
+      if (telemToggle) telemToggle.classList.toggle("active", isTelemetryRestricted);
+      const tsub = document.getElementById("card-telemetry-sub");
+      if (tsub) tsub.innerText = isTelemetryRestricted ? "Sleep 20+ bloat daemons" : "Bloat daemons active";
+
+      // 9. Enhanced CPU
       const cpuToggle = document.getElementById("toggle-cpu");
-      if (cpuVal === "1") {
-        isEnhancedCpu = true;
-        cpuToggle.classList.add("active");
-        document.getElementById("card-cpu-sub").innerText = "Fast clock ramp • Low UI latency";
-      } else {
-        isEnhancedCpu = false;
-        cpuToggle.classList.remove("active");
-        document.getElementById("card-cpu-sub").innerText = "Standard clock ramp";
-      }
+      const cfgCpu = getConfigVal("ENHANCED_CPU_RESPONSIVENESS");
+      const savedCpu = localStorage.getItem('vtx_cpu');
+      isEnhancedCpu = (cpuVal === "1") || (cfgCpu === "1") || (savedCpu === "1");
+      if (cpuToggle) cpuToggle.classList.toggle("active", isEnhancedCpu);
+      const csub = document.getElementById("card-cpu-sub");
+      if (csub) csub.innerText = isEnhancedCpu ? "Fast clock ramp • Low UI latency" : "Standard clock ramp";
 
-      // 7. Vulkan UI (SkiaVK)
+      // 10. Vulkan UI (SkiaVK)
       const vulkanToggle = document.getElementById("toggle-vulkan");
-      if (hwuiRenderer === "skiavk" || hwuiRenderer === "") {
-        isVulkanUi = true;
-        if (vulkanToggle) vulkanToggle.classList.add("active");
-        const vsub = document.getElementById("card-vulkan-sub");
-        if (vsub) vsub.innerText = "SkiaVK • 0-latency frame latch";
-      } else {
-        isVulkanUi = false;
-        if (vulkanToggle) vulkanToggle.classList.remove("active");
-        const vsub = document.getElementById("card-vulkan-sub");
-        if (vsub) vsub.innerText = "SkiaGL (OpenGL ES) • Default";
-      }
+      const cfgVulkan = getConfigVal("VULKAN_UI_ENABLED");
+      const savedVulkan = localStorage.getItem('vtx_vulkan');
+      isVulkanUi = (hwuiRenderer === "skiavk" || hwuiRenderer === "") && (cfgVulkan !== "0") && (savedVulkan !== "0");
+      if (vulkanToggle) vulkanToggle.classList.toggle("active", isVulkanUi);
+      const vsub = document.getElementById("card-vulkan-sub");
+      if (vsub) vsub.innerText = isVulkanUi ? "SkiaVK • 0-latency frame latch" : "SkiaGL (OpenGL ES) • Default";
 
-      // 8. Touch Boost
+      // 11. Touch Boost
       const touchToggle = document.getElementById("toggle-touch");
-      if (touchSens === "1") {
-        isTouchBoost = true;
-        if (touchToggle) touchToggle.classList.add("active");
-        const tsub = document.getElementById("card-touch-sub");
-        if (tsub) tsub.innerText = "240Hz digitizer • RT inputflinger";
-      } else {
-        isTouchBoost = false;
-        if (touchToggle) touchToggle.classList.remove("active");
-        const tsub = document.getElementById("card-touch-sub");
-        if (tsub) tsub.innerText = "Standard touch sensitivity";
-      }
+      const cfgTouch = getConfigVal("TOUCH_BOOST_ENABLED");
+      const savedTouch = localStorage.getItem('vtx_touch');
+      isTouchBoost = (touchSens === "1") || (cfgTouch === "1") || (savedTouch === "1");
+      if (touchToggle) touchToggle.classList.toggle("active", isTouchBoost);
+      const tcsub = document.getElementById("card-touch-sub");
+      if (tcsub) tcsub.innerText = isTouchBoost ? "240Hz digitizer • RT inputflinger" : "Standard touch sensitivity";
     }
 
-    // Initial Load & Lightweight 6s polling
+    // Restore cached state immediately (0ms, zero flash) then query hardware
+    restoreCachedState();
     refreshData();
     setInterval(refreshData, 6000);
   </script>
