@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Vertex</title>
   <style>
     :root {
@@ -15,9 +19,11 @@
       --text-muted: rgba(255, 255, 255, 0.45);
       --oneui-blue: #2c7bf6;
       --toggle-track-off: #434348;
-      --radius-sheet: 30px;
+      --radius-sheet: 32px;
       --radius-card: 26px;
       --radius-item: 18px;
+      --spring-bounce: cubic-bezier(0.34, 1.4, 0.64, 1);
+      --spring-smooth: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     * {
@@ -27,48 +33,61 @@
       font-family: "Samsung Sans", "SamsungOne", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
 
-    body {
+    html, body {
       background-color: var(--bg);
       color: var(--text-primary);
       min-height: 100vh;
-      padding-bottom: 40px;
       overflow-x: hidden;
+      overscroll-behavior-y: contain;
       font-size: 15px;
+      touch-action: pan-y;
     }
 
-    /* One UI Large Top Header */
-    .header-area {
-      padding: 44px 20px 18px 20px;
+    body {
+      padding-bottom: 50px;
+    }
+
+    /* Pinned Top Navigation Bar (Collapses and shows title on scroll) */
+    .top-appbar {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 100;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      position: relative;
+      justify-content: space-between;
+      padding: 0 16px;
+      transition: border-color 0.2s;
+      border-bottom: 1px solid transparent;
     }
 
-    .header-title {
-      font-size: 34px;
+    .top-appbar.scrolled {
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .top-appbar-title {
+      font-size: 18px;
       font-weight: 700;
       color: var(--text-primary);
-      letter-spacing: -0.4px;
-      text-align: center;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.25s var(--spring-smooth), transform 0.25s var(--spring-smooth);
+      letter-spacing: -0.2px;
+      pointer-events: none;
     }
 
-    .header-subtitle {
-      font-size: 13.5px;
-      color: var(--text-secondary);
-      margin-top: 4px;
-      font-weight: 400;
-    }
-
-    .header-actions {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 18px;
-      padding: 0 4px;
+    .top-appbar.scrolled .top-appbar-title {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .icon-btn {
@@ -79,14 +98,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      transition: background 0.2s;
+      transition: transform 0.15s ease, background 0.15s ease;
+      touch-action: manipulation;
     }
 
     .icon-btn:active {
-      background: rgba(255, 255, 255, 0.1);
+      transform: scale(0.9);
+      background: rgba(255, 255, 255, 0.12);
     }
 
     .icon-btn svg {
@@ -95,7 +116,32 @@
       stroke-width: 2.2;
     }
 
-    /* Home Up Style Master Toggle Banner */
+    /* Samsung One UI Viewing Area (Large Collapsible Title) */
+    .viewing-area {
+      padding: 16px 24px 28px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .viewing-title {
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.6px;
+      line-height: 1.15;
+    }
+
+    .viewing-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      font-weight: 400;
+    }
+
+    /* Home Up Master Toggle Banner */
     .master-banner {
       background: var(--master-bg);
       border-radius: 30px;
@@ -104,8 +150,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
       cursor: pointer;
+      transition: transform 0.15s var(--spring-smooth), filter 0.15s;
+    }
+
+    .master-banner:active {
+      transform: scale(0.98);
+      filter: brightness(0.92);
     }
 
     .master-text-group {
@@ -114,7 +166,7 @@
     }
 
     .master-title {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 600;
       color: var(--text-primary);
     }
@@ -122,18 +174,18 @@
     .master-subtitle {
       font-size: 13px;
       color: var(--text-secondary);
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
-    /* Samsung One UI Toggle Switch */
+    /* Elastic Samsung One UI Toggle Switch */
     .oneui-toggle {
-      width: 50px;
-      height: 28px;
+      width: 52px;
+      height: 30px;
       background-color: var(--toggle-track-off);
-      border-radius: 14px;
+      border-radius: 15px;
       position: relative;
       cursor: pointer;
-      transition: background-color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: background-color 0.25s var(--spring-smooth);
       flex-shrink: 0;
     }
 
@@ -142,19 +194,27 @@
     }
 
     .oneui-toggle-thumb {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       background-color: #ffffff;
       border-radius: 50%;
       position: absolute;
       top: 3px;
       left: 3px;
-      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      transition: transform 0.28s var(--spring-bounce), width 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    }
+
+    .oneui-toggle:active .oneui-toggle-thumb {
+      width: 28px;
     }
 
     .oneui-toggle.active .oneui-toggle-thumb {
       transform: translateX(22px);
+    }
+
+    .oneui-toggle.active:active .oneui-toggle-thumb {
+      transform: translateX(18px);
     }
 
     /* 2-Column Home Up Jewel Card Grid */
@@ -168,31 +228,32 @@
     .homeup-card {
       border-radius: var(--radius-card);
       padding: 18px 16px;
-      min-height: 146px;
+      min-height: 148px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      transition: transform 0.15s ease, filter 0.15s ease;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+      transition: transform 0.18s var(--spring-bounce), filter 0.15s ease;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     .homeup-card:active {
-      transform: scale(0.97);
-      filter: brightness(0.92);
+      transform: scale(0.955);
+      filter: brightness(0.9);
     }
 
-    /* Home Up Distinct Jewel Palette */
-    .card-navy { background-color: #12284c; }        /* Home screen style */
-    .card-slate { background-color: #13213d; }       /* Backup/Restore style */
-    .card-crimson { background-color: #4b1425; }     /* Task Changer style */
-    .card-forest { background-color: #143818; }      /* Gesture settings style */
-    .card-teal { background-color: #0b3438; }        /* Edge panel style */
-    .card-amber { background-color: #3f280e; }       /* Share Manager style */
-    .card-purple { background-color: #271442; }      /* Applock style */
-    .card-plum { background-color: #3b1338; }        /* QuickStar style */
+    /* Palette */
+    .card-navy { background-color: #12284c; }        /* RAM Plus */
+    .card-purple { background-color: #271442; }      /* ZRAM */
+    .card-crimson { background-color: #4b1425; }     /* 120Hz */
+    .card-forest { background-color: #143818; }      /* Bypass */
+    .card-teal { background-color: #0b3438; }        /* Audio */
+    .card-slate { background-color: #13213d; }       /* TCP BBR */
+    .card-amber { background-color: #3f280e; }       /* Telemetry */
+    .card-plum { background-color: #3b1338; }        /* Enhanced CPU */
 
     .card-top {
       display: flex;
@@ -202,8 +263,8 @@
     }
 
     .card-icon {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -211,8 +272,18 @@
     }
 
     .card-icon svg {
-      width: 24px;
-      height: 24px;
+      width: 25px;
+      height: 25px;
+    }
+
+    .card-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 10px;
+      border-radius: 12px;
+      color: #ffffff;
+      backdrop-filter: blur(4px);
     }
 
     .card-bottom {
@@ -222,40 +293,41 @@
     }
 
     .card-title {
-      font-size: 16.5px;
+      font-size: 17px;
       font-weight: 600;
       color: var(--text-primary);
       line-height: 1.25;
     }
 
     .card-subtitle {
-      font-size: 12px;
+      font-size: 12.5px;
       color: var(--text-secondary);
       margin-top: 4px;
       line-height: 1.35;
-      white-space: normal;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
 
-    /* Section Title for One UI Layout */
+    /* Section Header */
     .section-header {
-      padding: 14px 20px 10px 20px;
-      font-size: 14.5px;
-      font-weight: 600;
-      color: var(--text-secondary);
+      padding: 16px 20px 10px 20px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
     }
 
-    /* Maintenance Actions List (One UI Settings Group) */
+    /* Action List (One UI Settings Group) */
     .action-group {
       background: var(--master-bg);
       border-radius: var(--radius-card);
       margin: 0 16px 18px 16px;
       overflow: hidden;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     .action-row {
@@ -264,7 +336,7 @@
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, transform 0.15s var(--spring-bounce);
     }
 
     .action-row:not(:last-child) {
@@ -273,6 +345,7 @@
 
     .action-row:active {
       background: rgba(255, 255, 255, 0.08);
+      transform: scale(0.99);
     }
 
     .action-row-left {
@@ -282,8 +355,8 @@
     }
 
     .action-row-icon {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.08);
       display: flex;
@@ -294,8 +367,8 @@
     }
 
     .action-row-icon svg {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
     }
 
     .action-row-text {
@@ -317,11 +390,11 @@
 
     .action-chevron {
       color: var(--text-muted);
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
     }
 
-    /* One UI Bottom Sheet Modal */
+    /* Gesture-Dismissable One UI Bottom Sheets */
     .sheet-scrim {
       position: fixed;
       top: 0;
@@ -329,12 +402,12 @@
       right: 0;
       bottom: 0;
       background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       z-index: 1000;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: opacity 0.3s var(--spring-smooth);
       display: flex;
       align-items: flex-end;
     }
@@ -348,61 +421,75 @@
       width: 100%;
       background: #1e1e22;
       border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
-      padding: 20px 20px 36px 20px;
-      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6);
+      padding: 18px 20px 36px 20px;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.7);
       transform: translateY(100%);
-      transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: transform 0.32s var(--spring-smooth);
       max-height: 85vh;
       overflow-y: auto;
+      touch-action: pan-y;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .sheet-scrim.open .oneui-sheet {
       transform: translateY(0);
     }
 
+    .sheet-handle-bar {
+      padding: 4px 0 16px 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      cursor: grab;
+    }
+
     .sheet-handle {
-      width: 44px;
-      height: 4.5px;
-      background: rgba(255, 255, 255, 0.22);
+      width: 48px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.28);
       border-radius: 3px;
-      margin: 0 auto 16px auto;
     }
 
     .sheet-title {
-      font-size: 22px;
+      font-size: 23px;
       font-weight: 700;
       color: var(--text-primary);
       margin-bottom: 6px;
+      letter-spacing: -0.3px;
     }
 
     .sheet-desc {
-      font-size: 13.5px;
+      font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.45;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
 
     .sheet-option-list {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      margin-bottom: 22px;
+      margin-bottom: 24px;
     }
 
     .sheet-option {
-      background: #2a2a2f;
+      background: #28282d;
       border-radius: var(--radius-item);
-      padding: 15px 18px;
+      padding: 16px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
       border: 2px solid transparent;
-      transition: all 0.2s;
+      transition: all 0.2s var(--spring-smooth);
+    }
+
+    .sheet-option:active {
+      transform: scale(0.98);
     }
 
     .sheet-option.selected {
-      background: #26334a;
+      background: #24324a;
       border-color: var(--oneui-blue);
     }
 
@@ -413,7 +500,7 @@
     }
 
     .sheet-opt-desc {
-      font-size: 12.5px;
+      font-size: 13px;
       color: var(--text-secondary);
       margin-top: 2px;
     }
@@ -427,6 +514,7 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      transition: all 0.2s;
     }
 
     .sheet-option.selected .sheet-radio {
@@ -451,13 +539,13 @@
     .oneui-btn {
       width: 100%;
       border: none;
-      border-radius: 22px;
-      padding: 14px 20px;
-      font-size: 15px;
+      border-radius: 24px;
+      padding: 15px 20px;
+      font-size: 15.5px;
       font-weight: 600;
       cursor: pointer;
       text-align: center;
-      transition: opacity 0.2s;
+      transition: transform 0.15s var(--spring-bounce), opacity 0.15s;
     }
 
     .oneui-btn-primary {
@@ -466,7 +554,7 @@
     }
 
     .oneui-btn-danger {
-      background: rgba(242, 184, 181, 0.15);
+      background: rgba(242, 184, 181, 0.14);
       color: #f2b8b5;
       border: 1px solid rgba(242, 184, 181, 0.3);
     }
@@ -482,10 +570,11 @@
     }
 
     .oneui-btn:active {
-      opacity: 0.8;
+      transform: scale(0.97);
+      opacity: 0.85;
     }
 
-    /* Terminal Log View inside Bottom Sheet */
+    /* Terminal View in Sheet */
     .terminal-box {
       background: #111114;
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -499,28 +588,29 @@
       white-space: pre-wrap;
       word-break: break-all;
       user-select: text;
+      -webkit-user-select: text;
       margin-bottom: 16px;
     }
 
     /* One UI Floating Toast */
     .toast {
       position: fixed;
-      bottom: 30px;
+      bottom: 34px;
       left: 50%;
       transform: translateX(-50%) translateY(40px);
       background: #2b2b2f;
       color: #ffffff;
-      padding: 13px 24px;
-      border-radius: 24px;
-      font-size: 14px;
+      padding: 13px 26px;
+      border-radius: 26px;
+      font-size: 14.5px;
       font-weight: 500;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
       opacity: 0;
       pointer-events: none;
-      transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: all 0.28s var(--spring-smooth);
       z-index: 2000;
       white-space: nowrap;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .toast.show {
@@ -531,22 +621,24 @@
 </head>
 <body>
 
-  <!-- Top One UI Header Area -->
-  <div class="header-area">
-    <div class="header-actions">
-      <button class="icon-btn" onclick="window.history.back()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);">VERTEX</div>
-      <button class="icon-btn" onclick="openSystemSheet()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-      </button>
-    </div>
-    <div class="header-title">Vertex</div>
-    <div class="header-subtitle" id="val-module-ver">One UI Performance Suite &bull; v1.3</div>
+  <!-- Sticky One UI Top Bar with Title Fade -->
+  <div class="top-appbar" id="appbar">
+    <button class="icon-btn" onclick="haptic(15); window.history.back()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="top-appbar-title">Vertex</div>
+    <button class="icon-btn" onclick="haptic(15); openSystemSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+    </button>
   </div>
 
-  <!-- Home Up Master Toggle Banner (Controls Daily 5:00 AM Scheduler) -->
+  <!-- One UI Large Viewing Area (Collapses smoothly on scroll) -->
+  <div class="viewing-area" id="viewingArea">
+    <div class="viewing-title">Vertex</div>
+    <div class="viewing-subtitle" id="val-module-ver">One UI Performance Suite &bull; v1.3</div>
+  </div>
+
+  <!-- Home Up Master Toggle Banner -->
   <div class="master-banner" onclick="toggleMasterDaemon(event)">
     <div class="master-text-group">
       <div class="master-title" id="master-status-text">On</div>
@@ -560,11 +652,10 @@
   <!-- Home Up 2-Column Jewel Cards Grid -->
   <div class="grid-container">
 
-    <!-- Card 1: RAM Plus (Deep Royal Blue) -->
-    <div class="homeup-card card-navy" onclick="openRamSheet()">
+    <!-- Card 1: RAM Plus -->
+    <div class="homeup-card card-navy" onclick="haptic(20); openRamSheet()">
       <div class="card-top">
         <div class="card-icon">
-          <!-- RAM / Chip SVG -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="4" y="4" width="16" height="16" rx="2"/>
             <rect x="9" y="9" width="6" height="6"/>
@@ -584,18 +675,15 @@
       </div>
     </div>
 
-    <!-- Card 2: ZRAM Engine (Deep Purple / Violet) -->
-    <div class="homeup-card card-purple" onclick="openZramSheet()">
+    <!-- Card 2: ZRAM Engine -->
+    <div class="homeup-card card-purple" onclick="haptic(20); openZramSheet()">
       <div class="card-top">
         <div class="card-icon">
-          <!-- Lightning / Compression SVG -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
         </div>
-        <div style="font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.18); padding: 4px 9px; border-radius: 12px; color: #fff;" id="chip-zram-alg">
-          ZSTD
-        </div>
+        <div class="card-badge" id="chip-zram-alg">ZSTD</div>
       </div>
       <div class="card-bottom">
         <div class="card-title">ZRAM Engine</div>
@@ -603,11 +691,10 @@
       </div>
     </div>
 
-    <!-- Card 3: 120Hz Smooth Scroll (Deep Crimson / Burgundy) -->
+    <!-- Card 3: 120Hz Smooth Scroll -->
     <div class="homeup-card card-crimson" onclick="toggleRefreshRate(event)">
       <div class="card-top">
         <div class="card-icon">
-          <!-- Display Refresh SVG -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
             <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
@@ -623,11 +710,10 @@
       </div>
     </div>
 
-    <!-- Card 4: Bypass Charging (Deep Forest Green) -->
+    <!-- Card 4: Bypass Charging -->
     <div class="homeup-card card-forest" onclick="toggleBypassCharging(event)">
       <div class="card-top">
         <div class="card-icon">
-          <!-- Power Plug / Wall Power SVG -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/>
           </svg>
@@ -642,11 +728,10 @@
       </div>
     </div>
 
-    <!-- Card 5: Audio Thread Guard (Deep Teal) -->
+    <!-- Card 5: Audio Guard -->
     <div class="homeup-card card-teal" onclick="boostAudioPriority(event)">
       <div class="card-top">
         <div class="card-icon">
-          <!-- Headset SVG -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
             <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
@@ -662,11 +747,10 @@
       </div>
     </div>
 
-    <!-- Card 6: Network & TCP BBR (Deep Cobalt) -->
+    <!-- Card 6: TCP BBR & Radio -->
     <div class="homeup-card card-slate" onclick="toggleNetworkBoost(event)">
       <div class="card-top">
         <div class="card-icon">
-          <!-- Globe / Network SVG -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -682,11 +766,10 @@
       </div>
     </div>
 
-    <!-- Card 7: Telemetry Sleep (Deep Amber / Warm Brown) -->
+    <!-- Card 7: Telemetry Sleep -->
     <div class="homeup-card card-amber" onclick="toggleTelemetry(event)">
       <div class="card-top">
         <div class="card-icon">
-          <!-- Shield SVG -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
@@ -701,11 +784,10 @@
       </div>
     </div>
 
-    <!-- Card 8: Enhanced CPU (Deep Plum / Magenta) -->
+    <!-- Card 8: Enhanced CPU -->
     <div class="homeup-card card-plum" onclick="toggleEnhancedCpu(event)">
       <div class="card-top">
         <div class="card-icon">
-          <!-- Speedometer SVG -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
           </svg>
@@ -716,7 +798,7 @@
       </div>
       <div class="card-bottom">
         <div class="card-title">Enhanced CPU</div>
-        <div class="card-subtitle" id="card-cpu-sub">Faster clock ramp &bull; Low UI latency</div>
+        <div class="card-subtitle" id="card-cpu-sub">Fast clock ramp &bull; Low UI latency</div>
       </div>
     </div>
 
@@ -726,7 +808,7 @@
   <div class="section-header">Maintenance & Diagnostics</div>
   <div class="action-group">
     
-    <div class="action-row" onclick="runOptimizeNow()">
+    <div class="action-row" onclick="haptic(15); runOptimizeNow()">
       <div class="action-row-left">
         <div class="action-row-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -739,7 +821,7 @@
       <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
-    <div class="action-row" onclick="compactMemory()">
+    <div class="action-row" onclick="haptic(15); compactMemory()">
       <div class="action-row-left">
         <div class="action-row-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
@@ -752,7 +834,7 @@
       <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
-    <div class="action-row" onclick="purgeLogs()">
+    <div class="action-row" onclick="haptic(15); purgeLogs()">
       <div class="action-row-left">
         <div class="action-row-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -765,7 +847,7 @@
       <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
-    <div class="action-row" onclick="openLogSheet()">
+    <div class="action-row" onclick="haptic(15); openLogSheet()">
       <div class="action-row-left">
         <div class="action-row-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -783,33 +865,33 @@
   <!-- Bottom Sheet 1: RAM Plus Selector -->
   <div class="sheet-scrim" id="sheet-ramplus" onclick="closeSheets(event)">
     <div class="oneui-sheet" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
+      <div class="sheet-handle-bar"><div class="sheet-handle"></div></div>
       <div class="sheet-title">RAM Plus</div>
       <div class="sheet-desc">Swapping pages onto flash storage can trigger kernel swap thrashing. Disabling it (0 GB) completely eliminates background audio and UI stutter.</div>
 
       <div class="sheet-option-list">
-        <div class="sheet-option" id="sheet-opt-0" onclick="chooseRam(0)">
+        <div class="sheet-option" id="sheet-opt-0" onclick="haptic(15); chooseRam(0)">
           <div>
             <div class="sheet-opt-title">0 GB</div>
             <div class="sheet-opt-desc">Off &bull; Lowest latency (Recommended)</div>
           </div>
           <div class="sheet-radio"></div>
         </div>
-        <div class="sheet-option" id="sheet-opt-2048" onclick="chooseRam(2048)">
+        <div class="sheet-option" id="sheet-opt-2048" onclick="haptic(15); chooseRam(2048)">
           <div>
             <div class="sheet-opt-title">2 GB</div>
             <div class="sheet-opt-desc">Minimal swap</div>
           </div>
           <div class="sheet-radio"></div>
         </div>
-        <div class="sheet-option" id="sheet-opt-4096" onclick="chooseRam(4096)">
+        <div class="sheet-option" id="sheet-opt-4096" onclick="haptic(15); chooseRam(4096)">
           <div>
             <div class="sheet-opt-title">4 GB</div>
             <div class="sheet-opt-desc">Samsung stock balanced</div>
           </div>
           <div class="sheet-radio"></div>
         </div>
-        <div class="sheet-option" id="sheet-opt-8192" onclick="chooseRam(8192)">
+        <div class="sheet-option" id="sheet-opt-8192" onclick="haptic(15); chooseRam(8192)">
           <div>
             <div class="sheet-opt-title">8 GB</div>
             <div class="sheet-opt-desc">Maximum swap headroom</div>
@@ -819,7 +901,7 @@
       </div>
 
       <div class="sheet-buttons">
-        <button class="oneui-btn oneui-btn-primary" onclick="saveRamChoice()">Apply Setting (Reboot to take effect)</button>
+        <button class="oneui-btn oneui-btn-primary" onclick="haptic(25); saveRamChoice()">Apply Setting (Reboot to take effect)</button>
         <button class="oneui-btn oneui-btn-flat" onclick="closeSheets()">Cancel</button>
       </div>
     </div>
@@ -828,26 +910,26 @@
   <!-- Bottom Sheet 2: ZRAM Compression Engine Selector -->
   <div class="sheet-scrim" id="sheet-zram" onclick="closeSheets(event)">
     <div class="oneui-sheet" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
+      <div class="sheet-handle-bar"><div class="sheet-handle"></div></div>
       <div class="sheet-title">ZRAM Engine</div>
       <div class="sheet-desc">Choose the kernel compression algorithm. ZSTD offers ~35% higher compression ratio on modern ARMv9 CPUs (Snapdragon 8 Gen 3 / Exynos 2400).</div>
 
       <div class="sheet-option-list">
-        <div class="sheet-option" id="sheet-alg-zstd" onclick="chooseAlg('zstd')">
+        <div class="sheet-option" id="sheet-alg-zstd" onclick="haptic(15); chooseAlg('zstd')">
           <div>
             <div class="sheet-opt-title">ZSTD</div>
             <div class="sheet-opt-desc">High compression (~35% more RAM headroom)</div>
           </div>
           <div class="sheet-radio"></div>
         </div>
-        <div class="sheet-option" id="sheet-alg-lz4" onclick="chooseAlg('lz4')">
+        <div class="sheet-option" id="sheet-alg-lz4" onclick="haptic(15); chooseAlg('lz4')">
           <div>
             <div class="sheet-opt-title">LZ4</div>
             <div class="sheet-opt-desc">Ultra-fast decompression</div>
           </div>
           <div class="sheet-radio"></div>
         </div>
-        <div class="sheet-option" id="sheet-alg-lzo-rle" onclick="chooseAlg('lzo-rle')">
+        <div class="sheet-option" id="sheet-alg-lzo-rle" onclick="haptic(15); chooseAlg('lzo-rle')">
           <div>
             <div class="sheet-opt-title">LZO-RLE</div>
             <div class="sheet-opt-desc">Samsung stock default</div>
@@ -857,8 +939,8 @@
       </div>
 
       <div class="sheet-buttons">
-        <button class="oneui-btn oneui-btn-primary" onclick="confirmZramSwitch('reboot')">Save for Next Reboot (Recommended &bull; Zero Lag)</button>
-        <button class="oneui-btn oneui-btn-danger" onclick="confirmZramSwitch('live')">Switch Live Now (May cause 5-10s freeze)</button>
+        <button class="oneui-btn oneui-btn-primary" onclick="haptic(25); confirmZramSwitch('reboot')">Save for Next Reboot (Recommended &bull; Zero Lag)</button>
+        <button class="oneui-btn oneui-btn-danger" onclick="haptic(25); confirmZramSwitch('live')">Switch Live Now (May cause 5-10s freeze)</button>
         <button class="oneui-btn oneui-btn-flat" onclick="closeSheets()">Cancel</button>
       </div>
     </div>
@@ -867,7 +949,7 @@
   <!-- Bottom Sheet 3: System Overview -->
   <div class="sheet-scrim" id="sheet-system" onclick="closeSheets(event)">
     <div class="oneui-sheet" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
+      <div class="sheet-handle-bar"><div class="sheet-handle"></div></div>
       <div class="sheet-title">System Metrics</div>
       <div class="sheet-desc">Live device status, memory residency, and subsystem diagnostics.</div>
 
@@ -913,10 +995,10 @@
   <!-- Bottom Sheet 4: Activity Log -->
   <div class="sheet-scrim" id="sheet-log" onclick="closeSheets(event)">
     <div class="oneui-sheet" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
+      <div class="sheet-handle-bar"><div class="sheet-handle"></div></div>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
         <div class="sheet-title" style="margin-bottom:0;">Terminal Log</div>
-        <button onclick="loadLogs()" class="oneui-btn oneui-btn-secondary" style="width:auto; padding:6px 14px; font-size:12.5px; border-radius:14px;">Refresh ⟳</button>
+        <button onclick="haptic(15); loadLogs()" class="oneui-btn oneui-btn-secondary" style="width:auto; padding:6px 14px; font-size:12.5px; border-radius:14px;">Refresh ⟳</button>
       </div>
       <div class="terminal-box" id="terminal-log">Loading activity log...</div>
       <div class="sheet-buttons">
@@ -936,8 +1018,38 @@
     let isBypassActive = false;
     let isEnhancedCpu = true;
 
+    // Native Haptic Vibration Trigger
+    function haptic(ms = 15) {
+      if (window.navigator && window.navigator.vibrate) {
+        try {
+          window.navigator.vibrate(ms);
+        } catch (e) {}
+      }
+    }
+
+    // Disable Default Web Context Menu for True App Feel
+    window.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    // One UI Collapsible Header Scroll Physics
+    window.addEventListener("scroll", () => {
+      const scrollY = window.scrollY;
+      const appbar = document.getElementById("appbar");
+      const viewingArea = document.getElementById("viewingArea");
+      if (scrollY > 30) {
+        appbar.classList.add("scrolled");
+      } else {
+        appbar.classList.remove("scrolled");
+      }
+      if (viewingArea) {
+        const factor = Math.max(0, 1 - scrollY / 70);
+        viewingArea.style.opacity = factor;
+        viewingArea.style.transform = `translateY(${-scrollY * 0.3}px)`;
+      }
+    }, { passive: true });
+
     // Toast Messenger
     function showToast(msg) {
+      haptic([15, 30, 20]);
       const t = document.getElementById("toast");
       t.innerText = msg;
       t.classList.add("show");
@@ -975,6 +1087,45 @@
       }
     }
 
+    // Gesture Drag-to-Dismiss Touch Tracking for Bottom Sheets
+    let touchStartY = 0;
+    let currentSheet = null;
+
+    document.querySelectorAll(".oneui-sheet").forEach(sheet => {
+      sheet.addEventListener("touchstart", (e) => {
+        if (sheet.scrollTop <= 0) {
+          touchStartY = e.touches[0].clientY;
+          currentSheet = sheet;
+        } else {
+          currentSheet = null;
+        }
+      }, { passive: true });
+
+      sheet.addEventListener("touchmove", (e) => {
+        if (!currentSheet) return;
+        const currentY = e.touches[0].clientY;
+        const deltaY = currentY - touchStartY;
+        if (deltaY > 0) {
+          currentSheet.style.transition = "none";
+          currentSheet.style.transform = `translateY(${deltaY}px)`;
+        }
+      }, { passive: true });
+
+      sheet.addEventListener("touchend", (e) => {
+        if (!currentSheet) return;
+        const currentY = e.changedTouches[0].clientY;
+        const deltaY = currentY - touchStartY;
+        currentSheet.style.transition = "transform 0.32s var(--spring-smooth)";
+        if (deltaY > 110) {
+          haptic(15);
+          closeSheets();
+        } else {
+          currentSheet.style.transform = "translateY(0)";
+        }
+        currentSheet = null;
+      });
+    });
+
     // Sheet Controllers
     function openRamSheet() {
       document.getElementById('sheet-ramplus').classList.add('open');
@@ -995,12 +1146,17 @@
 
     function closeSheets(e) {
       if (e && e.target !== e.currentTarget && !e.target.classList.contains('sheet-scrim')) return;
-      document.querySelectorAll('.sheet-scrim').forEach(s => s.classList.remove('open'));
+      document.querySelectorAll('.sheet-scrim').forEach(s => {
+        s.classList.remove('open');
+        const sheet = s.querySelector(".oneui-sheet");
+        if (sheet) sheet.style.transform = "";
+      });
     }
 
     // Master Toggle (Daemon start / stop)
     async function toggleMasterDaemon(e) {
       if (e) e.stopPropagation();
+      haptic(20);
       if (isDaemonRunning) {
         showToast("Stopping 5:00 AM daemon...");
         await execCmd("sh /data/adb/modules/samsung_daily_optimizer/stop_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/stop_daemon.sh 2>/dev/null");
@@ -1024,6 +1180,7 @@
 
     async function quickToggleRam(e) {
       if (e) e.stopPropagation();
+      haptic(20);
       const nextSize = currentRamChoice === 0 ? 2048 : 0;
       chooseRam(nextSize);
       await saveRamChoice();
@@ -1109,6 +1266,7 @@
     // Display 120Hz Toggle
     async function toggleRefreshRate(e) {
       if (e) e.stopPropagation();
+      haptic(20);
       if (is120HzLocked) {
         showToast("Restoring dynamic LTPO (1Hz - 120Hz)...");
         await execCmd("settings put system min_refresh_rate 1.0 2>/dev/null; settings put system peak_refresh_rate 120.0 2>/dev/null; cmd notification post -i @android:drawable/ic_dialog_info -t 'Vertex' 'samsung_optimizer' '🌱 Dynamic LTPO Restored (1Hz - 120Hz)' 2>/dev/null");
@@ -1124,6 +1282,7 @@
     // Bypass Charging Toggle
     async function toggleBypassCharging(e) {
       if (e) e.stopPropagation();
+      haptic(20);
       if (isBypassActive) {
         showToast("Resuming normal battery charging...");
         await execCmd(`
@@ -1147,6 +1306,7 @@
     // Audio Boost
     async function boostAudioPriority(e) {
       if (e) e.stopPropagation();
+      haptic(20);
       showToast("Boosting audio, HAL & Bluetooth priorities...");
       const cmd = `
         for apid in $(pidof audioserver secaudiohalaidl android.hardware.audio.service com.android.bluetooth com.sec.android.app.soundalive android.hardware.bluetooth@1.1-service-qti 2>/dev/null); do
@@ -1170,6 +1330,7 @@
     // Network Boost
     async function toggleNetworkBoost(e) {
       if (e) e.stopPropagation();
+      haptic(20);
       showToast("Applying TCP BBR & Audio Radio Boost...");
       const cmd = `
         if grep -q "bbr" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
@@ -1188,6 +1349,7 @@
     // Telemetry Restriction
     async function toggleTelemetry(e) {
       if (e) e.stopPropagation();
+      haptic(20);
       showToast("Restricting Samsung diagnostic & telemetry daemons...");
       const cmd = `
         for pkg in com.sec.android.diagmonagent com.samsung.android.survey.service com.samsung.android.ipsgeofence; do
@@ -1206,6 +1368,7 @@
     // Enhanced CPU
     async function toggleEnhancedCpu(e) {
       if (e) e.stopPropagation();
+      haptic(20);
       const cur = await execCmd("settings get global sem_enhanced_cpu_responsiveness 2>/dev/null");
       const next = cur.trim() === "1" ? "0" : "1";
       await execCmd(`settings put global sem_enhanced_cpu_responsiveness ${next}`);
