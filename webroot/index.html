@@ -3,13 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#000000">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" type="text/css" href="/internal/insets.css">
+  <link rel="stylesheet" type="text/css" href="https://mui.kernelsu.org/internal/insets.css">
   <title>Vertex</title>
   <style>
+    @import url("/internal/insets.css");
+    @import url("https://mui.kernelsu.org/internal/insets.css");
+
     :root {
+      color-scheme: dark;
+      --safe-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+      --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
       --bg: #000000;
       --surface: #1e1e22;
       --surface-card: #28282c;
@@ -54,47 +65,17 @@
       overflow-x: hidden;
       overflow-y: visible;
       font-size: 15px;
-      padding-bottom: 60px;
+      padding-top: var(--safe-top);
+      padding-bottom: calc(var(--safe-bottom) + 50px);
       position: relative;
     }
 
-    /* Pinned Top Navigation Bar (Collapses and shows title on scroll) */
-    .top-appbar {
-      position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 56px;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      z-index: 100;
+    /* Home Up Action Row (< Back and ⋮ More) */
+    .nav-action-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
-      transition: border-color 0.2s;
-      border-bottom: 1px solid transparent;
-    }
-
-    .top-appbar.scrolled {
-      border-color: rgba(255, 255, 255, 0.08);
-    }
-
-    .top-appbar-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-primary);
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 0.25s var(--spring-smooth), transform 0.25s var(--spring-smooth);
-      letter-spacing: -0.2px;
-      pointer-events: none;
-    }
-
-    .top-appbar.scrolled .top-appbar-title {
-      opacity: 1;
-      transform: translateY(0);
+      padding: 0 16px 14px 16px;
     }
 
     .icon-btn {
@@ -105,8 +86,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       transition: transform 0.15s ease, background 0.15s ease;
       touch-action: manipulation;
@@ -123,9 +104,9 @@
       stroke-width: 2.2;
     }
 
-    /* Samsung One UI Viewing Area (Large Collapsible Title) */
+    /* Samsung One UI Viewing Area (Home Up Centered Title) */
     .viewing-area {
-      padding: 16px 24px 28px 24px;
+      padding: 24px 24px 16px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -430,7 +411,7 @@
       width: 100%;
       background: #1e1e22;
       border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
-      padding: 18px 20px 36px 20px;
+      padding: 18px 20px calc(var(--safe-bottom) + 36px) 20px;
       box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.7);
       transform: translateY(100%);
       transition: transform 0.32s var(--spring-smooth);
@@ -608,7 +589,7 @@
     /* One UI Floating Toast */
     .toast {
       position: fixed;
-      bottom: 34px;
+      bottom: calc(var(--safe-bottom) + 34px);
       left: 50%;
       transform: translateX(-50%) translateY(40px);
       background: #2b2b2f;
@@ -634,21 +615,20 @@
 </head>
 <body>
 
-  <!-- Sticky One UI Top Bar with Title Fade -->
-  <div class="top-appbar" id="appbar">
-    <button class="icon-btn" onclick="haptic(15); window.history.back()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <div class="top-appbar-title">Vertex</div>
-    <button class="icon-btn" onclick="haptic(15); openSystemSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-    </button>
-  </div>
-
-  <!-- One UI Large Viewing Area (Collapses smoothly on scroll) -->
+  <!-- One UI Viewing Area (Home Up Header) -->
   <div class="viewing-area" id="viewingArea">
     <div class="viewing-title">Vertex</div>
     <div class="viewing-subtitle" id="val-module-ver">One UI Performance Suite &bull; v1.3</div>
+  </div>
+
+  <!-- Home Up Action Row (< Back and ⋮ Settings) -->
+  <div class="nav-action-row">
+    <button class="icon-btn" onclick="haptic(15); window.history.back()" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="icon-btn" onclick="haptic(15); openSystemSheet()" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+    </button>
   </div>
 
   <!-- Home Up Master Toggle Banner -->
@@ -1031,6 +1011,11 @@
     let isBypassActive = false;
     let isEnhancedCpu = true;
 
+    // Request Edge-to-Edge immersion in KernelSU / KernelSU-Next / APatch WebUI
+    if (window.ksu && typeof window.ksu.enableEdgeToEdge === "function") {
+      try { window.ksu.enableEdgeToEdge(true); } catch (e) {}
+    }
+
     // Native Haptic Vibration Trigger
     function haptic(ms = 15) {
       if (window.navigator && window.navigator.vibrate) {
@@ -1043,20 +1028,14 @@
     // Disable Default Web Context Menu for True App Feel
     window.addEventListener("contextmenu", (e) => e.preventDefault());
 
-    // One UI Collapsible Header Scroll Physics
+    // One UI Header Scroll Physics
     window.addEventListener("scroll", () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      const appbar = document.getElementById("appbar");
       const viewingArea = document.getElementById("viewingArea");
-      if (scrollY > 30) {
-        appbar.classList.add("scrolled");
-      } else {
-        appbar.classList.remove("scrolled");
-      }
       if (viewingArea) {
-        const factor = Math.max(0, 1 - scrollY / 70);
+        const factor = Math.max(0, 1 - scrollY / 90);
         viewingArea.style.opacity = factor;
-        viewingArea.style.transform = `translateY(${-scrollY * 0.3}px)`;
+        viewingArea.style.transform = `translateY(${-scrollY * 0.25}px)`;
       }
     }, { passive: true });
 
