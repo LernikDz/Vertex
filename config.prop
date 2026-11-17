@@ -53,6 +53,9 @@ RESTRICT_SAMSUNG_TELEMETRY=1
 # Audio & Bluetooth Real-Time Scheduling (nice -16 + top-app cpuset to prevent L/R earbud desync)
 BOOST_AUDIO_PRIORITY=1
 
+# Prevent Screen Lock Audio Stutter (Disables lockscreen sound effect to eliminate AudioFlinger stream collision)
+PREVENT_LOCKSCREEN_AUDIO_STUTTER=1
+
 # ZRAM Compression Algorithm Engine (zstd = ~35% higher compression ratio, lz4 = low CPU, lzo-rle = default)
 TUNE_ZRAM_ALGORITHM=1
 ZRAM_COMP_ALGORITHM=zstd

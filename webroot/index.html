@@ -1147,20 +1147,23 @@
     // Audio Boost
     async function boostAudioPriority(e) {
       if (e) e.stopPropagation();
-      showToast("Boosting audio & Bluetooth real-time priorities...");
+      showToast("Boosting audio, HAL & Bluetooth priorities...");
       const cmd = `
-        for apid in $(pidof audioserver android.hardware.audio.service com.android.bluetooth android.hardware.bluetooth@1.1-service-qti 2>/dev/null); do
+        for apid in $(pidof audioserver secaudiohalaidl android.hardware.audio.service com.android.bluetooth com.sec.android.app.soundalive android.hardware.bluetooth@1.1-service-qti 2>/dev/null); do
           renice -n -16 -p "$apid" 2>/dev/null
           if [ -d "/proc/$apid/task" ]; then
             for atid in /proc/"$apid"/task/*; do
-              [ -d /dev/cpuset/top-app ] && echo "$(basename "$atid")" > /dev/cpuset/top-app/tasks 2>/dev/null
+              tid_num=$(basename "$atid")
+              [ -d /dev/cpuset/foreground-boost ] && echo "$tid_num" > /dev/cpuset/foreground-boost/tasks 2>/dev/null
+              [ -d /dev/cpuset/top-app ] && echo "$tid_num" > /dev/cpuset/top-app/tasks 2>/dev/null
             done
           fi
         done
-        cmd notification post -i @android:drawable/stat_sys_headset -t 'Vertex' 'samsung_optimizer' '🎧 Audio & Bluetooth threads boosted to Real-Time priority' 2>/dev/null
+        settings put system lockscreen_sounds_enabled 0 2>/dev/null
+        cmd notification post -i @android:drawable/stat_sys_headset -t 'Vertex' 'samsung_optimizer' '🎧 Audio HAL & Bluetooth boosted to Real-Time (Lock stutter guard active)' 2>/dev/null
       `;
       await execCmd(cmd);
-      showToast("Audio & BT threads boosted to real-time priority!");
+      showToast("Audio HAL, SoundAlive & BT boosted (Zero lock stutter)!");
       refreshData();
     }
 

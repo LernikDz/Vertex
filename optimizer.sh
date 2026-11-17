@@ -38,6 +38,7 @@ DISABLE_BT_SNOOP_LOG="${DISABLE_BT_SNOOP_LOG:-1}"
 TUNE_WIFI_SLEEP="${TUNE_WIFI_SLEEP:-1}"
 RESTRICT_SAMSUNG_TELEMETRY="${RESTRICT_SAMSUNG_TELEMETRY:-1}"
 BOOST_AUDIO_PRIORITY="${BOOST_AUDIO_PRIORITY:-1}"
+PREVENT_LOCKSCREEN_AUDIO_STUTTER="${PREVENT_LOCKSCREEN_AUDIO_STUTTER:-1}"
 TUNE_ZRAM_ALGORITHM="${TUNE_ZRAM_ALGORITHM:-1}"
 ZRAM_COMP_ALGORITHM="${ZRAM_COMP_ALGORITHM:-zstd}"
 FORCE_120HZ_REFRESH="${FORCE_120HZ_REFRESH:-0}"
@@ -228,21 +229,31 @@ for pkg in $COMPILE_PKGS; do
 done
 
 # 10. Real-Time Audio & Bluetooth Thread Priority Boost
-# Prevents audio thread starvation and L/R earbud desync under high CPU/memory load
+# Prevents audio thread starvation, screen-lock stutters, and L/R earbud desync
 if [ "$BOOST_AUDIO_PRIORITY" = "1" ]; then
-    log "Boosting Bluetooth and Audio HAL real-time priorities..."
-    notify_live "🎧 Prioritizing Bluetooth audio & AudioFlinger threads..."
-    AUDIO_PIDS=$(pidof audioserver android.hardware.audio.service com.android.bluetooth android.hardware.bluetooth@1.1-service-qti 2>/dev/null)
-    for apid in $AUDIO_PIDS; do
-        renice -n -16 -p "$apid" >/dev/null 2>&1
-        if [ -d "/proc/$apid/task" ]; then
-            for atid in /proc/"$apid"/task/*; do
-                tid_num=$(basename "$atid")
-                [ -d /dev/cpuset/top-app ] && echo "$tid_num" > /dev/cpuset/top-app/tasks 2>/dev/null
-            done
-        fi
+    log "Boosting Bluetooth, AudioFlinger, SoundAlive, and Exynos Audio HAL priorities..."
+    notify_live "🎧 Prioritizing audio HAL & Bluetooth streaming threads..."
+    AUDIO_DAEMONS="audioserver secaudiohalaidl android.hardware.audio.service com.android.bluetooth com.sec.android.app.soundalive android.hardware.bluetooth@1.1-service-qti"
+    for daemon in $AUDIO_DAEMONS; do
+        for apid in $(pidof "$daemon" 2>/dev/null); do
+            renice -n -16 -p "$apid" >/dev/null 2>&1
+            if [ -d "/proc/$apid/task" ]; then
+                for atid in /proc/"$apid"/task/*; do
+                    tid_num=$(basename "$atid")
+                    [ -d /dev/cpuset/foreground-boost ] && echo "$tid_num" > /dev/cpuset/foreground-boost/tasks 2>/dev/null
+                    [ -d /dev/cpuset/top-app ] && echo "$tid_num" > /dev/cpuset/top-app/tasks 2>/dev/null
+                done
+            fi
+        done
     done
-    log "  [OK] Bluetooth audio encoder & AudioFlinger boosted to high-priority scheduling"
+    log "  [OK] Audio HAL (secaudiohalaidl), SoundAlive, and Bluetooth pinned to performance cpusets"
+fi
+
+# 10b. Lockscreen Audio Collision Guard
+# Disables lockscreen sound effect to prevent AudioFlinger PCM stream re-negotiation & 1-second stutter on screen lock
+if [ "$PREVENT_LOCKSCREEN_AUDIO_STUTTER" = "1" ]; then
+    settings put system lockscreen_sounds_enabled 0 2>/dev/null
+    log "  [OK] Lockscreen sound effect disabled to prevent Bluetooth stream collision on lock"
 fi
 
 # 11. ZRAM Compression Algorithm Engine Tuning

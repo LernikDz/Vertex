@@ -7,3 +7,4 @@ daemon.pid
 .DS_Store
 Thumbs.db
 *.zip
+features.txt
