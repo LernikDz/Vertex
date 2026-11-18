@@ -684,7 +684,7 @@
     </div>
 
     <!-- Card 3: 120Hz Smooth Scroll -->
-    <div class="homeup-card card-crimson" onclick="toggleRefreshRate(event)">
+    <div class="homeup-card card-crimson" onclick="openFeatureSheet('refresh')">
       <div class="card-top">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -703,7 +703,7 @@
     </div>
 
     <!-- Card 4: Bypass Charging -->
-    <div class="homeup-card card-forest" onclick="toggleBypassCharging(event)">
+    <div class="homeup-card card-forest" onclick="openFeatureSheet('bypass')">
       <div class="card-top">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -721,7 +721,7 @@
     </div>
 
     <!-- Card 5: Audio Guard -->
-    <div class="homeup-card card-teal" onclick="boostAudioPriority(event)">
+    <div class="homeup-card card-teal" onclick="openFeatureSheet('audio')">
       <div class="card-top">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -740,7 +740,7 @@
     </div>
 
     <!-- Card 6: TCP BBR & Radio -->
-    <div class="homeup-card card-slate" onclick="toggleNetworkBoost(event)">
+    <div class="homeup-card card-slate" onclick="openFeatureSheet('network')">
       <div class="card-top">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -759,7 +759,7 @@
     </div>
 
     <!-- Card 7: Deep Hibernation -->
-    <div class="homeup-card card-amber" onclick="toggleTelemetry(event)">
+    <div class="homeup-card card-amber" onclick="openFeatureSheet('telemetry')">
       <div class="card-top">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -777,7 +777,7 @@
     </div>
 
     <!-- Card 8: Enhanced CPU -->
-    <div class="homeup-card card-plum" onclick="toggleEnhancedCpu(event)">
+    <div class="homeup-card card-plum" onclick="openFeatureSheet('cpu')">
       <div class="card-top">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -795,7 +795,7 @@
     </div>
 
     <!-- Card 9: Vulkan UI (SkiaVK) -->
-    <div class="homeup-card card-indigo" onclick="toggleVulkanUi(event)">
+    <div class="homeup-card card-indigo" onclick="openFeatureSheet('vulkan')">
       <div class="card-top">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -815,7 +815,7 @@
     </div>
 
     <!-- Card 10: Touch Boost -->
-    <div class="homeup-card card-coral" onclick="toggleTouchBoost(event)">
+    <div class="homeup-card card-coral" onclick="openFeatureSheet('touch')">
       <div class="card-top">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -833,7 +833,7 @@
     </div>
 
     <!-- Card 11: Classic Bluetooth (Disable LE Audio) -->
-    <div class="homeup-card card-cyan" onclick="toggleClassicBt(event)">
+    <div class="homeup-card card-cyan" onclick="openFeatureSheet('classic_bt')">
       <div class="card-top">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -921,6 +921,45 @@
       <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
+  </div>
+
+  <!-- Bottom Sheet 0: Feature Detail Flyout -->
+  <div class="sheet-scrim" id="sheet-feature" onclick="closeSheets(event)">
+    <div class="oneui-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle-bar"><div class="sheet-handle"></div></div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div id="feat-icon-box" class="card-icon" style="background:#28282d; border-radius:14px; width:46px; height:46px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <div id="feat-svg" style="display:flex;"></div>
+          </div>
+          <div>
+            <div class="sheet-title" id="feat-title" style="margin-bottom:2px; font-size:21px;">Feature</div>
+            <div id="feat-badge" style="font-size:12px; font-weight:600; color:var(--oneui-blue);">Subsystem</div>
+          </div>
+        </div>
+        <div class="oneui-toggle" id="feat-sheet-toggle" onclick="toggleFromSheet(event)">
+          <div class="oneui-toggle-thumb"></div>
+        </div>
+      </div>
+
+      <div class="sheet-option-list" style="margin-bottom:20px;">
+        <div class="sheet-option" style="cursor:default; flex-direction:column; align-items:flex-start; gap:8px;">
+          <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">What it does</div>
+          <div id="feat-overview" style="font-size:14px; color:var(--text-primary); line-height:1.55;"></div>
+        </div>
+
+        <div class="sheet-option" style="cursor:default; flex-direction:column; align-items:flex-start; gap:8px;">
+          <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Under the Hood</div>
+          <div id="feat-technical" style="font-size:13px; color:var(--text-secondary); line-height:1.55;"></div>
+        </div>
+      </div>
+
+      <div class="sheet-buttons">
+        <button class="oneui-btn oneui-btn-primary" id="feat-btn-toggle" onclick="toggleFromSheet(event)">Enable Feature</button>
+        <button class="oneui-btn oneui-btn-flat" onclick="closeSheets()">Close</button>
+      </div>
+    </div>
   </div>
 
   <!-- Bottom Sheet 1: RAM Plus Selector -->
@@ -1369,6 +1408,146 @@
     });
 
     // Sheet Controllers
+    let currentFeatureSheetId = null;
+
+    const FEATURE_DATA = {
+      refresh: {
+        title: "Smooth Scroll",
+        badge: "Display & Motion Smoothness",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+        bgColor: '#3b1219',
+        overview: "Samsung's dynamic LTPO refresh rate aggressively drops down to 24Hz or 60Hz when you scroll slowly or browse apps like Chrome, Reddit, Twitter, and Instagram. This causes noticeable micro-stuttering and jank. Enabling Smooth Scroll locks the display to 120Hz at all times for butter-smooth motion.",
+        technical: "Sets system properties 'min_refresh_rate 120.0' and 'peak_refresh_rate 120.0'. Completely eliminates refresh rate step-down delays without breaking variable panel brightness.",
+        getState: () => is120HzLocked,
+        toggle: (e) => toggleRefreshRate(e)
+      },
+      bypass: {
+        title: "Bypass Charging",
+        badge: "Battery Longevity & Thermal Protection",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>',
+        bgColor: '#162f23',
+        overview: "Standard charging pumps high current directly into the battery, creating intense heat while gaming or docked at your desk. Bypass Charging powers your phone directly from the charger without routing current into the battery, keeping your phone cool and stopping battery wear.",
+        technical: "Enables Samsung kernel 'batt_slate_mode' and disables battery charging switches in /sys/class/power_supply/battery/. The battery percentage remains frozen while wall current powers the SoC.",
+        getState: () => isBypassActive,
+        toggle: (e) => toggleBypassCharging(e)
+      },
+      audio: {
+        title: "Audio Guard",
+        badge: "Real-Time Priority & Desync Fix",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>',
+        bgColor: '#0c2b2a',
+        overview: "Background apps, widgets, KWGT, and system animations often preempt the audio server on the CPU, causing buffer underruns and left/right earbud phase-drift on Galaxy Buds. Audio Guard gives audio and Bluetooth services real-time priority so playback never cuts out.",
+        technical: "Renices audioserver, secaudiohalaidl, and com.android.bluetooth to real-time nice -16 and binds audio worker threads to high-performance cores (/dev/cpuset/top-app). Disables lockscreen sounds to eliminate audio channel collisions.",
+        getState: () => isAudioBoost,
+        toggle: (e) => boostAudioPriority(e)
+      },
+      network: {
+        title: "TCP BBR & Radio",
+        badge: "Congestion Control & Low Latency",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+        bgColor: '#1a2636',
+        overview: "Stock Android uses legacy Cubic TCP congestion control, which struggles with latency spikes during streaming. Furthermore, Samsung dumps heavy Bluetooth HCI logs to internal storage in the background. This tweak enables Google's BBR congestion control and silences Bluetooth logging.",
+        technical: "Sets 'net.ipv4.tcp_congestion_control' to 'bbr' for model-based congestion avoidance. Disables 'bluetooth_btsnoop_default_mode' to eliminate storage I/O stalls on the Bluetooth radio.",
+        getState: () => isNetworkBoost,
+        toggle: (e) => toggleNetworkBoost(e)
+      },
+      telemetry: {
+        title: "Deep Hibernation",
+        badge: "Background Bloat & Battery Standby",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+        bgColor: '#3a2b10',
+        overview: "Samsung Galaxy phones run dozens of background daemons for AR Zone, Live Stickers, AR Emojis, Rubin personalized analytics, and diagnostic telemetry that constantly wake the CPU. Deep Hibernation places over 15 unneeded daemons into strict restricted standby.",
+        technical: "Uses 'am set-standby-bucket <pkg> restricted' and 'appops RUN_IN_BACKGROUND ignore' on AR Zone, sticker services, Rubin core, and diagmonagent. Completely preserves Knox, Samsung Accounts, and system stability while maximizing battery standby time.",
+        getState: () => isTelemetryRestricted,
+        toggle: (e) => toggleTelemetry(e)
+      },
+      cpu: {
+        title: "Enhanced CPU",
+        badge: "Frequency Scaling & Low UI Latency",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+        bgColor: '#3b1338',
+        overview: "Samsung CPU governors use conservative frequency step-ups to maximize power saving, which can make app launches and gesture transitions feel hesitant. Enhanced CPU instructs the kernel to instantly ramp up CPU clock frequencies the moment you touch the screen.",
+        technical: "Activates Samsung's proprietary 'sem_enhanced_cpu_responsiveness 1' setting, boosting CPU energy-aware scheduler (EAS) response curves during user interaction without pinning max frequencies at idle.",
+        getState: () => isEnhancedCpu,
+        toggle: (e) => toggleEnhancedCpu(e)
+      },
+      vulkan: {
+        title: "Vulkan UI (SkiaVK)",
+        badge: "Vulkan Hardware Acceleration",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+        bgColor: '#17173e',
+        overview: "Android One UI draws and rasterizes UI animations using OpenGL ES by default. On modern Adreno (Snapdragon 8 Gen 3) and Xclipse RDNA3 (Exynos 2400) GPUs, Vulkan offers substantially higher draw-call throughput and lower CPU overhead for 120Hz rendering.",
+        technical: "Sets 'debug.hwui.renderer=skiavk' and enables SurfaceFlinger zero-latency unsignaled frame latching ('debug.sf.latch_unsignaled=1', 'enable_gl_backpressure=0') so display frames latch immediately without fence waits.",
+        getState: () => isVulkanUi,
+        toggle: (e) => toggleVulkanUi(e)
+      },
+      touch: {
+        title: "Touch Boost",
+        badge: "240Hz Digitizer & RT Dispatcher",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
+        bgColor: '#3e1614',
+        overview: "Enables maximum 240Hz touch sampling on the display digitizer and prioritizes the input processing threads in the Android framework, making every swipe and tap register with zero input latency.",
+        technical: "Sets 'settings put system touch_sensitivity 1' and renices InputDispatcher and InputReader threads in system_server and surfaceflinger to real-time nice -20 pinned to performance CPU cores.",
+        getState: () => isTouchBoost,
+        toggle: (e) => toggleTouchBoost(e)
+      },
+      classic_bt: {
+        title: "Classic Bluetooth",
+        badge: "Force A2DP & Disable LE Audio",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg>',
+        bgColor: '#0b2a3a',
+        overview: "Samsung forces Galaxy Buds into Bluetooth LE Audio (BAP / CIS streams) on the S24. Because antenna time slots are shared with Wi-Fi and BLE beaconing, this causes periodic 0.5s audio stutters. Disabling LE Audio forces the phone to use standard Classic Bluetooth (A2DP) with Samsung Scalable Codec (SSC), exactly like on Galaxy tablets.",
+        technical: "Uses resetprop to disable 'bluetooth.profile.bap.unicast.client.enabled' and broadcast assist profiles, forcing the Bluetooth stack to negotiate classic BR/EDR A2DP streams with larger buffer margins.",
+        getState: () => isClassicBt,
+        toggle: (e) => toggleClassicBt(e)
+      }
+    };
+
+    function openFeatureSheet(id) {
+      const feat = FEATURE_DATA[id];
+      if (!feat) return;
+      currentFeatureSheetId = id;
+      haptic(15);
+
+      document.getElementById("feat-title").innerText = feat.title;
+      document.getElementById("feat-badge").innerText = feat.badge;
+      document.getElementById("feat-svg").innerHTML = feat.icon;
+      document.getElementById("feat-icon-box").style.backgroundColor = feat.bgColor;
+      document.getElementById("feat-overview").innerText = feat.overview;
+      document.getElementById("feat-technical").innerText = feat.technical;
+
+      updateFeatureSheetControls();
+
+      document.getElementById("sheet-feature").classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+
+    function updateFeatureSheetControls() {
+      if (!currentFeatureSheetId) return;
+      const feat = FEATURE_DATA[currentFeatureSheetId];
+      if (!feat) return;
+      const isActive = feat.getState();
+
+      const toggle = document.getElementById("feat-sheet-toggle");
+      const btn = document.getElementById("feat-btn-toggle");
+
+      if (toggle) toggle.classList.toggle("active", isActive);
+      if (btn) {
+        btn.innerText = isActive ? "Turn Off" : "Turn On";
+        btn.className = isActive ? "oneui-btn oneui-btn-danger" : "oneui-btn oneui-btn-primary";
+      }
+    }
+
+    function toggleFromSheet(e) {
+      if (e) e.stopPropagation();
+      if (!currentFeatureSheetId) return;
+      const feat = FEATURE_DATA[currentFeatureSheetId];
+      if (!feat) return;
+
+      feat.toggle(e);
+      setTimeout(updateFeatureSheetControls, 50);
+    }
+
     function openRamSheet() {
       document.getElementById('sheet-ramplus').classList.add('open');
       document.body.style.overflow = 'hidden';
