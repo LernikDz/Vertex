@@ -4,6 +4,15 @@ All notable changes to the **Vertex** (formerly Samsung Daily Optimizer) project
 
 ---
 
+## [v1.4.2] - 2026-11-18
+
+### ⚙️ Master Daemon & Reliability
+* **Persistent 5:00 AM Master Switch**: Fixed master daemon state persistence across WebUI exits by syncing to both `localStorage` (`vtx_master`) and disk `config.prop` (`DAEMON_ENABLED=1`).
+* **Robust PID & Process Detection**: Replaced brittle file-only PID lookup with multi-tier process table and `/proc` verification (`pgrep -f "sh .*/daemon\.sh"` and `/dev/vertex_daemon.pid`), preventing the toggle from falsely reverting to "Off" when the daemon is actively running.
+* **Session Detachment via setsid**: Updated `start_daemon.sh` and `service.sh` to spawn background tasks using `setsid nohup` to prevent Android WebViews or session cleanups from terminating background processes.
+
+---
+
 ## [v1.4.1] - 2026-11-18
 
 ### 🎧 Audio & Bluetooth

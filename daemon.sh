@@ -7,10 +7,12 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PID_FILE="$SCRIPT_DIR/daemon.pid"
 
 # Terminate duplicate daemon processes
-for p in $(pgrep -f "daemon.sh" 2>/dev/null); do
+for p in $(pgrep -f "sh .*/daemon\.sh" 2>/dev/null); do
     [ "$p" != "$$" ] && kill -9 "$p" 2>/dev/null
 done
 echo $$ > "$PID_FILE" 2>/dev/null
+echo $$ > /dev/vertex_daemon.pid 2>/dev/null
+echo $$ > /data/local/tmp/vertex_daemon.pid 2>/dev/null
 
 log_daemon() {
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')

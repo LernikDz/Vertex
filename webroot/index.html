@@ -634,9 +634,9 @@
   <div class="master-banner" onclick="toggleMasterDaemon(event)">
     <div class="master-text-group">
       <div class="master-title" id="master-status-text">On</div>
-      <div class="master-subtitle" id="master-status-desc">Daily maintenance scheduled for 05:00 AM</div>
+      <div class="master-subtitle" id="master-status-desc">Active • Daily at 05:00 AM</div>
     </div>
-    <div class="oneui-toggle" id="master-toggle">
+    <div class="oneui-toggle active" id="master-toggle">
       <div class="oneui-toggle-thumb"></div>
     </div>
   </div>
@@ -1111,7 +1111,7 @@
   <div id="toast" class="toast">Action applied</div>
 
   <script>
-    let isDaemonRunning = false;
+    let isDaemonRunning = true;
     let currentRamChoice = 0;
     let currentAlgChoice = 'zstd';
     let is120HzLocked = false;
@@ -1147,13 +1147,15 @@
         const sMaster = localStorage.getItem('vtx_master');
         if (sMaster !== null) {
           isDaemonRunning = (sMaster === '1');
-          const el = document.getElementById("master-toggle");
-          if (el) el.classList.toggle("active", isDaemonRunning);
-          const t = document.getElementById("master-status-text");
-          const d = document.getElementById("master-status-desc");
-          if (t) t.innerText = isDaemonRunning ? "On" : "Off";
-          if (d) d.innerText = isDaemonRunning ? "Active • Daily at 05:00 AM" : "Manual trigger only (Tap to schedule 05:00 AM)";
+        } else {
+          isDaemonRunning = true; // Default ON
         }
+        const el = document.getElementById("master-toggle");
+        if (el) el.classList.toggle("active", isDaemonRunning);
+        const t = document.getElementById("master-status-text");
+        const d = document.getElementById("master-status-desc");
+        if (t) t.innerText = isDaemonRunning ? "On" : "Off";
+        if (d) d.innerText = isDaemonRunning ? "Active • Daily at 05:00 AM" : "Manual trigger only (Tap to schedule 05:00 AM)";
 
         const sRam = localStorage.getItem('vtx_ramplus');
         if (sRam !== null) {
@@ -1590,6 +1592,9 @@
       const desc = document.getElementById("master-status-desc");
 
       isDaemonRunning = !isDaemonRunning;
+      try { localStorage.setItem('vtx_master', isDaemonRunning ? '1' : '0'); } catch (e) {}
+      updateConfigProp('DAEMON_ENABLED', isDaemonRunning ? '1' : '0');
+
       if (isDaemonRunning) {
         if (masterToggle) masterToggle.classList.add("active");
         if (title) title.innerText = "On";
@@ -2144,7 +2149,24 @@
       if (Date.now() - lastToggleTime < 4500) return;
 
       const script = `
-        cat /data/adb/modules/samsung_daily_optimizer/daemon.pid 2>/dev/null || cat /data/local/tmp/SamsungDailyOptimizer/daemon.pid 2>/dev/null
+        DPID=""
+        for f in /data/adb/modules/samsung_daily_optimizer/daemon.pid /data/local/tmp/SamsungDailyOptimizer/daemon.pid /data/local/tmp/vertex_daemon.pid /dev/vertex_daemon.pid; do
+          if [ -f "$f" ]; then
+            p=$(cat "$f" 2>/dev/null | tr -d '\\r\\n')
+            if [ -n "$p" ] && [ -d "/proc/$p" ]; then
+              DPID="$p"
+              break
+            fi
+          fi
+        done
+        if [ -z "$DPID" ]; then
+          DPID=$(pgrep -f "sh .*/daemon\\.sh" 2>/dev/null | head -n 1 | tr -d '\\r\\n')
+        fi
+        if [ -n "$DPID" ] && [ -d "/proc/$DPID" ]; then
+          echo "$DPID"
+        else
+          echo ""
+        fi
         echo '===VTX==='
         settings get global ram_expand_size 2>/dev/null
         echo '===VTX==='
@@ -2190,18 +2212,33 @@
 
       // 1. Daemon Status
       const masterToggle = document.getElementById("master-toggle");
+      const title = document.getElementById("master-status-text");
+      const desc = document.getElementById("master-status-desc");
+      const daemonConfigVal = getConfigVal("DAEMON_ENABLED");
+
       if (daemonPid && !isNaN(parseInt(daemonPid))) {
         isDaemonRunning = true;
-        masterToggle.classList.add("active");
-        document.getElementById("master-status-text").innerText = "On";
-        document.getElementById("master-status-desc").innerText = "Active (PID " + daemonPid + ") • Daily at 05:00 AM";
+        if (masterToggle) masterToggle.classList.add("active");
+        if (title) title.innerText = "On";
+        if (desc) desc.innerText = "Active (PID " + daemonPid + ") • Daily at 05:00 AM";
         try { localStorage.setItem('vtx_master', '1'); } catch (e) {}
       } else {
-        isDaemonRunning = false;
-        masterToggle.classList.remove("active");
-        document.getElementById("master-status-text").innerText = "Off";
-        document.getElementById("master-status-desc").innerText = "Manual trigger only (Tap to schedule 05:00 AM)";
-        try { localStorage.setItem('vtx_master', '0'); } catch (e) {}
+        const cachedMaster = localStorage.getItem('vtx_master');
+        const shouldBeRunning = (daemonConfigVal === "1") || (cachedMaster === "1") || (daemonConfigVal === null && cachedMaster === null);
+        if (shouldBeRunning) {
+          isDaemonRunning = true;
+          if (masterToggle) masterToggle.classList.add("active");
+          if (title) title.innerText = "On";
+          if (desc) desc.innerText = "Active • Daily at 05:00 AM";
+          try { localStorage.setItem('vtx_master', '1'); } catch (e) {}
+          execCmd("sh /data/adb/modules/samsung_daily_optimizer/start_daemon.sh 2>/dev/null || sh /data/local/tmp/SamsungDailyOptimizer/start_daemon.sh 2>/dev/null");
+        } else {
+          isDaemonRunning = false;
+          if (masterToggle) masterToggle.classList.remove("active");
+          if (title) title.innerText = "Off";
+          if (desc) desc.innerText = "Manual trigger only (Tap to schedule 05:00 AM)";
+          try { localStorage.setItem('vtx_master', '0'); } catch (e) {}
+        }
       }
 
       // 2. RAM Plus Status

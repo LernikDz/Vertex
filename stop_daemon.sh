@@ -2,15 +2,18 @@
 # Stop optimizer daemon
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-if [ -f "$SCRIPT_DIR/daemon.pid" ]; then
-    PID=$(cat "$SCRIPT_DIR/daemon.pid" 2>/dev/null)
-    if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
-        kill "$PID" 2>/dev/null
-        rm -f "$SCRIPT_DIR/daemon.pid"
-        echo "Optimizer daemon (PID $PID) stopped."
-        exit 0
+for f in "$SCRIPT_DIR/daemon.pid" /dev/vertex_daemon.pid /data/local/tmp/vertex_daemon.pid /data/adb/modules/samsung_daily_optimizer/daemon.pid; do
+    if [ -f "$f" ]; then
+        PID=$(cat "$f" 2>/dev/null | tr -d '\r\n')
+        if [ -n "$PID" ]; then
+            kill "$PID" 2>/dev/null || kill -9 "$PID" 2>/dev/null
+        fi
+        rm -f "$f" 2>/dev/null
     fi
-    rm -f "$SCRIPT_DIR/daemon.pid"
-fi
+done
 
-pkill -f "daemon.sh" 2>/dev/null && echo "Stopped running daemon instances." || echo "Optimizer daemon is not running."
+for p in $(pgrep -f "sh .*/daemon\.sh" 2>/dev/null); do
+    [ "$p" != "$$" ] && kill -9 "$p" 2>/dev/null
+done
+
+echo "Optimizer daemon stopped."

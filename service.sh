@@ -60,4 +60,6 @@ if [ "${TUNE_UFS_SCHEDULER:-1}" = "1" ]; then
 fi
 
 # Launch scheduler daemon in background
-nohup sh "$MODDIR/daemon.sh" >/dev/null 2>&1 &
+if [ "${DAEMON_ENABLED:-1}" = "1" ]; then
+    setsid nohup sh "$MODDIR/daemon.sh" >/dev/null 2>&1 &
+fi
