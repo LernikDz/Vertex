@@ -15,6 +15,7 @@ Compatible with **KernelSU**, **Magisk**, **APatch**, and **Temproot**.
 | 🌋 **Vulkan UI Acceleration** | Renders One UI using high-performance Vulkan (`SkiaVK`) hardware acceleration instead of legacy OpenGL ES for maximum frame stability. |
 | 🎯 **Instant Touch Response** | Boosts digitizer sampling and gives real-time priority to touch processing threads so taps register instantly without input lag. |
 | 🧈 **Silky Smooth 120Hz Scrolling** | Stops One UI from awkwardly dropping down to 60Hz mid-scroll in apps like Twitter, Instagram, or Chrome (`120Hz Smooth Scroll`). |
+| 📻 **Force Classic Bluetooth (A2DP)** | Disables bug-prone Bluetooth LE Audio streams (`bap.unicast.client.enabled=false`) to force reliable Classic A2DP audio (Samsung Scalable Codec) just like on Galaxy tablets. |
 | 🎧 **No More Audio Stutter** | Stops your Galaxy Buds or Bluetooth headphones from cutting out when you lock your screen or walk around. |
 | 🚀 **Instant App Switching** | Fixes Samsung's slow virtual memory ("RAM Plus") so your apps open quickly and stay in memory without lag. |
 | 🗄️ **Defragmented App Databases** | Compacts and defragments SQLite databases overnight so apps open snappy and don't slow down over time. |
@@ -51,6 +52,7 @@ Vertex includes a built-in dashboard right inside KernelSU, APatch, or MMRL. Tap
 - **Smooth Scroll Card**: Lock your screen to 120Hz for zero micro-stutter, or tap to restore standard dynamic LTPO.
 - **Bypass Charging Card**: Power your phone directly from the charger without heating the battery while gaming.
 - **Audio Guard Card**: Give real-time priority to Bluetooth and audio threads to prevent glitches.
+- **Classic Bluetooth Card**: Force standard A2DP audio and disable LE Audio to eliminate stutter on Galaxy Buds.
 - **Deep Hibernation Card**: Put 15+ background Samsung bloat daemons to sleep.
 - **1-Tap Maintenance**: Run instant optimization, defragment SQLite databases, trim storage (`fstrim`), and compact memory on demand.
 

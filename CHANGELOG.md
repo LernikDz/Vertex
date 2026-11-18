@@ -4,6 +4,14 @@ All notable changes to the **Vertex** (formerly Samsung Daily Optimizer) project
 
 ---
 
+## [v1.4.1] - 2026-11-18
+
+### 🎧 Audio & Bluetooth
+* **Force Classic Bluetooth (A2DP / Disable LE Audio)**: Added dedicated root system toggle (`DISABLE_LE_AUDIO=1`) using `resetprop` to disable the Bluetooth LE Audio BAP client and broadcast profiles (`bluetooth.profile.bap.unicast.client.enabled=false`). Completely stops Galaxy Buds from using bug-prone BLE isochronous streams and forces standard high-quality Classic Bluetooth A2DP (Samsung Scalable Codec) for 100% stutter-free listening.
+* **Persistent WebUI State**: Fixed all 11 card toggles syncing synchronously via `localStorage` and `config.prop`, eliminating toggle resets on app exit.
+
+---
+
 ## [v1.4] - 2026-11-17
 
 ### 🌋 Graphics & Touch Performance

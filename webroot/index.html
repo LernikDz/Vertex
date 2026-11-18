@@ -240,6 +240,7 @@
     .card-plum { background-color: #3b1338; }        /* Enhanced CPU */
     .card-indigo { background-color: #17173e; }      /* Vulkan UI */
     .card-coral { background-color: #3e1614; }       /* Touch Boost */
+    .card-cyan { background-color: #0b2a3a; }        /* Classic Bluetooth */
 
     .card-top {
       display: flex;
@@ -831,6 +832,24 @@
       </div>
     </div>
 
+    <!-- Card 11: Classic Bluetooth (Disable LE Audio) -->
+    <div class="homeup-card card-cyan" onclick="toggleClassicBt(event)">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/>
+          </svg>
+        </div>
+        <div class="oneui-toggle active" id="toggle-classic-bt" onclick="toggleClassicBt(event)">
+          <div class="oneui-toggle-thumb"></div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-title">Classic Bluetooth</div>
+        <div class="card-subtitle" id="card-classic-bt-sub">Force A2DP &bull; Zero LE stutter</div>
+      </div>
+    </div>
+
   </div>
 
   <!-- One UI Maintenance Section -->
@@ -1064,6 +1083,7 @@
     let isEnhancedCpu = true;
     let isVulkanUi = true;
     let isTouchBoost = true;
+    let isClassicBt = false;
     let lastToggleTime = 0;
 
     // Persistent State Helper for disk config.prop
@@ -1187,6 +1207,15 @@
           const sub = document.getElementById("card-touch-sub");
           if (el) el.classList.toggle("active", isTouchBoost);
           if (sub) sub.innerText = isTouchBoost ? "240Hz digitizer • RT inputflinger" : "Standard touch sensitivity";
+        }
+
+        const sBt = localStorage.getItem('vtx_classic_bt');
+        if (sBt !== null) {
+          isClassicBt = (sBt === '1');
+          const el = document.getElementById("toggle-classic-bt");
+          const sub = document.getElementById("card-classic-bt-sub");
+          if (el) el.classList.toggle("active", isClassicBt);
+          if (sub) sub.innerText = isClassicBt ? "Force A2DP • LE Audio disabled" : "Stock Bluetooth (LE Audio allowed)";
         }
       } catch (e) {}
     }
@@ -1775,6 +1804,74 @@
       }
     }
 
+    // Classic Bluetooth Toggle (Disable LE Audio / Force A2DP)
+    function toggleClassicBt(e) {
+      if (e) e.stopPropagation();
+      lastToggleTime = Date.now();
+      haptic(15);
+      const toggle = document.getElementById("toggle-classic-bt");
+      const sub = document.getElementById("card-classic-bt-sub");
+
+      isClassicBt = !isClassicBt;
+      try { localStorage.setItem('vtx_classic_bt', isClassicBt ? '1' : '0'); } catch (e) {}
+
+      if (isClassicBt) {
+        if (toggle) toggle.classList.add("active");
+        if (sub) sub.innerText = "Force A2DP • LE Audio disabled";
+        showToast("🎧 Classic A2DP forced! Cycling Bluetooth...");
+        const cmd = `
+          RP=""
+          for p in resetprop /data/adb/ksu/bin/resetprop /data/adb/magisk/resetprop /data/adb/ap/bin/resetprop; do
+            if command -v "$p" >/dev/null 2>&1 || [ -x "$p" ]; then
+              RP="$p"
+              break
+            fi
+          done
+          [ -z "$RP" ] && RP="setprop"
+          $RP -n bluetooth.profile.bap.unicast.client.enabled false 2>/dev/null
+          $RP -n bluetooth.profile.bap.broadcast.source.enabled false 2>/dev/null
+          $RP -n bluetooth.profile.bap.broadcast.assist.enabled false 2>/dev/null
+          $RP -n bluetooth.profile.csip.set_coordinator.enabled false 2>/dev/null
+          $RP -n persist.bluetooth.leaudio_offload.disabled true 2>/dev/null
+          $RP -n persist.bluetooth.leaudio_mode disabled 2>/dev/null
+          setprop bluetooth.profile.bap.unicast.client.enabled false 2>/dev/null
+          setprop persist.bluetooth.leaudio_offload.disabled true 2>/dev/null
+          svc bluetooth disable 2>/dev/null
+          sleep 1.2
+          svc bluetooth enable 2>/dev/null
+        `;
+        execCmd(cmd);
+        updateConfigProp('DISABLE_LE_AUDIO', '1');
+      } else {
+        if (toggle) toggle.classList.remove("active");
+        if (sub) sub.innerText = "Stock Bluetooth (LE Audio allowed)";
+        showToast("Stock Bluetooth restored. Cycling Bluetooth...");
+        const cmd = `
+          RP=""
+          for p in resetprop /data/adb/ksu/bin/resetprop /data/adb/magisk/resetprop /data/adb/ap/bin/resetprop; do
+            if command -v "$p" >/dev/null 2>&1 || [ -x "$p" ]; then
+              RP="$p"
+              break
+            fi
+          done
+          [ -z "$RP" ] && RP="setprop"
+          $RP -n bluetooth.profile.bap.unicast.client.enabled true 2>/dev/null
+          $RP -n bluetooth.profile.bap.broadcast.source.enabled true 2>/dev/null
+          $RP -n bluetooth.profile.bap.broadcast.assist.enabled true 2>/dev/null
+          $RP -n bluetooth.profile.csip.set_coordinator.enabled true 2>/dev/null
+          $RP -n persist.bluetooth.leaudio_offload.disabled false 2>/dev/null
+          $RP -n persist.bluetooth.leaudio_mode unicast 2>/dev/null
+          setprop bluetooth.profile.bap.unicast.client.enabled true 2>/dev/null
+          setprop persist.bluetooth.leaudio_offload.disabled false 2>/dev/null
+          svc bluetooth disable 2>/dev/null
+          sleep 1.2
+          svc bluetooth enable 2>/dev/null
+        `;
+        execCmd(cmd);
+        updateConfigProp('DISABLE_LE_AUDIO', '0');
+      }
+    }
+
     // Maintenance Actions
     async function vacuumDatabases() {
       showToast("Defragmenting databases & truncating WAL...");
@@ -2045,6 +2142,15 @@
       if (touchToggle) touchToggle.classList.toggle("active", isTouchBoost);
       const tcsub = document.getElementById("card-touch-sub");
       if (tcsub) tcsub.innerText = isTouchBoost ? "240Hz digitizer • RT inputflinger" : "Standard touch sensitivity";
+
+      // 12. Classic Bluetooth (Force A2DP / Disable LE Audio)
+      const btToggle = document.getElementById("toggle-classic-bt");
+      const cfgBt = getConfigVal("DISABLE_LE_AUDIO");
+      const savedBt = localStorage.getItem('vtx_classic_bt');
+      isClassicBt = (cfgBt === "1") || (savedBt === "1");
+      if (btToggle) btToggle.classList.toggle("active", isClassicBt);
+      const btsub = document.getElementById("card-classic-bt-sub");
+      if (btsub) btsub.innerText = isClassicBt ? "Force A2DP • LE Audio disabled" : "Stock Bluetooth (LE Audio allowed)";
     }
 
     // Restore cached state immediately (0ms, zero flash) then query hardware

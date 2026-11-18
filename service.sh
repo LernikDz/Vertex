@@ -28,6 +28,26 @@ if [ "${BYPASS_CHARGING_ENABLED:-0}" = "1" ]; then
     echo 1 > /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || echo 0 > /sys/class/power_supply/battery/charging_enabled 2>/dev/null
 fi
 
+# Force Classic Bluetooth A2DP & Disable LE Audio
+if [ "${DISABLE_LE_AUDIO:-1}" = "1" ]; then
+    RP=""
+    for p in resetprop /data/adb/ksu/bin/resetprop /data/adb/magisk/resetprop /data/adb/ap/bin/resetprop; do
+        if command -v "$p" >/dev/null 2>&1 || [ -x "$p" ]; then
+            RP="$p"
+            break
+        fi
+    done
+    [ -z "$RP" ] && RP="setprop"
+    $RP -n bluetooth.profile.bap.unicast.client.enabled false 2>/dev/null
+    $RP -n bluetooth.profile.bap.broadcast.source.enabled false 2>/dev/null
+    $RP -n bluetooth.profile.bap.broadcast.assist.enabled false 2>/dev/null
+    $RP -n bluetooth.profile.csip.set_coordinator.enabled false 2>/dev/null
+    $RP -n persist.bluetooth.leaudio_offload.disabled true 2>/dev/null
+    $RP -n persist.bluetooth.leaudio_mode disabled 2>/dev/null
+    setprop bluetooth.profile.bap.unicast.client.enabled false 2>/dev/null
+    setprop persist.bluetooth.leaudio_offload.disabled true 2>/dev/null
+fi
+
 # Apply UFS 4.0 scheduler queue optimizations
 if [ "${TUNE_UFS_SCHEDULER:-1}" = "1" ]; then
     for q in /sys/block/sd*/queue /sys/block/nvme*/queue; do

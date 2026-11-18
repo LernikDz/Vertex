@@ -49,6 +49,7 @@ SF_ZERO_LATENCY_LATCHING="${SF_ZERO_LATENCY_LATCHING:-1}"
 TUNE_UFS_SCHEDULER="${TUNE_UFS_SCHEDULER:-1}"
 SQLITE_VACUUM_ENABLED="${SQLITE_VACUUM_ENABLED:-1}"
 TOUCH_BOOST_ENABLED="${TOUCH_BOOST_ENABLED:-1}"
+DISABLE_LE_AUDIO="${DISABLE_LE_AUDIO:-1}"
 
 # Notification helpers (Live NowBar / Dynamic Island notification while running, static on finish)
 notify_live() {
@@ -315,6 +316,27 @@ fi
 if [ "$BYPASS_CHARGING_ENABLED" = "1" ]; then
     echo 1 > /sys/class/power_supply/battery/batt_slate_mode 2>/dev/null || echo 0 > /sys/class/power_supply/battery/charging_enabled 2>/dev/null
     log "  [OK] Bypass charging mode maintained (battery charging stopped)"
+fi
+
+# 12. Force Classic Bluetooth A2DP (Disable LE Audio Unicast/Broadcast)
+if [ "$DISABLE_LE_AUDIO" = "1" ]; then
+    RP=""
+    for p in resetprop /data/adb/ksu/bin/resetprop /data/adb/magisk/resetprop /data/adb/ap/bin/resetprop; do
+        if command -v "$p" >/dev/null 2>&1 || [ -x "$p" ]; then
+            RP="$p"
+            break
+        fi
+    done
+    [ -z "$RP" ] && RP="setprop"
+    $RP -n bluetooth.profile.bap.unicast.client.enabled false 2>/dev/null
+    $RP -n bluetooth.profile.bap.broadcast.source.enabled false 2>/dev/null
+    $RP -n bluetooth.profile.bap.broadcast.assist.enabled false 2>/dev/null
+    $RP -n bluetooth.profile.csip.set_coordinator.enabled false 2>/dev/null
+    $RP -n persist.bluetooth.leaudio_offload.disabled true 2>/dev/null
+    $RP -n persist.bluetooth.leaudio_mode disabled 2>/dev/null
+    setprop bluetooth.profile.bap.unicast.client.enabled false 2>/dev/null
+    setprop persist.bluetooth.leaudio_offload.disabled true 2>/dev/null
+    log "  [OK] Force Classic Bluetooth active (LE Audio disabled for zero stutter)"
 fi
 
 # 13. Vulkan Skia UI & SurfaceFlinger Zero-Latency Frame Latching

@@ -82,3 +82,6 @@ SQLITE_VACUUM_ENABLED=1
 
 # Touch Digitizer Sensitivity & InputDispatcher Real-Time Boost (240Hz High Sampling Rate)
 TOUCH_BOOST_ENABLED=1
+
+# Force Classic Bluetooth A2DP & Disable LE Audio (Fixes audio cuts/stutters on Galaxy Buds)
+DISABLE_LE_AUDIO=1
